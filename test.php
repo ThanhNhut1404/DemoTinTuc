@@ -1,1 +1,3 @@
-toi ten
+<?php
+echo "Xin chào!";
+?>
