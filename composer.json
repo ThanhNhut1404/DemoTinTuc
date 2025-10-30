@@ -1,0 +1,15 @@
+{
+    "name": "thanhnhut/demo-tin-tuc",
+    "description": "Trang demo tin tuc",
+    "autoload": {
+        "psr-4": {
+            "Thanhnhut\\DemoTinTuc\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "ThanhNhut"
+        }
+    ],
+    "require": {}
+}
