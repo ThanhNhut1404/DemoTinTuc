@@ -1,14 +1,14 @@
 {
-    "name": "thanhnhut/demo-tin-tuc",
+    "name": "website/tin-tuc",
     "description": "Trang demo tin tuc",
     "autoload": {
         "psr-4": {
-            "Thanhnhut\\DemoTinTuc\\": "src/"
+            "Website\\TinTuc\\": "src/"
         }
     },
     "authors": [
         {
-            "name": "ThanhNhut"
+            "name": "Website"
         }
     ],
     "require": {}
