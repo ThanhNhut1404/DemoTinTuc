@@ -15,15 +15,16 @@ class LoginController
     // Hiển thị form đăng nhập
     public function showLoginForm() {
         include __DIR__ . '/../../views/login.php';
+        
     }
 
-    // Xử lý đăng nhập
+    // ✅ Xử lý đăng nhập
     public function login() {
         $email = trim($_POST['email'] ?? '');
-        $password = trim($_POST['password'] ?? '');
+        $password = trim($_POST['mat_khau'] ?? ''); // ✅ đúng tên input
 
         if (empty($email) || empty($password)) {
-            echo "<script>alert('Vui lòng nhập đầy đủ thông tin!'); history.back();</script>";
+            echo "<script>alert('⚠️ Vui lòng nhập đầy đủ thông tin!'); history.back();</script>";
             return;
         }
 
@@ -36,9 +37,12 @@ class LoginController
         if ($user && password_verify($password, $user['mat_khau'])) {
             session_start();
             $_SESSION['user'] = $user;
-            echo "<script>alert('Đăng nhập thành công!'); window.location='index.php?action=home';</script>";
+
+            // ✅ Chuyển hướng thẳng vào trang chủ
+            header("Location: index.php?action=home");
+            exit;
         } else {
-            echo "<script>alert('Sai email hoặc mật khẩu!'); history.back();</script>";
+            echo "<script>alert('❌ Sai email hoặc mật khẩu!'); history.back();</script>";
         }
     }
 
@@ -47,38 +51,39 @@ class LoginController
         include __DIR__ . '/../../views/register.php';
     }
 
-    // Xử lý đăng ký
+    // ✅ Xử lý đăng ký
     public function register() {
         $email = trim($_POST['email'] ?? '');
-        $password = trim($_POST['password'] ?? '');
+        $password = trim($_POST['mat_khau'] ?? '');
 
         if (empty($email) || empty($password)) {
-            echo "<script>alert('Vui lòng nhập đầy đủ thông tin!'); history.back();</script>";
+            echo "<script>alert('⚠️ Vui lòng nhập đầy đủ thông tin!'); history.back();</script>";
             return;
         }
 
-        // Kiểm tra trùng email
+        // ✅ Kiểm tra trùng email
         $stmt = $this->conn->prepare("SELECT id FROM nguoi_dung WHERE email = ?");
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
-            echo "<script>alert('Email đã tồn tại!'); history.back();</script>";
+            echo "<script>alert('❌ Email đã tồn tại!'); history.back();</script>";
             return;
         }
 
-        // Mã hóa mật khẩu
+        // ✅ Mã hóa mật khẩu
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        // Lưu vào DB
-        $stmt = $this->conn->prepare("INSERT INTO nguoi_dung (email, password) VALUES (?, ?)");
+        // ✅ Lưu vào DB — ĐÃ SỬA DÒNG NÀY
+        $stmt = $this->conn->prepare("INSERT INTO nguoi_dung (email, mat_khau) VALUES (?, ?)");
         $stmt->execute([$email, $hashedPassword]);
 
-        echo "<script>alert('Đăng ký thành công!'); window.location='index.php?action=login';</script>";
+        echo "<script>alert('✅ Đăng ký thành công!'); window.location='index.php?action=login';</script>";
     }
 
-    // Đăng xuất
+    // ✅ Đăng xuất
     public function logout() {
         session_start();
         session_destroy();
-        echo "<script>alert('Đã đăng xuất!'); window.location='index.php?action=login';</script>";
+        header("Location: index.php?action=login");
+        exit;
     }
 }

@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng ký tài khoản</title>
+    <title>Quên mật khẩu</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -14,11 +14,11 @@
             margin: 0;
         }
 
-        .register-box {
+        .form-container {
             background: #fff;
             padding: 40px 35px;
             border-radius: 15px;
-            width: 350px;
+            width: 360px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             text-align: center;
         }
@@ -37,24 +37,23 @@
         }
 
         label {
-            display: block;
-            text-align: left;
-            width: 100%;
+            font-size: 15px;
             font-weight: 500;
-            color: #444;
-            margin-bottom: 6px;
-            font-size: 14px;
+            color: #333;
+            align-self: flex-start;
+            margin-bottom: 5px;
+            margin-left: 5px;
         }
 
         input {
             width: 100%;
             padding: 12px 15px;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 15px;
-            transition: all 0.3s ease;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         input:focus {
@@ -81,9 +80,8 @@
         }
 
         p {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
+            margin-top: 18px;
+            font-size: 15px;
         }
 
         a {
@@ -98,24 +96,14 @@
     </style>
 </head>
 <body>
-<div class="register-box">
-    <h2>Đăng ký</h2>
-    <form action="index.php?action=do_register" method="POST">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br>
-
-        <label for="mat_khau">Mật khẩu:</label>
-        <input type="password" id="password" name="mat_khau" required><br>
-
-        <label for="confirm_password">Xác nhận mật khẩu:</label>
-        <input type="password" id="confirm_password" name="confirm_password" required><br>
-
-        <button type="submit">Đăng ký</button>
-    </form>
-
-    <p>
-        Đã có tài khoản? <a href="index.php?action=login">Đăng nhập</a>
-    </p>
-</div>
+    <div class="form-container">
+        <h2>Quên mật khẩu</h2>
+        <form action="index.php?action=forgot" method="POST">
+            <label for="email">Email:</label>
+            <input id="email" type="email" name="email" placeholder="Nhập email của bạn" required>
+            <button type="submit">Gửi mật khẩu mới</button>
+        </form>
+        <p><a href="index.php?action=login">← Quay lại đăng nhập</a></p>
+    </div>
 </body>
 </html>

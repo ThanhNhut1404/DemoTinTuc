@@ -12,10 +12,12 @@ require_once __DIR__ . '/../src/Controllers/LoginController.php';
 require_once __DIR__ . '/../src/Controllers/RegisterController.php';
 require_once __DIR__ . '/../src/Controllers/TrangChuController.php';
 require_once __DIR__ . '/../src/Controllers/BaiVietController.php';
+require_once __DIR__ . '/../src/Controllers/ForgotPasswordController.php'; // <-- Thêm controller quên mật khẩu
 
 use Website\TinTuc\Controllers\LoginController;
 use Website\TinTuc\Controllers\RegisterController;
 use Website\TinTuc\Controllers\TrangChuController;
+use Website\TinTuc\Controllers\ForgotPasswordController;
 
 // ✅ Lấy tham số "action" trên URL (vd: ?action=login)
 $action = $_GET['action'] ?? 'home';
@@ -44,6 +46,7 @@ switch ($action) {
         $controller->logout();
         break;
 
+    // 📝 Đăng ký
     case 'register':
         $controller = new RegisterController();
         $controller->showForm();
@@ -53,22 +56,39 @@ switch ($action) {
         $controller = new RegisterController();
         $controller->handleRegister();
         break;
+
+        
+
+    // CRUD ví dụ
     case 'create':
         $controller->create();
         break;
+
     case 'store':
         $controller->store();
         break;
+
     case 'edit':
         $controller->edit($_GET['id']);
         break;
+
     case 'update':
         $controller->update($_POST['id']);
         break;
+
     case 'delete':
         $controller->delete($_GET['id']);
         break;
 
+    // 🔑 Quên mật khẩu
+    case 'forgot':
+        $controller = new ForgotPasswordController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->submit();
+        } else {
+            $controller->index();
+        }
+        break;
 
     // ❌ Mặc định: về trang chủ
     default:

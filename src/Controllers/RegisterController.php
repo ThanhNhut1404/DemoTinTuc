@@ -31,7 +31,7 @@ class RegisterController
     {
         // Lấy dữ liệu từ form
         $email = trim($_POST['email'] ?? '');
-        $password = trim($_POST['password'] ?? '');
+        $password = trim($_POST['mat_khau'] ?? '');
         $confirm = trim($_POST['confirm_password'] ?? '');
 
         // 🔸 1. Kiểm tra dữ liệu
