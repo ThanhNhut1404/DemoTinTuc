@@ -43,12 +43,19 @@
 <body>
 <div class="register-box">
     <h2>Đăng ký</h2>
-    <form method="POST" action="index.php?action=do_register">
-        <input type="email" name="email" placeholder="Nhập email" required>
-        <input type="password" name="password" placeholder="Nhập mật khẩu" required>
-        <input type="password" name="confirm" placeholder="Xác nhận mật khẩu" required>
-        <button type="submit">Đăng ký</button>
-    </form>
+    <form action="index.php?action=do_register" method="POST">
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required><br>
+
+    <label for="password">Mật khẩu:</label>
+    <input type="password" id="password" name="password" required><br>
+
+    <label for="confirm_password">Xác nhận mật khẩu:</label>
+    <input type="password" id="confirm_password" name="confirm_password" required><br>
+
+    <button type="submit">Đăng ký</button>
+</form>
+
     <p style="text-align:center;margin-top:10px;">
         Đã có tài khoản? <a href="index.php?action=login">Đăng nhập</a>
     </p>
