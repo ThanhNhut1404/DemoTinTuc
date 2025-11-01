@@ -11,6 +11,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Controllers/LoginController.php';
 require_once __DIR__ . '/../src/Controllers/RegisterController.php';
 require_once __DIR__ . '/../src/Controllers/TrangChuController.php';
+require_once __DIR__ . '/../src/Controllers/BaiVietController.php';
 
 use Website\TinTuc\Controllers\LoginController;
 use Website\TinTuc\Controllers\RegisterController;
