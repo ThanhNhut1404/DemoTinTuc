@@ -1,20 +1,23 @@
 <?php
 namespace Website\TinTuc\Models;
 
-use Website\TinTuc\Database;
 use PDO;
 
-class QuangCaoModel {
-    private $conn;
+class QuangcaoModel
+{
+    private $db;
 
-    public function __construct() {
-        $db = new Database();
-        $this->conn = $db->connect();
+    public function __construct()
+    {
+        $this->db = new PDO("mysql:host=localhost;dbname=website_tin_tuc;charset=utf8", "root", "");
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    public function getQuangCaoTrangChu() {
-        $sql = "SELECT * FROM quang_cao WHERE vi_tri = 'trang_chu'";
-        $stmt = $this->conn->query($sql);
+    // Lấy quảng cáo theo vị trí (Trang_chu, Sidebar)
+    public function getQuangCaoTheoViTri($vi_tri)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM quang_cao WHERE vi_tri = ? ORDER BY id DESC");
+        $stmt->execute([$vi_tri]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
