@@ -44,14 +44,29 @@ switch ($action) {
         break;
 
     case 'register':
-    $controller = new RegisterController();
-    $controller->showForm();
-    break;
+        $controller = new RegisterController();
+        $controller->showForm();
+        break;
 
-case 'do_register':
-    $controller = new RegisterController();
-    $controller->handleRegister();
-    break;
+    case 'do_register':
+        $controller = new RegisterController();
+        $controller->handleRegister();
+        break;
+    case 'create':
+        $controller->create();
+        break;
+    case 'store':
+        $controller->store();
+        break;
+    case 'edit':
+        $controller->edit($_GET['id']);
+        break;
+    case 'update':
+        $controller->update($_POST['id']);
+        break;
+    case 'delete':
+        $controller->delete($_GET['id']);
+        break;
 
 
     // ❌ Mặc định: về trang chủ
