@@ -3,6 +3,7 @@
 $banners = isset($banners) && is_array($banners) ? $banners : [];
 $quangCaoTrai = isset($quangCaoTrai) && is_array($quangCaoTrai) ? $quangCaoTrai : [];
 $quangCaoPhai = isset($quangCaoPhai) && is_array($quangCaoPhai) ? $quangCaoPhai : [];
+$chuyenMuc = isset($chuyenMuc) && is_array($chuyenMuc) ? $chuyenMuc : [];
 ?>
 
 <!DOCTYPE html>
@@ -175,6 +176,40 @@ $quangCaoPhai = isset($quangCaoPhai) && is_array($quangCaoPhai) ? $quangCaoPhai 
             margin-bottom: 15px;
         }
 
+        .category-list {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            padding: 15px;
+        }
+
+        .category-menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .category-menu li {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+        }
+
+        .category-menu li:last-child {
+            border-bottom: none;
+        }
+
+        .category-menu a {
+            text-decoration: none;
+            color: #0077cc;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .category-menu a:hover {
+            color: #005fa3;
+        }
+
         .qc-item img {
             width: 100%;
             border-radius: 10px;
@@ -189,28 +224,29 @@ $quangCaoPhai = isset($quangCaoPhai) && is_array($quangCaoPhai) ? $quangCaoPhai 
             margin-top: 30px;
         }
 
-    .auth-nav {
-        display: flex;
-        gap: 15px;
-        align-items: center;
-    }
+        .auth-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
 
-    .auth-link {
-        text-decoration: none;
-        color: #fff;
-        background-color: #28a745; /* xanh lá nhẹ */
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-weight: 500;
-        font-family: 'Segoe UI', sans-serif;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
+        .auth-link {
+            text-decoration: none;
+            color: #fff;
+            background-color: #28a745;
+            /* xanh lá nhẹ */
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-family: 'Segoe UI', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
 
-    .auth-link:hover {
-        background-color: #218838;
-        transform: translateY(-2px);
-    }
+        .auth-link:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 
@@ -242,15 +278,20 @@ $quangCaoPhai = isset($quangCaoPhai) && is_array($quangCaoPhai) ? $quangCaoPhai 
     </header>
 
     <main>
-        <!-- QUẢNG CÁO TRÁI -->
-        <aside>
-            <?php foreach ($quangCaoTrai as $index => $qc): ?>
-                <div class="qc-item qc-left <?= $index === 0 ? 'active' : '' ?>">
-                    <a href="<?= htmlspecialchars($qc['lien_ket']) ?>" target="_blank">
-                        <img src="<?= htmlspecialchars($qc['hinh_anh']) ?>" alt="<?= htmlspecialchars($qc['tieu_de']) ?>">
-                    </a>
-                </div>
-            <?php endforeach; ?>
+        <!-- menu chuyên mục  -->
+        <aside class="category-list">
+            <div class="section">
+                <h2>Chuyên mục</h2>
+                <ul class="category-menu">
+                    <?php foreach ($chuyenMuc as $cm): ?>
+                        <li>
+                            <a href="#" class="link-chuyen-muc" data-id="<?= htmlspecialchars($cm['id']) ?>">
+                                <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
         </aside>
 
         <!-- NỘI DUNG CHÍNH -->
@@ -262,7 +303,9 @@ $quangCaoPhai = isset($quangCaoPhai) && is_array($quangCaoPhai) ? $quangCaoPhai 
                         <div class="slide-item">
                             <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="">
                             <div class="info">
-                                <b><?= htmlspecialchars($tin['tieu_de']) ?></b><br>
+                                <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" style="text-decoration:none;color:#005fa3;font-weight:bold;">
+                                    <?= htmlspecialchars($tin['tieu_de']) ?>
+                                </a>
                                 <small>Ngày đăng: <?= htmlspecialchars($tin['ngay_dang']) ?> | 👁 <?= htmlspecialchars($tin['luot_xem']) ?></small>
                             </div>
                         </div>
@@ -349,6 +392,31 @@ $quangCaoPhai = isset($quangCaoPhai) && is_array($quangCaoPhai) ? $quangCaoPhai 
             showAds(leftAds, adIndex % leftAds.length);
             showAds(rightAds, adIndex % rightAds.length);
         }, 5000);
+        // --- Chuyên mục động (AJAX) ---
+        document.querySelectorAll('.link-chuyen-muc').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.dataset.id;
+                const contentDiv = document.querySelector('.content');
+                // Hiển thị đang tải
+                contentDiv.innerHTML = "<div class='section'><p>⏳ Đang tải bài viết...</p></div>";
+                fetch(`index.php?action=load_chuyen_muc&id=${id}`)
+                    .then(res => res.text())
+                    .then(html => {
+                        contentDiv.innerHTML = html + `
+                            <div style="margin-top:15px;">
+                                <button onclick="location.reload()" 
+                                    style="background:#0077cc;color:white;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;">
+                                    ← Quay lại trang chủ
+                                </button>
+                            </div>`;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        contentDiv.innerHTML = "<div class='section'><p>Lỗi khi tải chuyên mục. Vui lòng thử lại.</p></div>";
+                    });
+            });
+        });
     </script>
 </body>
 

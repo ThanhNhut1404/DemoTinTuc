@@ -18,7 +18,7 @@ use Website\TinTuc\Controllers\LoginController;
 use Website\TinTuc\Controllers\RegisterController;
 use Website\TinTuc\Controllers\TrangChuController;
 use Website\TinTuc\Controllers\ForgotPasswordController;
-
+use Website\TinTuc\Controllers\ChuyenMucController;
 // ✅ Lấy tham số "action" trên URL (vd: ?action=login)
 $action = $_GET['action'] ?? 'home';
 
@@ -57,7 +57,7 @@ switch ($action) {
         $controller->handleRegister();
         break;
 
-        
+
 
     // CRUD ví dụ
     case 'create':
@@ -89,6 +89,14 @@ switch ($action) {
             $controller->index();
         }
         break;
+    case 'load_chuyen_muc':
+        $controller = new ChuyenMucController();
+        $controller->ajaxLoadChuyenMuc($_GET['id'] ?? 0);
+        break;
+    case 'chi_tiet_bai_viet':
+    $controller = new \Website\TinTuc\Controllers\BaiVietController();
+    $controller->chiTiet($_GET['id']);
+    break;
 
     // ❌ Mặc định: về trang chủ
     default:
