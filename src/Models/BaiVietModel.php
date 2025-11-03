@@ -95,7 +95,7 @@ class BaiVietModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // --- Tin theo chuyên mục ---
+    // --- Tin theo chuyên mục (toàn bộ, không phân trang) ---
     public function getTinTheoChuyenMuc($id_chuyen_muc)
     {
         try {
@@ -124,5 +124,29 @@ class BaiVietModel
         $sql = "UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$id]);
+    }
+
+    // --- Lấy bài viết theo chuyên mục (có phân trang) ---
+    public function getByChuyenMuc($chuyenMucId, $limit, $offset)
+    {
+        // Không bind LIMIT/OFFSET bằng tham số trong MySQL cũ để tránh lỗi
+        $sql = "SELECT * FROM bai_viet 
+                WHERE id_chuyen_muc = :id 
+                ORDER BY ngay_dang DESC 
+                LIMIT $limit OFFSET $offset";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', (int)$chuyenMucId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // --- Đếm tổng số bài trong chuyên mục ---
+    public function countByChuyenMuc($chuyenMucId)
+    {
+        $sql = "SELECT COUNT(*) as total FROM bai_viet WHERE id_chuyen_muc = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', (int)$chuyenMucId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int) $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
 }
