@@ -123,10 +123,13 @@ public function updateProfile() {
         }
 
         $id = $_SESSION['user_id'];
-        $hoTen = $_POST['ho_ten'];
-        $email = $_POST['email'];
+        $hoTen = trim($_POST['ho_ten']);
+        $email = trim($_POST['email']);
+        $ngaySinh = !empty($_POST['ngay_sinh']) ? $_POST['ngay_sinh'] : null;
+        $gioiTinh = !empty($_POST['gioi_tinh']) ? $_POST['gioi_tinh'] : null;
         $anhDaiDien = null;
 
+        // 📁 Xử lý upload ảnh (nếu có)
         if (!empty($_FILES['anh_dai_dien']['name'])) {
             $fileName = basename($_FILES['anh_dai_dien']['name']);
             $target = __DIR__ . '/../../public/uploads/' . $fileName;
@@ -135,14 +138,21 @@ public function updateProfile() {
         }
 
         $model = new ThanhVienModel();
-        $model->capNhatThongTin($id, $hoTen, $email, $anhDaiDien);
 
-        // 🔹 Ghi thông báo vào session flash
-        $_SESSION['flash_message'] = "✅ Cập nhật thông tin thành công!";
+        try {
+            // ✅ Cập nhật thông tin người dùng
+            $model->capNhatThongTin($id, $hoTen, $email, $anhDaiDien, $ngaySinh, $gioiTinh);
+            $_SESSION['flash_message'] = "✅ Cập nhật thông tin thành công!";
+        } catch (\Exception $e) {
+            // ⚠️ Nếu có lỗi (ví dụ trùng email)
+            $_SESSION['flash_message'] = "⚠️ " . $e->getMessage();
+        }
 
-        // 🔹 Redirect lại (tránh việc người dùng refresh gửi lại form)
+        // 🔁 Quay lại trang người dùng
         header("Location: admin.php?action=userPage");
         exit;
     }
 }
+
+
 }

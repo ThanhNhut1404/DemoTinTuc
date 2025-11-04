@@ -160,15 +160,31 @@ class ThanhVienModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function capNhatThongTin($id, $hoTen, $email, $anh = null) {
-        if ($anh) {
-            $sql = "UPDATE nguoi_dung SET ho_ten=?, email=?, anh_dai_dien=? WHERE id=?";
-            $params = [$hoTen, $email, $anh, $id];
-        } else {
-            $sql = "UPDATE nguoi_dung SET ho_ten=?, email=? WHERE id=?";
-            $params = [$hoTen, $email, $id];
-        }
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute($params);
+  public function capNhatThongTin($id, $hoTen, $email, $anh = null, $ngaySinh = null, $gioiTinh = null) {
+    // 🔹 Kiểm tra email trùng lặp (ngoại trừ chính mình)
+    $check = $this->conn->prepare("SELECT id FROM nguoi_dung WHERE email = ? AND id != ?");
+    $check->execute([$email, $id]);
+    if ($check->fetch()) {
+        throw new \Exception("❌ Email này đã được sử dụng bởi tài khoản khác!");
     }
+
+    // 🔹 Nếu có ảnh mới
+    if ($anh) {
+        $sql = "UPDATE nguoi_dung 
+                SET ho_ten = ?, email = ?, anh_dai_dien = ?, ngay_sinh = ?, gioi_tinh = ? 
+                WHERE id = ?";
+        $params = [$hoTen, $email, $anh, $ngaySinh, $gioiTinh, $id];
+    } else {
+        // 🔹 Không có ảnh mới
+        $sql = "UPDATE nguoi_dung 
+                SET ho_ten = ?, email = ?, ngay_sinh = ?, gioi_tinh = ? 
+                WHERE id = ?";
+        $params = [$hoTen, $email, $ngaySinh, $gioiTinh, $id];
+    }
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute($params);
+}
+
+
 }
