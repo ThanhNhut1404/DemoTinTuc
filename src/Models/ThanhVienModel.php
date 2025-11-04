@@ -95,7 +95,8 @@ class ThanhVienModel {
         }
 
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->normalizeRows($rows);
     }
 
     // Tìm kiếm người dùng theo tên hoặc email
@@ -127,7 +128,30 @@ class ThanhVienModel {
         }
 
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->normalizeRows($rows);
+    }
+
+    /**
+     * Normalize row values (especially trang_thai) to consistent display values
+     * @param array $rows
+     * @return array
+     */
+    private function normalizeRows(array $rows): array
+    {
+        foreach ($rows as &$r) {
+            $val = $r['trang_thai'] ?? '';
+            $low = mb_strtolower(trim((string)$val), 'UTF-8');
+            if ($low === '' || in_array($low, ['hoat_dong', 'hoạt_động', 'active', 'hoạt động', 'hoat dong'])) {
+                $r['trang_thai'] = 'Hoat_dong';
+            } elseif (in_array($low, ['khoa', 'bi_khoa', 'locked'])) {
+                $r['trang_thai'] = 'Khoa';
+            } else {
+                // unknown value: keep original but make readable
+                $r['trang_thai'] = $val === null ? 'Hoat_dong' : $val;
+            }
+        }
+        return $rows;
     }
 
     // Khóa / mở khóa tài khoản
@@ -135,12 +159,12 @@ class ThanhVienModel {
         $statusCol = $this->cols['trang_thai'];
         // Toggle between common variants (hoat_dong/bi_khoa) or (active/locked)
         // Toggle considering different value variants (case-insensitive).
-        // If current value is 'hoat_dong' or 'active' (any case) -> set to 'Khoa'
-        // else set to 'Hoat_dong' for compatibility with your schema.
-        $sql = sprintf(
-            "UPDATE `%s` SET `%s` = IF(LOWER(`%s`) IN ('hoat_dong','active','hoat dong','hoạt_động','khoa'), 'Khoa', 'Hoat_dong') WHERE `%s` = ?",
-            $this->table, $statusCol, $statusCol, $this->cols['id']
-        );
+            // If current value is a variant of 'khoa' (locked), set to 'Hoat_dong', otherwise set to 'Khoa'.
+            // Use LOWER for case-insensitive comparison and consider common variants.
+            $sql = sprintf(
+                "UPDATE `%s` SET `%s` = (CASE WHEN LOWER(`%s`) IN ('khoa','bi_khoa','locked') THEN 'Hoat_dong' ELSE 'Khoa' END) WHERE `%s` = ?",
+                $this->table, $statusCol, $statusCol, $this->cols['id']
+            );
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([$id]);
     }
