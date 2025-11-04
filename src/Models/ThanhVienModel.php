@@ -6,6 +6,7 @@ use PDO;
 
 class ThanhVienModel {
     private $conn;
+     
     private $table = 'users';
     // logical -> actual column name mapping
     private $cols = [
@@ -152,5 +153,22 @@ class ThanhVienModel {
         $sql = sprintf("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?", $this->table, $roleCol, $idCol);
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([$role, $id]);
+    }
+    public function layThongTinNguoiDung($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM nguoi_dung WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function capNhatThongTin($id, $hoTen, $email, $anh = null) {
+        if ($anh) {
+            $sql = "UPDATE nguoi_dung SET ho_ten=?, email=?, anh_dai_dien=? WHERE id=?";
+            $params = [$hoTen, $email, $anh, $id];
+        } else {
+            $sql = "UPDATE nguoi_dung SET ho_ten=?, email=? WHERE id=?";
+            $params = [$hoTen, $email, $id];
+        }
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
     }
 }

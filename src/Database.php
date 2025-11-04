@@ -24,4 +24,5 @@ class Database {
             die("Lỗi kết nối DB: " . $e->getMessage());
         }
     }
+    
 }

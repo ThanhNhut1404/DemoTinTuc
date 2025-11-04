@@ -95,4 +95,23 @@ class BaiVietModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function layBaiVietYeuThich($idNguoiDung) {
+        $stmt = $this->conn->prepare("
+            SELECT bv.tieu_de, bv.ngay_dang
+            FROM yeu_thich yt
+            JOIN bai_viet bv ON bv.id = yt.id_bai_viet
+            WHERE yt.id_nguoi_dung = ?");
+        $stmt->execute([$idNguoiDung]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function layBaiVietDaLuu($idNguoiDung) {
+        $stmt = $this->conn->prepare("
+            SELECT bv.tieu_de, bv.ngay_dang
+            FROM luu_bai_viet lbv
+            JOIN bai_viet bv ON bv.id = lbv.id_bai_viet
+            WHERE lbv.id_nguoi_dung = ?");
+        $stmt->execute([$idNguoiDung]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
