@@ -5,12 +5,14 @@ use PDO;
 use PDOException;
 
 class Database {
+    // --- Cấu hình ---
     private $host = "localhost";
     private $dbname = "website_tin_tuc";
     private $username = "root";
     private $password = "";
     private $conn;
 
+    // --- Kết nối dạng đối tượng ---
     public function connect() {
         try {
             $this->conn = new PDO(

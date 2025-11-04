@@ -1,6 +1,7 @@
 <?php
 namespace Website\TinTuc\Controllers;
 
+use Website\TinTuc\Models\ChuyenMucModel;
 use Website\TinTuc\Models\BaiVietModel;
 use Website\TinTuc\Models\QuangCaoModel;
 use Website\TinTuc\Models\BannerModel; // thêm dòng này nếu bạn có BannerModel
@@ -8,7 +9,9 @@ use Website\TinTuc\Models\BannerModel; // thêm dòng này nếu bạn có Banne
 class TrangChuController {
     public function index() {
         $baiVietModel = new BaiVietModel();
-
+        // --- Lấy danh mục chuyên mục ---
+        $chuyenMucModel = new ChuyenMucModel();
+        $chuyenMuc = $chuyenMucModel->getAll();
         // tạo banner model và lấy dữ liệu
         $bannerModel = new BannerModel();
         $banners = $bannerModel->getAllBanners();
@@ -28,4 +31,5 @@ class TrangChuController {
         // Biến $banners, $tinMoiNhat... sẽ có sẵn trong view
         include __DIR__ . '/../../views/frontend/trang_chu.php';
     }
+    
 }
