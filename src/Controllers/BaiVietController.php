@@ -3,7 +3,7 @@
 namespace Website\TinTuc\Controllers;
 
 use Website\TinTuc\Models\BaiVietModel;
-
+use Website\TinTuc\Models\ChuyenMucModel;
 class BaiVietController
 {
     private $model;
@@ -62,5 +62,29 @@ class BaiVietController
     {
         $this->model->delete($id);
         header('Location: index.php?action=list');
+    }
+     public function chiTiet($id)
+    {
+        $baiVietModel = new BaiVietModel();
+        $chuyenMucModel = new ChuyenMucModel();
+
+        try {
+            $baiViet = $baiVietModel->getById($id);
+            if (!$baiViet) {
+                die("❌ Không tìm thấy bài viết.");
+            }
+
+            // Lấy thông tin chuyên mục (nếu cần hiển thị)
+            $cm = $chuyenMucModel->getById($baiViet['id_chuyen_muc']);
+
+            // Tăng lượt xem
+            $baiVietModel->tangLuotXem($id);
+
+        } catch (\PDOException $e) {
+            die("Lỗi khi lấy bài viết: " . $e->getMessage());
+        }
+
+        // Gọi giao diện chi tiết
+        include __DIR__ . '/../../views/chi_tiet_bai_viet.php';
     }
 }

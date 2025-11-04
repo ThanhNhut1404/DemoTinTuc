@@ -46,11 +46,9 @@ class ThanhVienModel {
                 $this->cols['trang_thai'] = $this->findColumn($cols, ['trang_thai', 'trangthai', 'status']);
                 return;
             } catch (\Exception $e) {
-                // table does not exist, try next
                 continue;
             }
         }
-        // if none found, keep defaults (will likely error later)
     }
 
     private function findColumn(array $cols, array $candidates)
@@ -62,17 +60,11 @@ class ThanhVienModel {
                 }
             }
         }
-        // fallback to first column if nothing matches
         return $cols[0] ?? 'id';
     }
 
     // Lấy danh sách tất cả người dùng
-    /**
-     * Lấy danh sách tất cả người dùng, có thể lọc theo vai trò
-     * @param string|null $role nếu truyền null hoặc empty thì không lọc
-     */
     public function getAll(?string $role = null) {
-        // Build select using detected table and columns; alias to logical names used by view
         $idCol = $this->cols['id'];
         $nameCol = $this->cols['ho_ten'];
         $emailCol = $this->cols['email'];
@@ -81,15 +73,19 @@ class ThanhVienModel {
 
         if ($role !== null && $role !== '') {
             $sql = sprintf(
-                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai FROM `%s` WHERE `%s` = :role ORDER BY `%s` DESC",
-                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, $this->table, $roleCol, $idCol
+                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
+                 FROM `%s` WHERE `%s` = :role ORDER BY `%s` DESC",
+                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, 
+                $this->table, $roleCol, $idCol
             );
             $stmt = $this->conn->prepare($sql);
             $stmt->bindValue(':role', $role, PDO::PARAM_STR);
         } else {
             $sql = sprintf(
-                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai FROM `%s` ORDER BY `%s` DESC",
-                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, $this->table, $idCol
+                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
+                 FROM `%s` ORDER BY `%s` DESC",
+                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, 
+                $this->table, $idCol
             );
             $stmt = $this->conn->prepare($sql);
         }
@@ -110,18 +106,21 @@ class ThanhVienModel {
 
         if ($role !== null && $role !== '') {
             $sql = sprintf(
-                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai FROM `%s` WHERE (`%s` LIKE :kw OR `%s` LIKE :kw) AND `%s` = :role ORDER BY `%s` DESC",
-                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, $this->table,
-                $nameCol, $emailCol, $roleCol, $idCol
+                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
+                 FROM `%s` WHERE (`%s` LIKE :kw OR `%s` LIKE :kw) 
+                 AND `%s` = :role ORDER BY `%s` DESC",
+                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, 
+                $this->table, $nameCol, $emailCol, $roleCol, $idCol
             );
             $stmt = $this->conn->prepare($sql);
             $stmt->bindValue(':kw', $like, PDO::PARAM_STR);
             $stmt->bindValue(':role', $role, PDO::PARAM_STR);
         } else {
             $sql = sprintf(
-                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai FROM `%s` WHERE `%s` LIKE :kw OR `%s` LIKE :kw ORDER BY `%s` DESC",
-                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, $this->table,
-                $nameCol, $emailCol, $idCol
+                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
+                 FROM `%s` WHERE `%s` LIKE :kw OR `%s` LIKE :kw ORDER BY `%s` DESC",
+                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, 
+                $this->table, $nameCol, $emailCol, $idCol
             );
             $stmt = $this->conn->prepare($sql);
             $stmt->bindValue(':kw', $like, PDO::PARAM_STR);
@@ -176,5 +175,41 @@ class ThanhVienModel {
         $sql = sprintf("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?", $this->table, $roleCol, $idCol);
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([$role, $id]);
+    }
+
+    // Tìm người dùng theo email
+    public function findByEmail($email)
+    {
+        $emailCol = $this->cols['email'];
+        $idCol = $this->cols['id'];
+        $nameCol = $this->cols['ho_ten'];
+        $roleCol = $this->cols['quyen'];
+        $statusCol = $this->cols['trang_thai'];
+
+        $sql = sprintf(
+            "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
+             FROM `%s` WHERE `%s` = :email LIMIT 1",
+            $idCol, $nameCol, $emailCol, $roleCol, $statusCol,
+            $this->table, $emailCol
+        );
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Cập nhật mật khẩu người dùng (đã sửa lỗi)
+    public function updatePassword($email, $hashedPassword)
+    {
+        $emailCol = $this->cols['email'];
+        $sql = sprintf(
+            "UPDATE `%s` SET `mat_khau` = :password WHERE `%s` = :email",
+            $this->table, $emailCol
+        );
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([
+            ':password' => $hashedPassword,
+            ':email' => $email
+        ]);
     }
 }
