@@ -12,7 +12,8 @@ require_once __DIR__ . '/../src/Controllers/LoginController.php';
 require_once __DIR__ . '/../src/Controllers/RegisterController.php';
 require_once __DIR__ . '/../src/Controllers/TrangChuController.php';
 require_once __DIR__ . '/../src/Controllers/BaiVietController.php';
-require_once __DIR__ . '/../src/Controllers/ForgotPasswordController.php'; // <-- Thêm controller quên mật khẩu
+require_once __DIR__ . '/../src/Controllers/ForgotPasswordController.php';
+require_once __DIR__ . '/../src/Controllers/ChuyenMucController.php'; // 🆕 thêm dòng này nè
 
 use Website\TinTuc\Controllers\LoginController;
 use Website\TinTuc\Controllers\RegisterController;
@@ -89,14 +90,15 @@ switch ($action) {
             $controller->index();
         }
         break;
-    case 'load_chuyen_muc':
+    case 'chuyenmuc':
+        $id = $_GET['id'] ?? 0;
         $controller = new ChuyenMucController();
-        $controller->ajaxLoadChuyenMuc($_GET['id'] ?? 0);
+        $controller->hienThiTheoChuyenMuc($id);
         break;
     case 'chi_tiet_bai_viet':
-    $controller = new \Website\TinTuc\Controllers\BaiVietController();
-    $controller->chiTiet($_GET['id']);
-    break;
+        $controller = new \Website\TinTuc\Controllers\BaiVietController();
+        $controller->chiTiet($_GET['id']);
+        break;
 
     // ❌ Mặc định: về trang chủ
     default:

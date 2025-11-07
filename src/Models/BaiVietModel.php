@@ -139,7 +139,8 @@ class BaiVietModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function layBaiVietYeuThich($idNguoiDung) {
+    public function layBaiVietYeuThich($idNguoiDung)
+    {
         $stmt = $this->conn->prepare("
             SELECT bv.tieu_de, bv.ngay_dang
             FROM yeu_thich yt
@@ -149,7 +150,8 @@ class BaiVietModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function layBaiVietDaLuu($idNguoiDung) {
+    public function layBaiVietDaLuu($idNguoiDung)
+    {
         $stmt = $this->conn->prepare("
             SELECT bv.tieu_de, bv.ngay_dang
             FROM luu_bai_viet lbv
@@ -157,5 +159,13 @@ class BaiVietModel
             WHERE lbv.id_nguoi_dung = ?");
         $stmt->execute([$idNguoiDung]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function countByChuyenMuc($id)
+    {
+        $sql = "SELECT COUNT(*) FROM bai_viet WHERE id_chuyen_muc = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
     }
 }
