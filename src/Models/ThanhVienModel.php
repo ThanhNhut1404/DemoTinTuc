@@ -44,6 +44,10 @@ class ThanhVienModel {
                 $this->cols['quyen'] = $this->findColumn($cols, ['quyen', 'vai_tro', 'role', 'permission']);
                 // status column candidates (Vietnamese and English)
                 $this->cols['trang_thai'] = $this->findColumn($cols, ['trang_thai', 'trangthai', 'status']);
+                // optional columns: avatar, gender and dob (use strict match and allow null)
+                $this->cols['avatar'] = $this->findColumnStrict($cols, ['avatar', 'anh_dai_dien', 'avatar_url', 'anh', 'hinh_anh']);
+                $this->cols['gioi_tinh'] = $this->findColumnStrict($cols, ['gioi_tinh', 'gender', 'sex']);
+                $this->cols['ngay_sinh'] = $this->findColumnStrict($cols, ['ngay_sinh', 'dob', 'birth_date', 'birthday']);
                 return;
             } catch (\Exception $e) {
                 continue;
@@ -60,33 +64,75 @@ class ThanhVienModel {
                 }
             }
         }
+        // fallback to first column if nothing matches (preserve previous behavior)
         return $cols[0] ?? 'id';
     }
 
+    /**
+     * Find a matching column case-insensitively, but return null if none match.
+     */
+    private function findColumnStrict(array $cols, array $candidates)
+    {
+        foreach ($candidates as $cand) {
+            foreach ($cols as $c) {
+                if (strcasecmp($c, $cand) === 0) {
+                    return $c;
+                }
+            }
+        }
+        return null;
+    }
+
     // Lấy danh sách tất cả người dùng
-    public function getAll(?string $role = null) {
+    // Lấy danh sách tất cả người dùng
+    public function getAll(?string $role = null, ?string $status = null, ?string $gender = null) {
         $idCol = $this->cols['id'];
         $nameCol = $this->cols['ho_ten'];
         $emailCol = $this->cols['email'];
         $roleCol = $this->cols['quyen'];
         $statusCol = $this->cols['trang_thai'];
+        $genderCol = $this->cols['gioi_tinh'] ?? null;
+        $dobCol = $this->cols['ngay_sinh'] ?? null;
 
+        // build select list dynamically to include optional columns
+        $selectParts = [
+            sprintf("`%s` AS id", $idCol),
+        ];
+        // optional avatar before ho_ten
+        $avatarCol = $this->cols['avatar'] ?? null;
+        if ($avatarCol) $selectParts[] = sprintf("`%s` AS avatar", $avatarCol);
+        $selectParts[] = sprintf("`%s` AS ho_ten", $nameCol);
+        if ($genderCol) $selectParts[] = sprintf("`%s` AS gioi_tinh", $genderCol);
+        if ($dobCol) $selectParts[] = sprintf("`%s` AS ngay_sinh", $dobCol);
+        $selectParts[] = sprintf("`%s` AS email", $emailCol);
+        $selectParts[] = sprintf("`%s` AS quyen", $roleCol);
+        $selectParts[] = sprintf("`%s` AS trang_thai", $statusCol);
+        $selectSql = implode(', ', $selectParts);
+
+        // Build WHERE clauses dynamically for role/status/gender (single-value filters)
+        $whereParts = [];
+        $params = [];
         if ($role !== null && $role !== '') {
-            $sql = sprintf(
-                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
-                 FROM `%s` WHERE `%s` = :role ORDER BY `%s` DESC",
-                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, 
-                $this->table, $roleCol, $idCol
-            );
+            $whereParts[] = sprintf("LOWER(`%s`) = LOWER(:role)", $roleCol);
+            $params[':role'] = $role;
+        }
+        if ($status !== null && $status !== '' && $statusCol) {
+            $whereParts[] = sprintf("LOWER(`%s`) = LOWER(:status)", $statusCol);
+            $params[':status'] = $status;
+        }
+        if ($gender !== null && $gender !== '' && $genderCol) {
+            $whereParts[] = sprintf("LOWER(`%s`) = LOWER(:gender)", $genderCol);
+            $params[':gender'] = $gender;
+        }
+
+        if (count($whereParts) > 0) {
+            $sql = sprintf("SELECT %s FROM `%s` WHERE %s ORDER BY `%s` DESC", $selectSql, $this->table, implode(' AND ', $whereParts), $idCol);
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(':role', $role, PDO::PARAM_STR);
+            foreach ($params as $k => $v) {
+                $stmt->bindValue($k, $v, PDO::PARAM_STR);
+            }
         } else {
-            $sql = sprintf(
-                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
-                 FROM `%s` ORDER BY `%s` DESC",
-                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, 
-                $this->table, $idCol
-            );
+            $sql = sprintf("SELECT %s FROM `%s` ORDER BY `%s` DESC", $selectSql, $this->table, $idCol);
             $stmt = $this->conn->prepare($sql);
         }
 
@@ -96,34 +142,58 @@ class ThanhVienModel {
     }
 
     // Tìm kiếm người dùng theo tên hoặc email
-    public function search(string $keyword, ?string $role = null) {
+    // Tìm kiếm người dùng theo tên hoặc email
+    public function search(string $keyword, ?string $role = null, ?string $status = null, ?string $gender = null) {
         $idCol = $this->cols['id'];
         $nameCol = $this->cols['ho_ten'];
         $emailCol = $this->cols['email'];
         $roleCol = $this->cols['quyen'];
         $statusCol = $this->cols['trang_thai'];
+        $genderCol = $this->cols['gioi_tinh'] ?? null;
+        $dobCol = $this->cols['ngay_sinh'] ?? null;
+
+        $selectParts = [
+            sprintf("`%s` AS id", $idCol),
+        ];
+        // optional avatar before ho_ten
+        $avatarCol = $this->cols['avatar'] ?? null;
+        if ($avatarCol) $selectParts[] = sprintf("`%s` AS avatar", $avatarCol);
+        $selectParts[] = sprintf("`%s` AS ho_ten", $nameCol);
+        if ($genderCol) $selectParts[] = sprintf("`%s` AS gioi_tinh", $genderCol);
+        if ($dobCol) $selectParts[] = sprintf("`%s` AS ngay_sinh", $dobCol);
+        $selectParts[] = sprintf("`%s` AS email", $emailCol);
+        $selectParts[] = sprintf("`%s` AS quyen", $roleCol);
+        $selectParts[] = sprintf("`%s` AS trang_thai", $statusCol);
+        $selectSql = implode(', ', $selectParts);
         $like = '%' . $keyword . '%';
 
+        // build where clauses dynamically: first the name/email LIKE part, then optional filters
+        $whereParts = [];
+        $params = [':kw' => $like];
+        $whereParts[] = sprintf("(`%s` LIKE :kw OR `%s` LIKE :kw)", $nameCol, $emailCol);
+
+        // build where clauses dynamically: first the name/email LIKE part, then optional filters
+        $whereParts = [];
+        $params = [':kw' => $like];
+        $whereParts[] = sprintf("(`%s` LIKE :kw OR `%s` LIKE :kw)", $nameCol, $emailCol);
+
         if ($role !== null && $role !== '') {
-            $sql = sprintf(
-                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
-                 FROM `%s` WHERE (`%s` LIKE :kw OR `%s` LIKE :kw) 
-                 AND `%s` = :role ORDER BY `%s` DESC",
-                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, 
-                $this->table, $nameCol, $emailCol, $roleCol, $idCol
-            );
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(':kw', $like, PDO::PARAM_STR);
-            $stmt->bindValue(':role', $role, PDO::PARAM_STR);
-        } else {
-            $sql = sprintf(
-                "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
-                 FROM `%s` WHERE `%s` LIKE :kw OR `%s` LIKE :kw ORDER BY `%s` DESC",
-                $idCol, $nameCol, $emailCol, $roleCol, $statusCol, 
-                $this->table, $nameCol, $emailCol, $idCol
-            );
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(':kw', $like, PDO::PARAM_STR);
+            $whereParts[] = sprintf("LOWER(`%s`) = LOWER(:role)", $roleCol);
+            $params[':role'] = $role;
+        }
+        if ($status !== null && $status !== '' && $statusCol) {
+            $whereParts[] = sprintf("LOWER(`%s`) = LOWER(:status)", $statusCol);
+            $params[':status'] = $status;
+        }
+        if ($gender !== null && $gender !== '' && $genderCol) {
+            $whereParts[] = sprintf("LOWER(`%s`) = LOWER(:gender)", $genderCol);
+            $params[':gender'] = $gender;
+        }
+
+        $sql = sprintf("SELECT %s FROM `%s` WHERE %s ORDER BY `%s` DESC", $selectSql, $this->table, implode(' AND ', $whereParts), $idCol);
+        $stmt = $this->conn->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v, PDO::PARAM_STR);
         }
 
         $stmt->execute();
@@ -146,7 +216,6 @@ class ThanhVienModel {
             } elseif (in_array($low, ['khoa', 'bi_khoa', 'locked'])) {
                 $r['trang_thai'] = 'Khoa';
             } else {
-                // unknown value: keep original but make readable
                 $r['trang_thai'] = $val === null ? 'Hoat_dong' : $val;
             }
         }

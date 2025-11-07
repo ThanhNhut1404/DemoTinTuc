@@ -16,7 +16,9 @@ class ThanhVienController
     public function index()
     {
         $role = $_GET['role'] ?? null;
-        $dsThanhVien = $this->model->getAll($role);
+        $status = $_GET['status'] ?? null; // trạng thái filter (Hoat_dong / Khoa / ...)
+        $gender = $_GET['gender'] ?? $_GET['gioi_tinh'] ?? null; // giới tính filter
+        $dsThanhVien = $this->model->getAll($role, $status, $gender);
         include __DIR__ . '/../../views/backend/Thanh_Vien.php';
     }
 
@@ -26,6 +28,8 @@ class ThanhVienController
         $id = $_GET['id'] ?? null;
         $hanhDong = $_GET['hanhDong'] ?? null;
         $role = $_GET['role'] ?? null;
+        $status = $_GET['status'] ?? null;
+        $gender = $_GET['gender'] ?? $_GET['gioi_tinh'] ?? null;
 
         if ($id && $hanhDong) {
             // Model chỉ có phương thức toggleStatus để chuyển trạng thái
@@ -33,7 +37,10 @@ class ThanhVienController
         }
 
         // Trả về trang quản lý (dùng admin.php khi đang test cục bộ)
-        $loc = 'admin.php?action=index' . ($role ? '&role=' . urlencode($role) : '');
+        $loc = 'admin.php?action=index';
+        if ($role) $loc .= '&role=' . urlencode($role);
+        if ($status) $loc .= '&status=' . urlencode($status);
+        if ($gender) $loc .= '&gender=' . urlencode($gender);
         header("Location: $loc");
         exit;
     }
@@ -45,13 +52,18 @@ class ThanhVienController
         // Chấp nhận cả 'quyen' (view mới) và 'role' (nếu có)
         $quyen = $_POST['quyen'] ?? $_POST['role'] ?? null;
         $role = $_POST['role'] ?? null; // preserve filter role if form sent it
+        $status = $_POST['status'] ?? null;
+        $gender = $_POST['gender'] ?? $_POST['gioi_tinh'] ?? null;
 
         if ($id && $quyen) {
             $this->model->updateRole($id, $quyen);
         }
 
         // Trả về trang quản lý admin
-        $loc = 'admin.php?action=index' . ($role ? '&role=' . urlencode($role) : '');
+        $loc = 'admin.php?action=index';
+        if ($role) $loc .= '&role=' . urlencode($role);
+        if ($status) $loc .= '&status=' . urlencode($status);
+        if ($gender) $loc .= '&gender=' . urlencode($gender);
         header("Location: $loc");
         exit;
     }
@@ -61,15 +73,18 @@ class ThanhVienController
     {
         $keyword = trim($_GET['keyword'] ?? '');
         $role = $_GET['role'] ?? null;
+        $status = $_GET['status'] ?? null;
+        $gender = $_GET['gender'] ?? $_GET['gioi_tinh'] ?? null;
+
         if ($keyword === '') {
-            // nếu không có từ khóa, show all (có thể kèm role)
-            $dsThanhVien = $this->model->getAll($role);
+            // nếu không có từ khóa, show all (có thể kèm role/status/gender)
+            $dsThanhVien = $this->model->getAll($role, $status, $gender);
             include __DIR__ . '/../../views/backend/Thanh_Vien.php';
             return;
         }
 
-        // gọi model search và include view với kết quả
-        $dsThanhVien = $this->model->search($keyword, $role);
+        // gọi model search và include view với kết quả (có thể kèm role/status/gender)
+        $dsThanhVien = $this->model->search($keyword, $role, $status, $gender);
         include __DIR__ . '/../../views/backend/Thanh_Vien.php';
     }
 
