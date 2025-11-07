@@ -139,14 +139,23 @@ class BaiVietModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function layBaiVietYeuThich($idNguoiDung) {
+        $stmt = $this->conn->prepare("
+            SELECT bv.tieu_de, bv.ngay_dang
+            FROM yeu_thich yt
+            JOIN bai_viet bv ON bv.id = yt.id_bai_viet
+            WHERE yt.id_nguoi_dung = ?");
+        $stmt->execute([$idNguoiDung]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-    // --- Đếm tổng số bài trong chuyên mục ---
-    public function countByChuyenMuc($chuyenMucId)
-    {
-        $sql = "SELECT COUNT(*) as total FROM bai_viet WHERE id_chuyen_muc = :id";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id', (int)$chuyenMucId, PDO::PARAM_INT);
-        $stmt->execute();
-        return (int) $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    public function layBaiVietDaLuu($idNguoiDung) {
+        $stmt = $this->conn->prepare("
+            SELECT bv.tieu_de, bv.ngay_dang
+            FROM luu_bai_viet lbv
+            JOIN bai_viet bv ON bv.id = lbv.id_bai_viet
+            WHERE lbv.id_nguoi_dung = ?");
+        $stmt->execute([$idNguoiDung]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

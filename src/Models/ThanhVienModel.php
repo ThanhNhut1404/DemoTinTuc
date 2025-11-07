@@ -6,6 +6,7 @@ use PDO;
 
 class ThanhVienModel {
     private $conn;
+     
     private $table = 'users';
     // logical -> actual column name mapping
     private $cols = [
@@ -245,40 +246,37 @@ class ThanhVienModel {
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([$role, $id]);
     }
-
-    // Tìm người dùng theo email
-    public function findByEmail($email)
-    {
-        $emailCol = $this->cols['email'];
-        $idCol = $this->cols['id'];
-        $nameCol = $this->cols['ho_ten'];
-        $roleCol = $this->cols['quyen'];
-        $statusCol = $this->cols['trang_thai'];
-
-        $sql = sprintf(
-            "SELECT `%s` AS id, `%s` AS ho_ten, `%s` AS email, `%s` AS quyen, `%s` AS trang_thai 
-             FROM `%s` WHERE `%s` = :email LIMIT 1",
-            $idCol, $nameCol, $emailCol, $roleCol, $statusCol,
-            $this->table, $emailCol
-        );
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
-        $stmt->execute();
+    public function layThongTinNguoiDung($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM nguoi_dung WHERE id = ?");
+        $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Cập nhật mật khẩu người dùng (đã sửa lỗi)
-    public function updatePassword($email, $hashedPassword)
-    {
-        $emailCol = $this->cols['email'];
-        $sql = sprintf(
-            "UPDATE `%s` SET `mat_khau` = :password WHERE `%s` = :email",
-            $this->table, $emailCol
-        );
-        $stmt = $this->conn->prepare($sql);
-        return $stmt->execute([
-            ':password' => $hashedPassword,
-            ':email' => $email
-        ]);
+  public function capNhatThongTin($id, $hoTen, $email, $anh = null, $ngaySinh = null, $gioiTinh = null) {
+    // 🔹 Kiểm tra email trùng lặp (ngoại trừ chính mình)
+    $check = $this->conn->prepare("SELECT id FROM nguoi_dung WHERE email = ? AND id != ?");
+    $check->execute([$email, $id]);
+    if ($check->fetch()) {
+        throw new \Exception("❌ Email này đã được sử dụng bởi tài khoản khác!");
     }
+
+    // 🔹 Nếu có ảnh mới
+    if ($anh) {
+        $sql = "UPDATE nguoi_dung 
+                SET ho_ten = ?, email = ?, anh_dai_dien = ?, ngay_sinh = ?, gioi_tinh = ? 
+                WHERE id = ?";
+        $params = [$hoTen, $email, $anh, $ngaySinh, $gioiTinh, $id];
+    } else {
+        // 🔹 Không có ảnh mới
+        $sql = "UPDATE nguoi_dung 
+                SET ho_ten = ?, email = ?, ngay_sinh = ?, gioi_tinh = ? 
+                WHERE id = ?";
+        $params = [$hoTen, $email, $ngaySinh, $gioiTinh, $id];
+    }
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute($params);
+}
+
+
 }

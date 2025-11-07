@@ -44,6 +44,12 @@ switch ($action) {
         // expects id and hanhDong=mo
         $controller->unlock();
         break;
+        case 'userPage':
+    $controller->userPage();
+    break;
+case 'updateProfile':
+        $controller->updateProfile();
+        break;
 
     default:
         echo "Action không tồn tại in admin.php";

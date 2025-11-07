@@ -2,6 +2,9 @@
 namespace Website\TinTuc\Controllers;
 
 use Website\TinTuc\Models\ThanhVienModel;
+use Website\TinTuc\Models\BaiVietModel;
+use Website\TinTuc\Models\BinhLuanModel;
+
 
 class ThanhVienController
 {
@@ -9,6 +12,12 @@ class ThanhVienController
 
     public function __construct()
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['user_id'] = 1;
+        }
         $this->model = new ThanhVienModel();
     }
 
@@ -105,4 +114,60 @@ class ThanhVienController
         // Gọi xử lý khóa/mở tài khoản (khi action là 'mo_tk')
         $this->khoaMoTaiKhoan();
     }
+      public function userPage()
+{
+    // đảm bảo session
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    if (!isset($_SESSION['user_id'])) $_SESSION['user_id'] = 1;
+
+    $thanhVienModel = new ThanhVienModel();
+    $baiVietModel = new BaiVietModel();
+    $binhLuanModel = new BinhLuanModel();
+
+    $user = $thanhVienModel->layThongTinNguoiDung($_SESSION['user_id']);
+    $yeuThich = $baiVietModel->layBaiVietYeuThich($_SESSION['user_id']);
+    $daLuu = $baiVietModel->layBaiVietDaLuu($_SESSION['user_id']);
+    $binhLuan = $binhLuanModel->layBinhLuanTheoNguoiDung($_SESSION['user_id']);
+
+          include __DIR__ . '/../../views/frontend/Trangnguoidung.php';
+}
+public function updateProfile() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $id = $_SESSION['user_id'];
+        $hoTen = trim($_POST['ho_ten']);
+        $email = trim($_POST['email']);
+        $ngaySinh = !empty($_POST['ngay_sinh']) ? $_POST['ngay_sinh'] : null;
+        $gioiTinh = !empty($_POST['gioi_tinh']) ? $_POST['gioi_tinh'] : null;
+        $anhDaiDien = null;
+
+        // 📁 Xử lý upload ảnh (nếu có)
+        if (!empty($_FILES['anh_dai_dien']['name'])) {
+            $fileName = basename($_FILES['anh_dai_dien']['name']);
+            $target = __DIR__ . '/../../public/uploads/' . $fileName;
+            move_uploaded_file($_FILES['anh_dai_dien']['tmp_name'], $target);
+            $anhDaiDien = $fileName;
+        }
+
+        $model = new ThanhVienModel();
+
+        try {
+            // ✅ Cập nhật thông tin người dùng
+            $model->capNhatThongTin($id, $hoTen, $email, $anhDaiDien, $ngaySinh, $gioiTinh);
+            $_SESSION['flash_message'] = "✅ Cập nhật thông tin thành công!";
+        } catch (\Exception $e) {
+            // ⚠️ Nếu có lỗi (ví dụ trùng email)
+            $_SESSION['flash_message'] = "⚠️ " . $e->getMessage();
+        }
+
+        // 🔁 Quay lại trang người dùng
+        header("Location: admin.php?action=userPage");
+        exit;
+    }
+}
+
+
 }
