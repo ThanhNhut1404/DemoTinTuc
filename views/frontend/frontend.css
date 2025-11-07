@@ -233,3 +233,71 @@
             background-color: #218838;
             transform: translateY(-2px);
         }
+/* ====== NAVIGATION BAR ====== */
+.main-nav {
+    background: linear-gradient(90deg, #005fa3, #0078d7);
+    padding: 10px 20px;
+    border-radius: 6px;
+}
+
+.main-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.main-nav ul li {
+    position: relative;
+}
+
+.main-nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    display: block;
+    transition: background 0.3s ease;
+}
+
+.main-nav a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+/* ====== DROPDOWN MENU ====== */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    z-index: 99;
+    padding: 8px 0;
+}
+
+.dropdown-content li a {
+    color: #005fa3;
+    padding: 8px 15px;
+    display: block;
+    font-weight: normal;
+}
+
+.dropdown-content li a:hover {
+    background: #f0f6ff;
+}
+
+/* Hiện menu khi hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Nút chuyên mục chính */
+.dropbtn {
+    cursor: pointer;
+}

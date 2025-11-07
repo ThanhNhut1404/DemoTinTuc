@@ -55,6 +55,116 @@ $chuyenMuc = isset($chuyenMuc) && is_array($chuyenMuc) ? $chuyenMuc : [];
     .tin .title:hover {
         color: #d9534f;
     }
+
+    /* 🎯 Thêm CSS cho dropdown chuyên mục */
+    header {
+        text-align: center;
+        background: #f8f9fa;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #005fa3;
+    }
+
+    .auth-nav {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        background: #005fa3;
+        padding: 10px 20px;
+        gap: 15px;
+        position: relative;
+    }
+
+    .auth-link {
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+        background: #007bff;
+        padding: 6px 12px;
+        border-radius: 5px;
+        transition: 0.2s;
+    }
+
+    .auth-link:hover {
+        background: #004a99;
+    }
+
+    /* ----- Dropdown ----- */
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-toggle {
+        cursor: pointer;
+    }
+
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 40px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        list-style: none;
+        margin: 0;
+        padding: 5px 0;
+        z-index: 1000;
+        min-width: 180px;
+    }
+
+    .dropdown-menu li a {
+        display: block;
+        padding: 10px 15px;
+        color: #005fa3;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .dropdown-menu li a:hover {
+        background: #f1f9ff;
+        color: #d9534f;
+    }
+
+    .dropdown.show .dropdown-menu {
+        display: block;
+        animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    header h1 {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: #005fa3;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    margin-top: 15px;
+    letter-spacing: 1px;
+}
+
+header p {
+    font-size: 1.05em;
+    color: #333;
+    font-style: italic;
+    margin-top: 4px;
+    margin-bottom: 15px;
+    background: linear-gradient(to right, #e3f2fd, #ffffff);
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid #cfe2ff;
+}
+
 </style>
 
 <body>
@@ -79,7 +189,22 @@ $chuyenMuc = isset($chuyenMuc) && is_array($chuyenMuc) ? $chuyenMuc : [];
         <nav class="auth-nav">
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
             <a href="index.php?action=register" class="auth-link">Đăng ký</a>
+
+            <!-- 🔽 Nút chuyên mục -->
+            <div class="dropdown">
+                <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
+                <ul class="dropdown-menu">
+                    <?php foreach ($chuyenMuc as $cm): ?>
+                        <li>
+                            <a href="index.php?action=chuyenmuc&id=<?= htmlspecialchars($cm['id']) ?>">
+                                <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
         </nav>
+
         <h1>🌐 Website Tin Tức</h1>
         <p>Cập nhật tin tức mới nhất, nổi bật và hấp dẫn mỗi ngày</p>
     </header>
@@ -205,6 +330,21 @@ $chuyenMuc = isset($chuyenMuc) && is_array($chuyenMuc) ? $chuyenMuc : [];
             showAds(leftAds, adIndex % leftAds.length);
             showAds(rightAds, adIndex % rightAds.length);
         }, 5000);
+        document.addEventListener("DOMContentLoaded", function() {
+            const dropdown = document.querySelector(".dropdown");
+            const toggle = dropdown.querySelector(".dropdown-toggle");
+
+            toggle.addEventListener("click", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.classList.toggle("show");
+            });
+
+            // Ẩn dropdown khi click ra ngoài
+            document.addEventListener("click", function() {
+                dropdown.classList.remove("show");
+            });
+        });
     </script>
 
 </body>
