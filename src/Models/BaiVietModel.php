@@ -168,4 +168,29 @@ class BaiVietModel
         $stmt->execute();
         return (int)$stmt->fetchColumn();
     }
+    public function getByChuyenMucFilter($chuyenMucId, $limit, $offset, $filter)
+{
+    // Mặc định: mới nhất
+    $orderBy = "ngay_dang DESC";
+
+    if ($filter === 'xem_nhieu') {
+        $orderBy = "luot_xem DESC";
+    } elseif ($filter === 'binh_luan') {
+        // Nếu có bảng bình luận thì dùng COUNT để sắp xếp
+        $orderBy = "(SELECT COUNT(*) FROM binh_luan WHERE binh_luan.id_bai_viet = bv.id) DESC";
+    }
+
+    $sql = "SELECT bv.* 
+            FROM bai_viet bv
+            WHERE bv.id_chuyen_muc = :id
+            ORDER BY $orderBy
+            LIMIT $limit OFFSET $offset";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindValue(':id', (int)$chuyenMucId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }
