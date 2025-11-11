@@ -9,7 +9,7 @@ class LoginController
     private $conn;
 
     public function __construct() {
-        $this->conn = Database::getConnection();
+        $this->conn = Database::class;
     }
 
     // Hiển thị form đăng nhập
