@@ -110,7 +110,7 @@ $related_posts = $conn->query($related_sql);
                     </form>
 
                 </div>
-                <a href="../index.php" class="text-decoration-none">← Quay lại trang chủ</a>
+                <a href="../public/index.php" class="text-decoration-none">← Quay lại trang chủ</a>
             </div>
         </div>
 

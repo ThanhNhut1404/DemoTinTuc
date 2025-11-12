@@ -168,4 +168,56 @@ class BaiVietModel
         $stmt->execute();
         return (int)$stmt->fetchColumn();
     }
+       public function search($q)
+    {
+        $sql = "SELECT * FROM bai_viet
+                WHERE (tieu_de LIKE :q OR noi_dung LIKE :q)
+                AND trang_thai = 'da_dang'
+                ORDER BY ngay_dang DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':q', '%' . $q . '%', PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ======================
+    // 2. COUNT SEARCH
+    // ======================
+    public function countSearch($q)
+    {
+        $sql = "SELECT COUNT(*) AS total
+                FROM bai_viet
+                WHERE (tieu_de LIKE :q OR noi_dung LIKE :q)
+                AND trang_thai = 'da_dang'";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':q', '%' . $q . '%', PDO::PARAM_STR);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)$row['total'];
+    }
+
+    // ======================
+    // 3. SUGGEST KHÔNG LIMIT
+    // (nhưng vẫn giữ limit nhẹ 10 để tránh 1000 gợi ý)
+    // ======================
+    public function suggest($q)
+    {
+        $sql = "SELECT id, tieu_de FROM bai_viet
+                WHERE (tieu_de LIKE :q OR noi_dung LIKE :q)
+                AND trang_thai = 'da_dang'
+                ORDER BY ngay_dang DESC
+                LIMIT 10";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':q', '%' . $q . '%', PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
+
+
