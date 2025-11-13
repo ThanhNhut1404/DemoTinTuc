@@ -23,13 +23,16 @@ class ChuyenMucController
 
         $tenChuyenMuc = $chuyenMuc['ten_chuyen_muc'];
 
+        // ✅ Bộ lọc (mặc định là 'moi_nhat')
+        $filter = $_GET['filter'] ?? 'moi_nhat';
+
         // ✅ Phân trang
         $page = $_GET['page'] ?? 1;
         $limit = 5;
         $offset = ($page - 1) * $limit;
 
-        // ✅ Lấy danh sách bài viết
-        $baiViet = $baiVietModel->getByChuyenMuc($id, $limit, $offset);
+        // ✅ Lấy danh sách bài viết có áp dụng bộ lọc
+        $baiViet = $baiVietModel->getByChuyenMucFilter($id, $limit, $offset, $filter);
 
         // ✅ Tổng số bài viết để tính phân trang
         $total = $baiVietModel->countByChuyenMuc($id);

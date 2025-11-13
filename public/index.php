@@ -57,9 +57,6 @@ switch ($action) {
         $controller = new RegisterController();
         $controller->handleRegister();
         break;
-
-
-
     // CRUD ví dụ
     case 'create':
         $controller->create();
