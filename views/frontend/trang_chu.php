@@ -4,6 +4,9 @@ $banners = isset($banners) && is_array($banners) ? $banners : [];
 $quangCaoTrai = isset($quangCaoTrai) && is_array($quangCaoTrai) ? $quangCaoTrai : [];
 $quangCaoPhai = isset($quangCaoPhai) && is_array($quangCaoPhai) ? $quangCaoPhai : [];
 $chuyenMuc = isset($chuyenMuc) && is_array($chuyenMuc) ? $chuyenMuc : [];
+$tinNoiBat = isset($tinNoiBat) && is_array($tinNoiBat) ? $tinNoiBat : [];
+$tinMoiNhat = isset($tinMoiNhat) && is_array($tinMoiNhat) ? $tinMoiNhat : [];
+$tinXemNhieu = isset($tinXemNhieu) && is_array($tinXemNhieu) ? $tinXemNhieu : [];
 ?>
 
 <!DOCTYPE html>
@@ -187,6 +190,17 @@ header p {
 
     <header>
         <nav class="auth-nav">
+           <form id="search-form" action="index.php" method="get" autocomplete="off" class="search-box">
+    <input type="hidden" name="action" value="search">
+
+    <div class="search-input-wrapper">
+        <input id="search-input" type="text" name="q" placeholder="Bạn muốn tìm gì hôm nay?">
+        <button type="submit" class="search-btn">🔍</button>
+    </div>
+
+    <div id="search-suggestions" class="suggest-box" style="display:none;"></div>
+</form>
+
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
             <a href="index.php?action=register" class="auth-link">Đăng ký</a>
 
@@ -246,8 +260,8 @@ header p {
                     <?php endforeach; ?>
                 </div>
             </div>
-
             <div class="section">
+                <!-- NỘI DUNG phu -->
                 <h2>🆕 Tin mới nhất</h2>
                 <?php foreach ($tinMoiNhat as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
