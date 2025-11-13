@@ -44,10 +44,17 @@ switch ($action) {
         // expects id and hanhDong=mo
         $controller->unlock();
         break;
-        case 'userPage':
-    $controller->userPage();
-    break;
-case 'updateProfile':
+
+    case 'thanh_vien_roles':
+        // Show member list (same as index)
+        $controller->index();
+        break;
+
+    case 'userPage':
+        $controller->userPage();
+        break;
+
+    case 'updateProfile':
         $controller->updateProfile();
         break;
 

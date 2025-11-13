@@ -168,4 +168,23 @@ class BaiVietModel
         $stmt->execute();
         return (int)$stmt->fetchColumn();
     }
+
+    // --- Tổng số bài viết ---
+    public function countAll()
+    {
+        $sql = "SELECT COUNT(*) FROM bai_viet";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    // --- Tổng lượt xem tất cả bài viết ---
+    public function totalViews()
+    {
+        $sql = "SELECT SUM(luot_xem) FROM bai_viet";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $val = $stmt->fetchColumn();
+        return $val === null ? 0 : (int)$val;
+    }
 }

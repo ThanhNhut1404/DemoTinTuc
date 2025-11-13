@@ -22,6 +22,13 @@ class ThanhVienModel {
         $this->conn = $db->connect();
         // Detect which table to use (prefer 'users', fallback to 'nguoi_dung')
         $this->detectTableAndColumns(['users', 'nguoi_dung']);
+        // write a short debug summary to tools/detect_debug.log (dev-only)
+        try {
+            $summary = sprintf("[%s] ThanhVienModel initialized. table=%s cols=%s\n", date('c'), $this->table, json_encode($this->cols, JSON_UNESCAPED_UNICODE));
+            @file_put_contents(__DIR__ . '/../../tools/detect_debug.log', $summary, FILE_APPEND);
+        } catch (\Exception $e) {
+            // ignore logging failures in production
+        }
     }
 
     private function detectTableAndColumns(array $candidates)
@@ -142,6 +149,16 @@ class ThanhVienModel {
         return $this->normalizeRows($rows);
     }
 
+    // --- Tổng người dùng ---
+    public function countAll()
+    {
+        $idCol = $this->cols['id'];
+        $sql = sprintf("SELECT COUNT(*) FROM `%s`", $this->table);
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
     // Tìm kiếm người dùng theo tên hoặc email
     // Tìm kiếm người dùng theo tên hoặc email
     public function search(string $keyword, ?string $role = null, ?string $status = null, ?string $gender = null) {
@@ -168,15 +185,11 @@ class ThanhVienModel {
         $selectSql = implode(', ', $selectParts);
         $like = '%' . $keyword . '%';
 
-        // build where clauses dynamically: first the name/email LIKE part, then optional filters
-        $whereParts = [];
-        $params = [':kw' => $like];
-        $whereParts[] = sprintf("(`%s` LIKE :kw OR `%s` LIKE :kw)", $nameCol, $emailCol);
-
-        // build where clauses dynamically: first the name/email LIKE part, then optional filters
-        $whereParts = [];
-        $params = [':kw' => $like];
-        $whereParts[] = sprintf("(`%s` LIKE :kw OR `%s` LIKE :kw)", $nameCol, $emailCol);
+    // build where clauses dynamically: first the name/email LIKE part, then optional filters
+    $whereParts = [];
+    $params = [':kw' => $like];
+    // use LIKE without COLLATE for broader matching
+    $whereParts[] = sprintf("(`%s` LIKE :kw OR `%s` LIKE :kw)", $nameCol, $emailCol);
 
         if ($role !== null && $role !== '') {
             $whereParts[] = sprintf("LOWER(`%s`) = LOWER(:role)", $roleCol);
@@ -192,14 +205,24 @@ class ThanhVienModel {
         }
 
         $sql = sprintf("SELECT %s FROM `%s` WHERE %s ORDER BY `%s` DESC", $selectSql, $this->table, implode(' AND ', $whereParts), $idCol);
-        $stmt = $this->conn->prepare($sql);
-        foreach ($params as $k => $v) {
-            $stmt->bindValue($k, $v, PDO::PARAM_STR);
+        // prepare and execute with debug logging on failure (dev helper)
+        try {
+            $stmt = $this->conn->prepare($sql);
+            foreach ($params as $k => $v) {
+                $stmt->bindValue($k, $v, PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // debug log for successful searches too
+            $log = sprintf("[%s] Search executed successfully\nKeyword: %s\nRole: %s\nStatus: %s\nGender: %s\nSQL: %s\nPARAMS: %s\nRows found: %d\n\n", date('c'), $keyword, $role, $status, $gender, $sql, print_r($params, true), count($rows));
+            @file_put_contents(__DIR__ . '/../../tools/search_debug.log', $log, FILE_APPEND);
+            return $this->normalizeRows($rows);
+        } catch (\PDOException $e) {
+            // write debug info to tools/search_debug.log (dev-only)
+            $log = sprintf("[%s] PDOException in ThanhVienModel::search\nSQL: %s\nPARAMS: %s\nError: %s\n\n", date('c'), $sql, print_r($params, true), $e->getMessage());
+            @file_put_contents(__DIR__ . '/../../tools/search_debug.log', $log, FILE_APPEND);
+            throw $e;
         }
-
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $this->normalizeRows($rows);
     }
 
     /**
@@ -247,35 +270,48 @@ class ThanhVienModel {
         return $stmt->execute([$role, $id]);
     }
     public function layThongTinNguoiDung($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM nguoi_dung WHERE id = ?");
+        $idCol = $this->cols['id'];
+        $sql = sprintf("SELECT * FROM `%s` WHERE `%s` = ?", $this->table, $idCol);
+        $stmt = $this->conn->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
   public function capNhatThongTin($id, $hoTen, $email, $anh = null, $ngaySinh = null, $gioiTinh = null) {
     // 🔹 Kiểm tra email trùng lặp (ngoại trừ chính mình)
-    $check = $this->conn->prepare("SELECT id FROM nguoi_dung WHERE email = ? AND id != ?");
+    $emailCol = $this->cols['email'];
+    $idCol = $this->cols['id'];
+    $checkSql = sprintf("SELECT `%s` FROM `%s` WHERE `%s` = ? AND `%s` != ?", $idCol, $this->table, $emailCol, $idCol);
+    $check = $this->conn->prepare($checkSql);
     $check->execute([$email, $id]);
     if ($check->fetch()) {
         throw new \Exception("❌ Email này đã được sử dụng bởi tài khoản khác!");
     }
 
-    // 🔹 Nếu có ảnh mới
-    if ($anh) {
-        $sql = "UPDATE nguoi_dung 
-                SET ho_ten = ?, email = ?, anh_dai_dien = ?, ngay_sinh = ?, gioi_tinh = ? 
-                WHERE id = ?";
-        $params = [$hoTen, $email, $anh, $ngaySinh, $gioiTinh, $id];
-    } else {
-        // 🔹 Không có ảnh mới
-        $sql = "UPDATE nguoi_dung 
-                SET ho_ten = ?, email = ?, ngay_sinh = ?, gioi_tinh = ? 
-                WHERE id = ?";
-        $params = [$hoTen, $email, $ngaySinh, $gioiTinh, $id];
+    // build dynamic SET using detected column names so the model works with different schemas
+    $nameCol = $this->cols['ho_ten'];
+    $avatarCol = $this->cols['avatar'] ?? null;
+    $dobCol = $this->cols['ngay_sinh'] ?? null;
+    $genderCol = $this->cols['gioi_tinh'] ?? null;
+
+    $setParts = [];
+    $params = [];
+    $setParts[] = sprintf("`%s` = ?", $nameCol); $params[] = $hoTen;
+    $setParts[] = sprintf("`%s` = ?", $emailCol); $params[] = $email;
+    if ($anh && $avatarCol) { $setParts[] = sprintf("`%s` = ?", $avatarCol); $params[] = $anh; }
+    if ($dobCol) { $setParts[] = sprintf("`%s` = ?", $dobCol); $params[] = $ngaySinh; }
+    if ($genderCol) { $setParts[] = sprintf("`%s` = ?", $genderCol); $params[] = $gioiTinh; }
+
+    // ensure we have at least one column to update
+    if (empty($setParts)) {
+        return false;
     }
 
+    $sql = sprintf("UPDATE `%s` SET %s WHERE `%s` = ?", $this->table, implode(', ', $setParts), $idCol);
+    $params[] = $id;
+
     $stmt = $this->conn->prepare($sql);
-    $stmt->execute($params);
+    return $stmt->execute($params);
 }
 
 

@@ -1,0 +1,107 @@
+[2025-11-13T14:07:32+01:00] Search executed successfully
+Keyword: nhụt
+Role: User
+Status: 
+Gender: 
+SQL: SELECT `id` AS id, `anh_dai_dien` AS avatar, `ho_ten` AS ho_ten, `gioi_tinh` AS gioi_tinh, `ngay_sinh` AS ngay_sinh, `email` AS email, `vai_tro` AS quyen, `trang_thai` AS trang_thai FROM `nguoi_dung` WHERE (`ho_ten` LIKE :kw COLLATE utf8_unicode_ci OR `email` LIKE :kw COLLATE utf8_unicode_ci) AND LOWER(`vai_tro`) = LOWER(:role) ORDER BY `id` DESC
+PARAMS: Array
+(
+    [:kw] => %nhụt%
+    [:role] => User
+)
+
+Rows found: 0
+
+[2025-11-13T14:08:53+01:00] Search executed successfully
+Keyword: nhựt
+Role: 
+Status: 
+Gender: 
+SQL: SELECT `id` AS id, `anh_dai_dien` AS avatar, `ho_ten` AS ho_ten, `gioi_tinh` AS gioi_tinh, `ngay_sinh` AS ngay_sinh, `email` AS email, `vai_tro` AS quyen, `trang_thai` AS trang_thai FROM `nguoi_dung` WHERE (`ho_ten` LIKE :kw OR `email` LIKE :kw) ORDER BY `id` DESC
+PARAMS: Array
+(
+    [:kw] => %nhựt%
+)
+
+Rows found: 1
+
+[2025-11-13T14:09:02+01:00] Search executed successfully
+Keyword: nhựt
+Role: 
+Status: Hoat_dong
+Gender: 
+SQL: SELECT `id` AS id, `anh_dai_dien` AS avatar, `ho_ten` AS ho_ten, `gioi_tinh` AS gioi_tinh, `ngay_sinh` AS ngay_sinh, `email` AS email, `vai_tro` AS quyen, `trang_thai` AS trang_thai FROM `nguoi_dung` WHERE (`ho_ten` LIKE :kw OR `email` LIKE :kw) AND LOWER(`trang_thai`) = LOWER(:status) ORDER BY `id` DESC
+PARAMS: Array
+(
+    [:kw] => %nhựt%
+    [:status] => Hoat_dong
+)
+
+Rows found: 1
+
+[2025-11-13T14:12:43+01:00] Search executed successfully
+Keyword: Tấn
+Role: 
+Status: 
+Gender: 
+SQL: SELECT `id` AS id, `anh_dai_dien` AS avatar, `ho_ten` AS ho_ten, `gioi_tinh` AS gioi_tinh, `ngay_sinh` AS ngay_sinh, `email` AS email, `vai_tro` AS quyen, `trang_thai` AS trang_thai FROM `nguoi_dung` WHERE (`ho_ten` LIKE :kw OR `email` LIKE :kw) ORDER BY `id` DESC
+PARAMS: Array
+(
+    [:kw] => %Tấn%
+)
+
+Rows found: 1
+
+[2025-11-13T14:12:48+01:00] Search executed successfully
+Keyword: Tấn
+Role: User
+Status: 
+Gender: 
+SQL: SELECT `id` AS id, `anh_dai_dien` AS avatar, `ho_ten` AS ho_ten, `gioi_tinh` AS gioi_tinh, `ngay_sinh` AS ngay_sinh, `email` AS email, `vai_tro` AS quyen, `trang_thai` AS trang_thai FROM `nguoi_dung` WHERE (`ho_ten` LIKE :kw OR `email` LIKE :kw) AND LOWER(`vai_tro`) = LOWER(:role) ORDER BY `id` DESC
+PARAMS: Array
+(
+    [:kw] => %Tấn%
+    [:role] => User
+)
+
+Rows found: 1
+
+[2025-11-13T14:14:43+01:00] Search executed successfully
+Keyword: nhựt
+Role: 
+Status: 
+Gender: 
+SQL: SELECT `id` AS id, `anh_dai_dien` AS avatar, `ho_ten` AS ho_ten, `gioi_tinh` AS gioi_tinh, `ngay_sinh` AS ngay_sinh, `email` AS email, `vai_tro` AS quyen, `trang_thai` AS trang_thai FROM `nguoi_dung` WHERE (`ho_ten` LIKE :kw OR `email` LIKE :kw) ORDER BY `id` DESC
+PARAMS: Array
+(
+    [:kw] => %nhựt%
+)
+
+Rows found: 1
+
+[2025-11-13T14:14:51+01:00] Search executed successfully
+Keyword: D
+Role: 
+Status: 
+Gender: 
+SQL: SELECT `id` AS id, `anh_dai_dien` AS avatar, `ho_ten` AS ho_ten, `gioi_tinh` AS gioi_tinh, `ngay_sinh` AS ngay_sinh, `email` AS email, `vai_tro` AS quyen, `trang_thai` AS trang_thai FROM `nguoi_dung` WHERE (`ho_ten` LIKE :kw OR `email` LIKE :kw) ORDER BY `id` DESC
+PARAMS: Array
+(
+    [:kw] => %D%
+)
+
+Rows found: 1
+
+[2025-11-13T14:16:32+01:00] Search executed successfully
+Keyword: D
+Role: 
+Status: 
+Gender: 
+SQL: SELECT `id` AS id, `anh_dai_dien` AS avatar, `ho_ten` AS ho_ten, `gioi_tinh` AS gioi_tinh, `ngay_sinh` AS ngay_sinh, `email` AS email, `vai_tro` AS quyen, `trang_thai` AS trang_thai FROM `nguoi_dung` WHERE (`ho_ten` LIKE :kw OR `email` LIKE :kw) ORDER BY `id` DESC
+PARAMS: Array
+(
+    [:kw] => %D%
+)
+
+Rows found: 1
+

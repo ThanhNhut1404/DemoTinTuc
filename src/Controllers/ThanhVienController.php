@@ -28,7 +28,8 @@ class ThanhVienController
         $status = $_GET['status'] ?? null; // trạng thái filter (Hoat_dong / Khoa / ...)
         $gender = $_GET['gender'] ?? $_GET['gioi_tinh'] ?? null; // giới tính filter
         $dsThanhVien = $this->model->getAll($role, $status, $gender);
-        include __DIR__ . '/../../views/backend/Thanh_Vien.php';
+        // Render inside the admin layout so shared CSS/JS are loaded
+        include __DIR__ . '/../../views/backend/layout.php';
     }
 
     // Khóa / Mở khóa tài khoản
@@ -88,13 +89,22 @@ class ThanhVienController
         if ($keyword === '') {
             // nếu không có từ khóa, show all (có thể kèm role/status/gender)
             $dsThanhVien = $this->model->getAll($role, $status, $gender);
-            include __DIR__ . '/../../views/backend/Thanh_Vien.php';
+            include __DIR__ . '/../../views/backend/layout.php';
             return;
         }
 
         // gọi model search và include view với kết quả (có thể kèm role/status/gender)
         $dsThanhVien = $this->model->search($keyword, $role, $status, $gender);
-        include __DIR__ . '/../../views/backend/Thanh_Vien.php';
+        // Nếu có áp dụng bộ lọc mà kết quả = 0, thử bỏ bộ lọc để tránh "lọc quá chặt"
+        $filterWarning = null;
+        if (empty($dsThanhVien) && ($role || $status || $gender)) {
+            $fallback = $this->model->search($keyword, null, null, null);
+            if (!empty($fallback)) {
+                $filterWarning = "Không tìm thấy với bộ lọc hiện tại. Đang hiển thị kết quả chỉ theo từ khóa.";
+                $dsThanhVien = $fallback;
+            }
+        }
+        include __DIR__ . '/../../views/backend/layout.php';
     }
 
     public function updateRole()
