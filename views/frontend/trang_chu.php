@@ -260,8 +260,8 @@ header p {
                     <?php endforeach; ?>
                 </div>
             </div>
-
             <div class="section">
+                <!-- NỘI DUNG phu -->
                 <h2>🆕 Tin mới nhất</h2>
                 <?php foreach ($tinMoiNhat as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
