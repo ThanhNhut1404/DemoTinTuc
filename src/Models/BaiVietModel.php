@@ -169,22 +169,83 @@ class BaiVietModel
         return (int)$stmt->fetchColumn();
     }
 
-    // --- Tổng số bài viết ---
-    public function countAll()
+    public function search($q)
     {
-        $sql = "SELECT COUNT(*) FROM bai_viet";
+        $sql = "SELECT * FROM bai_viet
+                WHERE (tieu_de LIKE :q OR noi_dung LIKE :q)
+                AND trang_thai = 'da_dang'
+                ORDER BY ngay_dang DESC";
+
         $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':q', '%' . $q . '%', PDO::PARAM_STR);
         $stmt->execute();
-        return (int)$stmt->fetchColumn();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // --- Tổng lượt xem tất cả bài viết ---
-    public function totalViews()
+    // ======================
+    // 2. COUNT SEARCH
+    // ======================
+    public function countSearch($q)
     {
-        $sql = "SELECT SUM(luot_xem) FROM bai_viet";
+        $sql = "SELECT COUNT(*) AS total
+                FROM bai_viet
+                WHERE (tieu_de LIKE :q OR noi_dung LIKE :q)
+                AND trang_thai = 'da_dang'";
+
         $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':q', '%' . $q . '%', PDO::PARAM_STR);
         $stmt->execute();
-        $val = $stmt->fetchColumn();
-        return $val === null ? 0 : (int)$val;
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)$row['total'];
     }
+
+    // ======================
+    // 3. SUGGEST KHÔNG LIMIT
+    // (nhưng vẫn giữ limit nhẹ 10 để tránh 1000 gợi ý)
+    // ======================
+    public function suggest($q)
+    {
+        $sql = "SELECT id, tieu_de FROM bai_viet
+                WHERE (tieu_de LIKE :q OR noi_dung LIKE :q)
+                AND trang_thai = 'da_dang'
+                ORDER BY ngay_dang DESC
+                LIMIT 10";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':q', '%' . $q . '%', PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getByChuyenMucFilter($chuyenMucId, $limit, $offset, $filter)
+{
+    // Mặc định: mới nhất
+    $orderBy = "ngay_dang DESC";
+
+    if ($filter === 'xem_nhieu') {
+        $orderBy = "luot_xem DESC";
+    } elseif ($filter === 'binh_luan') {
+        // Nếu có bảng bình luận thì dùng COUNT để sắp xếp
+        $orderBy = "(SELECT COUNT(*) FROM binh_luan WHERE binh_luan.id_bai_viet = bv.id) DESC";
+    }
+
+    $sql = "SELECT bv.* 
+            FROM bai_viet bv
+            WHERE bv.id_chuyen_muc = :id
+            ORDER BY $orderBy
+            LIMIT $limit OFFSET $offset";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindValue(':id', (int)$chuyenMucId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
+}
+
+

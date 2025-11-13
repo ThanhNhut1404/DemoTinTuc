@@ -57,9 +57,6 @@ switch ($action) {
         $controller = new RegisterController();
         $controller->handleRegister();
         break;
-
-
-
     // CRUD ví dụ
     case 'create':
         $controller->create();
@@ -99,6 +96,15 @@ switch ($action) {
         $controller = new \Website\TinTuc\Controllers\BaiVietController();
         $controller->chiTiet($_GET['id']);
         break;
+        case 'search':
+    $controller = new \Website\TinTuc\Controllers\searchController();
+    $controller->index();
+    break;
+
+case 'ajax_search':
+    $controller = new \Website\TinTuc\Controllers\BaiVietController();
+    $controller->ajaxSearch();
+    break;
 
     // ❌ Mặc định: về trang chủ
     default:

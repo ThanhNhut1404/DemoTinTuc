@@ -87,4 +87,40 @@ class BaiVietController
         // Gọi giao diện chi tiết
         include __DIR__ . '/../../views/chi_tiet_bai_viet.php';
     }
+    public function search()
+{
+    $q = trim($_GET['q'] ?? '');
+    $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    $perPage = 10;
+    $offset = ($page - 1) * $perPage;
+
+    $totalResults = 0;
+    $results = [];
+    if ($q !== '') {
+        $totalResults = $this->model->countSearch($q);
+        $results = $this->model->search($q, $perPage, $offset);
+    }
+
+    // lấy chuyên mục nếu view header cần hiển thị menu
+    $chuyenMucModel = new \Website\TinTuc\Models\ChuyenMucModel();
+    $chuyenMuc = $chuyenMucModel->getAll();
+
+    // biến cho view: $query, $results, $totalResults, $currentPage, $perPage
+    $query = $q;
+    $currentPage = $page;
+    include __DIR__ . '/../../views/frontend/search.php';
+}
+
+public function ajaxSearch()
+{
+    $q = trim($_GET['q'] ?? '');
+    header('Content-Type: application/json; charset=utf-8');
+    if ($q === '') {
+        echo json_encode([]);
+        return;
+    }
+    $suggestions = $this->model->suggest($q, 7);
+    // đảm bảo json safe
+    echo json_encode($suggestions, JSON_UNESCAPED_UNICODE);
+}
 }
