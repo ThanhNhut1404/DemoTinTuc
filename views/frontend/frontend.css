@@ -301,8 +301,4 @@
 .dropbtn {
     cursor: pointer;
 }
-#search-form { position: relative; display:flex; align-items:center; gap:8px; }
-#search-input { padding:6px 10px; border-radius:6px; border:1px solid rgba(0,0,0,0.1); min-width:220px; }
-#search-suggestions { position:absolute; right:0; top:40px; background:#fff; border:1px solid #ddd; box-shadow:0 6px 18px rgba(0,0,0,0.08); border-radius:6px; display:none; max-width:420px; z-index:2000; }
-#search-suggestions .item { padding:8px 12px; cursor:pointer; color:#005fa3; }
-#search-suggestions .item:hover { background:#f1f9ff; }
+

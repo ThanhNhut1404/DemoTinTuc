@@ -196,9 +196,10 @@ header p {
     <div class="search-input-wrapper">
         <input id="search-input" type="text" name="q" placeholder="Bạn muốn tìm gì hôm nay?">
         <button type="submit" class="search-btn">🔍</button>
+        
     </div>
-
     <div id="search-suggestions" class="suggest-box" style="display:none;"></div>
+    
 </form>
 
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>

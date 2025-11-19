@@ -49,4 +49,5 @@ class SearchController {
         // Truyền dữ liệu sang view
         include __DIR__ . '/../../views/frontend/search.php';
     }
+    
 }

@@ -182,6 +182,17 @@ class BaiVietModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+public function searchAll($keyword)
+{
+    $sql = "SELECT * FROM baiviet 
+            WHERE tieu_de LIKE :keyword
+               OR noi_dung LIKE :keyword
+            ORDER BY id DESC";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute(['keyword' => "%$keyword%"]);
+    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+}
 
     // ======================
     // 2. COUNT SEARCH
