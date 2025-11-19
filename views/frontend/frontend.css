@@ -323,3 +323,33 @@
         .hidden {
             display: none;
         }
+        .search-container {
+    width: 320px; /* chỉnh vừa với thanh xanh */
+    padding: 10px;
+}
+
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 25px;
+    padding: 5px 10px;
+    border: 2px solid #005fa3;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 8px 10px;
+    font-size: 14px;
+}
+
+.search-button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #333;
+}
+

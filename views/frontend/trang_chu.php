@@ -604,28 +604,17 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
 
     <header>
         <nav class="auth-nav">
-<<<<<<< HEAD
-           <form id="search-form" action="index.php" method="get" autocomplete="off" class="search-box">
+
+          <form id="searchForm" action="index.php" method="get" class="search-container">
     <input type="hidden" name="action" value="search">
 
-    <div class="search-input-wrapper">
-        <input id="search-input" type="text" name="q" placeholder="Bạn muốn tìm gì hôm nay?">
-        <button type="submit" class="search-btn">🔍</button>
-        
+    <div class="search-wrapper">
+        <input type="text" id="searchBox" name="q" placeholder="Bạn muốn tìm gì hôm nay?" autocomplete="off" class="search-input">
+        <button type="submit" class="search-button">🔍</button>
     </div>
-    <div id="search-suggestions" class="suggest-box" style="display:none;"></div>
-    
 </form>
 
-=======
-            <form id="search-form" action="index.php" method="get" class="search-box">
-                <input type="hidden" name="action" value="search">
-                <div class="search-input-wrapper">
-                    <input id="search-input" type="text" name="q" placeholder="Tìm kiếm tin tức...">
-                    <button type="submit" class="search-btn">Tìm</button>
-                </div>
-            </form>
->>>>>>> accb5f395cceb6539f8a2cf123548fd7ec7a1607
+
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
             <a href="index.php?action=register" class="auth-link">Đăng ký</a>
             <div class="dropdown">
