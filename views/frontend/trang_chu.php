@@ -7,172 +7,586 @@ $chuyenMuc = isset($chuyenMuc) && is_array($chuyenMuc) ? $chuyenMuc : [];
 $tinNoiBat = isset($tinNoiBat) && is_array($tinNoiBat) ? $tinNoiBat : [];
 $tinMoiNhat = isset($tinMoiNhat) && is_array($tinMoiNhat) ? $tinMoiNhat : [];
 $tinXemNhieu = isset($tinXemNhieu) && is_array($tinXemNhieu) ? $tinXemNhieu : [];
+$baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChuyenMuc) ? $baiVietTheoChuyenMuc : [];
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang chủ - Website Tin Tức</title>
     <link rel="stylesheet" href="../views/frontend/frontend.css">
+    <style>
+        :root {
+            --primary: #005fa3;
+            --primary-hover: #d9534f;
+            --bg-light: #fafafa;
+            --border: #eee;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* ===== HEADER & NAV ===== */
+        .auth-nav {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            background: var(--primary);
+            padding: 12px 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            margin-right: auto;
+            max-width: 300px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 8px 35px 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        .auth-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            background: #007bff;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            transition: 0.2s;
+        }
+
+        .auth-link:hover {
+            background: #004a99;
+        }
+
+        /* Dropdown Chuyên mục */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            min-width: 200px;
+            z-index: 1000;
+            padding: 8px 0;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 10px 16px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.95em;
+            transition: 0.2s;
+        }
+
+        .dropdown-menu a:hover {
+            background: #f1f9ff;
+            color: var(--primary-hover);
+        }
+
+        .dropdown.show .dropdown-menu {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 15px;
+            background: white;
+            border-bottom: 4px solid var(--primary);
+        }
+
+        header h1 {
+            font-size: 2.4em;
+            color: var(--primary);
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            font-style: italic;
+            color: #555;
+            background: linear-gradient(to right, #e3f2fd, #fff);
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 30px;
+            border: 1px solid #cfe2ff;
+            font-size: 1.05em;
+        }
+
+        /* ===== BANNER SLIDE ===== */
+        .banner-container {
+            position: relative;
+            max-width: 100%;
+            overflow: hidden;
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .banner-slide {
+            display: none;
+        }
+
+        .banner-slide.active {
+            display: block;
+        }
+
+        .banner-slide img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .banner-dots {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin: 0 6px;
+            background: #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .dot.active, .dot:hover {
+            background: var(--primary);
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+
+        .content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        aside {
+            width: 300px;
+            min-width: 250px;
+        }
+
+        .category-list {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .category-list h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-left: 4px solid #007bff;
+            padding-left: 10px;
+        }
+
+        .category-menu {
+            list-style: none;
+        }
+
+        .category-menu a {
+            display: block;
+            padding: 10px 0;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px dashed #eee;
+            transition: 0.2s;
+        }
+
+        .category-menu a:hover {
+            color: var(--primary-hover);
+            padding-left: 5px;
+        }
+
+        /* ===== TIN NỔI BẬT - SLIDE ===== */
+        .slide {
+            display: flex;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .slide-item {
+            min-width: 100%;
+            position: relative;
+        }
+
+        .slide-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .slide-item .info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 20px;
+        }
+
+        .slide-item .info a {
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-decoration: none;
+        }
+
+        .slide-item .info a:hover {
+            color: #ffeb3b;
+        }
+
+        /* ===== TIN MỚI & XEM NHIỀU ===== */
+        .section {
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            border-left: 5px solid #007bff;
+            padding-left: 10px;
+        }
+
+        .tin-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            margin-bottom: 12px;
+        }
+
+        .tin {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+
+        .tin:hover {
+            background: #f1f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .tin img {
+            width: 140px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .tin .title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 1.05em;
+            line-height: 1.4;
+        }
+
+        .tin .title:hover {
+            color: var(--primary-hover);
+        }
+
+        .tin small {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* ===== QUẢNG CÁO PHẢI ===== */
+        .qc-right {
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .qc-right.active {
+            display: block;
+        }
+
+        .qc-right img {
+            width: 100%;
+            height: auto;
+            transition: 0.3s;
+        }
+
+        .qc-right img:hover {
+            transform: scale(1.03);
+        }
+
+        /* ===== CHUYÊN MỤC - SCROLL NGANG ĐẸP ===== */
+        .chuyen-muc-wrapper {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 15px;
+        }
+
+        .chuyen-muc-block {
+            margin-bottom: 35px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .chuyen-muc-block h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            border-left: 5px solid #007bff;
+            padding-left: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scroll-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .scroll-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .scroll-btn:hover {
+            background: #004a99;
+            transform: scale(1.1);
+        }
+
+        .scroll-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .scroll-container {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scroll-behavior: smooth;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        .bai-viet-item {
+            flex: 0 0 260px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .bai-viet-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .bai-viet-item img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+
+        .bai-viet-item h4 {
+            font-size: 1.05em;
+            color: var(--primary);
+            margin: 12px 10px 8px;
+            line-height: 1.3;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .bai-viet-item p {
+            font-size: 0.9em;
+            color: #555;
+            margin: 0 10px 12px;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .bai-viet-item a {
+            display: block;
+            margin: 0 10px 12px;
+            padding: 8px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .bai-viet-item a:hover {
+            background: var(--primary);
+        }
+
+        .empty {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: #222;
+            color: #aaa;
+            font-size: 0.95em;
+            margin-top: 50px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            main {
+                flex-direction: column;
+            }
+            aside {
+                width: 100%;
+            }
+            .auth-nav {
+                justify-content: center;
+            }
+            .search-box {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            .banner-slide img {
+                height: 250px;
+            }
+            .tin img {
+                width: 100px;
+                height: 80px;
+            }
+        }
+    </style>
 </head>
-<style>
-    .tin-link {
-        display: block;
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .tin-link .tin {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 12px;
-        background: #fafafa;
-        border-radius: 8px;
-        overflow: hidden;
-        transition: 0.3s;
-        border: 1px solid #eee;
-    }
-
-    .tin-link .tin:hover {
-        background: #f1f9ff;
-        transform: scale(1.01);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .tin img {
-        width: 160px;
-        height: 110px;
-        object-fit: cover;
-        border-radius: 8px 0 0 8px;
-    }
-
-    .tin .title {
-        font-weight: bold;
-        color: #005fa3;
-        margin-bottom: 5px;
-    }
-
-    .tin .title:hover {
-        color: #d9534f;
-    }
-
-    /* 🎯 Thêm CSS cho dropdown chuyên mục */
-    header {
-        text-align: center;
-        background: #f8f9fa;
-        padding-bottom: 10px;
-        border-bottom: 3px solid #005fa3;
-    }
-
-    .auth-nav {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        background: #005fa3;
-        padding: 10px 20px;
-        gap: 15px;
-        position: relative;
-    }
-
-    .auth-link {
-        color: #fff;
-        text-decoration: none;
-        font-weight: bold;
-        background: #007bff;
-        padding: 6px 12px;
-        border-radius: 5px;
-        transition: 0.2s;
-    }
-
-    .auth-link:hover {
-        background: #004a99;
-    }
-
-    /* ----- Dropdown ----- */
-    .dropdown {
-        position: relative;
-        display: inline-block;
-    }
-
-    .dropdown-toggle {
-        cursor: pointer;
-    }
-
-    .dropdown-menu {
-        display: none;
-        position: absolute;
-        right: 0;
-        top: 40px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-        list-style: none;
-        margin: 0;
-        padding: 5px 0;
-        z-index: 1000;
-        min-width: 180px;
-    }
-
-    .dropdown-menu li a {
-        display: block;
-        padding: 10px 15px;
-        color: #005fa3;
-        text-decoration: none;
-        transition: background 0.2s;
-    }
-
-    .dropdown-menu li a:hover {
-        background: #f1f9ff;
-        color: #d9534f;
-    }
-
-    .dropdown.show .dropdown-menu {
-        display: block;
-        animation: fadeIn 0.2s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-5px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    header h1 {
-    font-size: 2.2em;
-    font-weight: 800;
-    color: #005fa3;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-    margin-top: 15px;
-    letter-spacing: 1px;
-}
-
-header p {
-    font-size: 1.05em;
-    color: #333;
-    font-style: italic;
-    margin-top: 4px;
-    margin-bottom: 15px;
-    background: linear-gradient(to right, #e3f2fd, #ffffff);
-    display: inline-block;
-    padding: 6px 16px;
-    border-radius: 8px;
-    border: 1px solid #cfe2ff;
-}
-
-</style>
-
 <body>
 
-    <!-- 🎞️ BANNER SLIDE -->
+    <!-- BANNER SLIDE -->
     <div class="banner-container">
         <?php foreach ($banners as $index => $b): ?>
             <div class="banner-slide <?= $index === 0 ? 'active' : '' ?>">
@@ -190,6 +604,7 @@ header p {
 
     <header>
         <nav class="auth-nav">
+<<<<<<< HEAD
            <form id="search-form" action="index.php" method="get" autocomplete="off" class="search-box">
     <input type="hidden" name="action" value="search">
 
@@ -202,91 +617,87 @@ header p {
     
 </form>
 
+=======
+            <form id="search-form" action="index.php" method="get" class="search-box">
+                <input type="hidden" name="action" value="search">
+                <div class="search-input-wrapper">
+                    <input id="search-input" type="text" name="q" placeholder="Tìm kiếm tin tức...">
+                    <button type="submit" class="search-btn">Tìm</button>
+                </div>
+            </form>
+>>>>>>> accb5f395cceb6539f8a2cf123548fd7ec7a1607
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
             <a href="index.php?action=register" class="auth-link">Đăng ký</a>
-
-            <!-- 🔽 Nút chuyên mục -->
             <div class="dropdown">
                 <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
                 <ul class="dropdown-menu">
                     <?php foreach ($chuyenMuc as $cm): ?>
-                        <li>
-                            <a href="index.php?action=chuyenmuc&id=<?= htmlspecialchars($cm['id']) ?>">
-                                <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
-                            </a>
-                        </li>
+                        <li><a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>"><?= htmlspecialchars($cm['ten_chuyen_muc']) ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
         </nav>
-
-        <h1>🌐 Website Tin Tức</h1>
-        <p>Cập nhật tin tức mới nhất, nổi bật và hấp dẫn mỗi ngày</p>
+        <h1>Website Tin Tức</h1>
+        <p>Cập nhật tin tức mới nhất, nhanh chóng & chính xác</p>
     </header>
 
     <main>
-        <!-- menu chuyên mục -->
         <aside class="category-list">
             <div class="section">
                 <h2>Chuyên mục</h2>
                 <ul class="category-menu">
                     <?php foreach ($chuyenMuc as $cm): ?>
-                        <li>
-                            <!-- 👉 Chuyển sang trang chuyên mục riêng -->
-                            <a href="index.php?action=chuyenmuc&id=<?= htmlspecialchars($cm['id']) ?>">
-                                <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
-                            </a>
-                        </li>
+                        <li><a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>"><?= htmlspecialchars($cm['ten_chuyen_muc']) ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
         </aside>
 
-        <!-- NỘI DUNG CHÍNH -->
         <div class="content">
+            <!-- Tin nổi bật -->
             <div class="section">
-                <h2>🔥 Top 5 tin nổi bật</h2>
-                <div class="slide">
+                <h2>Top 5 tin nổi bật</h2>
+                <div class="slide" id="highlight-slide">
                     <?php foreach ($tinNoiBat as $tin): ?>
                         <div class="slide-item">
                             <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="">
                             <div class="info">
-                                <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>"
-                                    style="text-decoration:none;color:#005fa3;font-weight:bold;">
+                                <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>">
                                     <?= htmlspecialchars($tin['tieu_de']) ?>
                                 </a>
-                                <small>Ngày đăng: <?= htmlspecialchars($tin['ngay_dang']) ?> | 👁 <?= htmlspecialchars($tin['luot_xem']) ?></small>
+                                <small>Ngày: <?= date('d/m/Y', strtotime($tin['ngay_dang'])) ?> | <?= $tin['luot_xem'] ?> lượt xem</small>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
+
+            <!-- Tin mới nhất -->
             <div class="section">
-                <!-- NỘI DUNG phu -->
-                <h2>🆕 Tin mới nhất</h2>
+                <h2>Tin mới nhất</h2>
                 <?php foreach ($tinMoiNhat as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
                         <div class="tin">
                             <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="">
                             <div>
                                 <p class="title"><?= htmlspecialchars($tin['tieu_de']) ?></p>
-                                <small>📅 Ngày đăng: <?= htmlspecialchars($tin['ngay_dang']) ?></small>
+                                <small>Ngày đăng: <?= date('d/m/Y H:i', strtotime($tin['ngay_dang'])) ?></small>
                             </div>
                         </div>
                     </a>
                 <?php endforeach; ?>
             </div>
 
-
+            <!-- Tin xem nhiều -->
             <div class="section">
-                <h2>📈 Tin xem nhiều</h2>
+                <h2>Tin xem nhiều</h2>
                 <?php foreach ($tinXemNhieu as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
                         <div class="tin">
                             <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="">
                             <div>
                                 <p class="title"><?= htmlspecialchars($tin['tieu_de']) ?></p>
-                                <small><?= htmlspecialchars($tin['luot_xem']) ?> lượt xem</small>
+                                <small><?= number_format($tin['luot_xem']) ?> lượt xem</small>
                             </div>
                         </div>
                     </a>
@@ -294,7 +705,7 @@ header p {
             </div>
         </div>
 
-        <!-- QUẢNG CÁO PHẢI -->
+        <!-- Quảng cáo phải -->
         <aside>
             <?php foreach ($quangCaoPhai as $index => $qc): ?>
                 <div class="qc-item qc-right <?= $index === 0 ? 'active' : '' ?>">
@@ -306,62 +717,89 @@ header p {
         </aside>
     </main>
 
+    <!-- CHUYÊN MỤC - SCROLL NGANG -->
+    <div class="chuyen-muc-wrapper">
+        <?php foreach ($chuyenMuc as $cm): ?>
+            <?php $baiViet = $baiVietTheoChuyenMuc[$cm['id']] ?? []; ?>
+            <div class="chuyen-muc-block">
+                <h3>
+                    <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
+                    <div class="scroll-controls">
+                        <button class="scroll-btn" onclick="scrollLeft('cm-<?= $cm['id'] ?>')">&lt;</button>
+                        <button class="scroll-btn" onclick="scrollRight('cm-<?= $cm['id'] ?>')">&gt;</button>
+                    </div>
+                </h3>
+                <div class="scroll-container" id="scroll-cm-<?= $cm['id'] ?>">
+                    <?php if (!empty($baiViet)): ?>
+                        <?php foreach ($baiViet as $bv): ?>
+                            <article class="bai-viet-item">
+                                <img src="../uploads/<?= htmlspecialchars($bv['anh_dai_dien']) ?>" alt="">
+                                <h4><?= htmlspecialchars($bv['tieu_de']) ?></h4>
+                                <p><?= htmlspecialchars($bv['mo_ta_ngan']) ?></p>
+                                <a href="index.php?action=chi_tiet_bai_viet&id=<?= $bv['id'] ?>">Xem thêm</a>
+                            </article>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p class="empty">Chưa có bài viết nào.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
     <footer>
         © <?= date('Y') ?> Website Tin Tức. All rights reserved.
     </footer>
 
     <script>
-        // --- Banner ---
+        // Banner Slide
         let currentBanner = 0;
-        let banners = document.querySelectorAll('.banner-slide');
-        let dots = document.querySelectorAll('.dot');
+        const banners = document.querySelectorAll('.banner-slide');
+        const dots = document.querySelectorAll('.dot');
 
         function showBanner(n) {
-            banners.forEach((slide, i) => {
-                slide.classList.toggle('active', i === n);
-                dots[i].classList.toggle('active', i === n);
-            });
+            banners.forEach((s, i) => s.classList.toggle('active', i === n));
+            dots.forEach((d, i) => d.classList.toggle('active', i === n));
             currentBanner = n;
         }
 
-        function nextBanner() {
+        setInterval(() => {
             currentBanner = (currentBanner + 1) % banners.length;
             showBanner(currentBanner);
-        }
-        setInterval(nextBanner, 4000);
+        }, 5000);
 
-        // --- Quảng cáo ---
-        const leftAds = document.querySelectorAll('.qc-left');
+        // Quảng cáo
         const rightAds = document.querySelectorAll('.qc-right');
         let adIndex = 0;
-
-        function showAds(list, idx) {
-            list.forEach((el, i) => el.style.display = (i === idx ? 'block' : 'none'));
-        }
-        showAds(leftAds, 0);
-        showAds(rightAds, 0);
         setInterval(() => {
-            adIndex++;
-            showAds(leftAds, adIndex % leftAds.length);
-            showAds(rightAds, adIndex % rightAds.length);
+            rightAds.forEach((ad, i) => ad.classList.toggle('active', i === adIndex));
+            adIndex = (adIndex + 1) % rightAds.length;
         }, 5000);
-        document.addEventListener("DOMContentLoaded", function() {
-            const dropdown = document.querySelector(".dropdown");
-            const toggle = dropdown.querySelector(".dropdown-toggle");
 
-            toggle.addEventListener("click", function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dropdown.classList.toggle("show");
-            });
-
-            // Ẩn dropdown khi click ra ngoài
-            document.addEventListener("click", function() {
-                dropdown.classList.remove("show");
-            });
+        // Dropdown
+        document.querySelector('.dropdown-toggle').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector('.dropdown').classList.toggle('show');
         });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelector('.dropdown').classList.remove('show');
+            }
+        });
+
+        // Scroll ngang
+        function scrollLeft(id) {
+            const container = document.getElementById('scroll-' + id);
+            container.scrollBy({ left: -300, behavior: 'smooth' });
+        }
+
+        function scrollRight(id) {
+            const container = document.getElementById('scroll-' + id);
+            container.scrollBy({ left: 300, behavior: 'smooth' });
+        }
+
+        // Tự động ẩn nút khi hết nội dung (tùy chọn nâng cao)
     </script>
-
 </body>
-
 </html>

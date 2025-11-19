@@ -1,8 +1,10 @@
 <?php
 $page = $page ?? 1;
 $totalPages = $totalPages ?? 1;
+use Website\TinTuc\Models\QuangcaoModel;
+$qcModel = new QuangcaoModel();
+$dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -99,10 +101,22 @@ $totalPages = $totalPages ?? 1;
 
         <!-- Cột phải: Quảng cáo -->
         <aside class="category-list">
-            <h2>🎯 Quảng cáo</h2>
-            <div class="qc-item"><img src="uploads/ads1.jpg" alt="Quảng cáo 1"></div>
-            <div class="qc-item"><img src="uploads/ads2.jpg" alt="Quảng cáo 2"></div>
-            <div class="qc-item"><img src="uploads/ads3.jpg" alt="Quảng cáo 3"></div>
+            <h2>Quảng cáo</h2>
+            <div class="quangcao-sidebar">
+                <?php foreach ($dsQuangCao as $index => $qc): ?>
+                    <?php
+                    // Nếu không có ảnh thì dùng ảnh mặc định
+                    $img = !empty($qc['hinh_anh']) ? $qc['hinh_anh'] : 'uploads/default_ads.jpg';
+                    // Nếu không có link thì để #
+                    $link = !empty($qc['lien_ket']) ? $qc['lien_ket'] : '#';
+                    ?>
+                    <div class="qc-item <?= $index >= 4 ? 'hidden' : '' ?>">
+                        <a href="<?= htmlspecialchars($link) ?>" target="_blank">
+                            <img src="<?= htmlspecialchars($img) ?>" alt="Quảng cáo">
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </aside>
     </main>
 
@@ -110,6 +124,26 @@ $totalPages = $totalPages ?? 1;
     <footer>
         © <?= date('Y') ?> Website Tin Tức. All rights reserved.
     </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let items = document.querySelectorAll(".qc-item");
+            let visibleCount = 4;
+            let startIndex = 0;
+
+            setInterval(() => {
+                // Ẩn tất cả
+                items.forEach(item => item.classList.add("hidden"));
+
+                // Hiển thị 4 quảng cáo tiếp theo
+                for (let i = 0; i < visibleCount; i++) {
+                    let idx = (startIndex + i) % items.length;
+                    items[idx].classList.remove("hidden");
+                }
+
+                startIndex = (startIndex + visibleCount) % items.length;
+            }, 5000); // đổi quảng cáo mỗi 5 giây
+        });
+    </script>
 </body>
 
 </html>

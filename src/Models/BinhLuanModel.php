@@ -27,4 +27,13 @@ class BinhLuanModel {
         $stmt = $this->conn->prepare("DELETE FROM binh_luan WHERE id = ?");
         $stmt->execute([$id]);
     }
+
+    // --- Tổng số bình luận ---
+    public function countAll()
+    {
+        $sql = "SELECT COUNT(*) FROM binh_luan";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
 }
