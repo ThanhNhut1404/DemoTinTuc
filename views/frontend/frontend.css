@@ -352,4 +352,133 @@
     cursor: pointer;
     color: #333;
 }
+/* ========================================================== */
+/* KHU VỰC THANH TÌM KIẾM (ĐẢM BẢO CẤU TRÚC VÀ VỊ TRÍ) */
+/* ========================================================== */
 
+/* Container chính của Form */
+.search-container {
+    /* Đặt các style về độ rộng (width) và căn giữa (margin: auto) của form tại đây */
+    /* width: 500px; */ 
+    /* margin: 0 auto; */
+}
+
+/* Khung chứa Input và Button */
+.search-wrapper {
+    position: relative; /* RẤT QUAN TRỌNG: Để .suggestions có thể căn chỉnh tuyệt đối */
+    display: flex;
+    align-items: center;
+    /* Thêm style cho khung search (ví dụ: background, border, border-radius) */
+    background-color: #f1f1f1; /* Màu nền nhẹ cho khung search */
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    padding: 4px;
+}
+
+/* Ô input */
+.search-input {
+    flex-grow: 1; /* Input chiếm hết không gian còn lại */
+    border: none;
+    outline: none; /* Bỏ viền khi focus */
+    padding: 10px 15px;
+    background: transparent;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Nút tìm kiếm */
+.search-button {
+    background: #4a90e2; /* Màu xanh của nút */
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s;
+}
+
+.search-button:hover {
+    background: #3a76c0;
+}
+
+
+/* ========================================================== */
+/* KHU VỰC GỢI Ý TÌM KIẾM (KIỂU YOUTUBE) */
+/* ========================================================== */
+
+/* Vùng gợi ý (dropdown) */
+.suggestions {
+    position: absolute;
+    top: calc(100% + 4px); /* Nằm sát ngay dưới khung search */
+    left: 0;
+    width: 100%; /* Rộng bằng khung search */
+
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 8px 0;
+    margin: 0;
+    list-style: none;
+    display: none; /* Mặc định ẩn, sẽ hiện bằng JS */
+    overflow: hidden;
+    z-index: 99999;
+
+    /* Giới hạn chiều cao */
+    max-height: 320px; 
+    overflow-y: auto;
+
+    /* Bóng đẹp (giữ nguyên style của bạn) */
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.05),
+        0 12px 32px rgba(0, 0, 0, 0.10);
+
+    /* Animation mở dropdown */
+    opacity: 0;
+    transform: translateY(6px);
+    animation: dropdownShow 0.25s ease forwards;
+}
+
+/* Item gợi ý */
+.suggestions li {
+    /* Dùng flexbox để căn icon và text */
+    display: flex;
+    align-items: center;
+
+    padding: 10px 20px;
+    font-size: 16px; 
+    cursor: pointer;
+    color: #0f0f0f; 
+    transition: background 0.18s ease;
+    /* Bỏ border-bottom */
+}
+
+/* Icon Kính lúp (hoặc Lịch sử) cho mỗi gợi ý */
+.suggestions li::before {
+    content: "🔍"; /* Thay bằng icon lịch sử nếu muốn: content: "↻"; */
+    font-size: 18px; 
+    margin-right: 16px; 
+    opacity: 0.5;
+    line-height: 1;
+}
+
+/* Hover kiểu YouTube (màu xám nhạt) */
+.suggestions li:hover {
+    background: #f0f0f0; 
+    padding-left: 20px; /* Giữ nguyên padding khi hover */
+}
+
+
+/* ========================================================== */
+/* ANIMATION */
+/* ========================================================== */
+
+@keyframes dropdownShow {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

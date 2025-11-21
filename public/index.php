@@ -101,11 +101,12 @@ switch ($action) {
     $controller->index();
     break;
 
-// case 'ajax_search':
-//     $controller = new \Website\TinTuc\Controllers\searchController();
-//     $controller->ajaxSearch();
-//     break;
-    
+case 'suggest':
+    $controller = new \Website\TinTuc\Controllers\SuggestController();
+    $controller->index();
+    break;
+
+
 
     // ❌ Mặc định: về trang chủ
     default:

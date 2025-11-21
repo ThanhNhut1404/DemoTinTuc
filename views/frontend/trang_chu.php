@@ -584,6 +584,8 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
         }
     </style>
 </head>
+
+
 <body>
 
     <!-- BANNER SLIDE -->
@@ -605,14 +607,8 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
     <header>
         <nav class="auth-nav">
 
-          <form id="searchForm" action="index.php" method="get" class="search-container">
-    <input type="hidden" name="action" value="search">
+          
 
-    <div class="search-wrapper">
-        <input type="text" id="searchBox" name="q" placeholder="Bạn muốn tìm gì hôm nay?" autocomplete="off" class="search-input">
-        <button type="submit" class="search-button">🔍</button>
-    </div>
-</form>
 
 
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
@@ -735,10 +731,12 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
             </div>
         <?php endforeach; ?>
     </div>
+    
 
     <footer>
         © <?= date('Y') ?> Website Tin Tức. All rights reserved.
     </footer>
+    
 
     <script>
         // Banner Slide
@@ -790,5 +788,6 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
 
         // Tự động ẩn nút khi hết nội dung (tùy chọn nâng cao)
     </script>
+    
 </body>
 </html>
