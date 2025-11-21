@@ -761,6 +761,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            // Sort suggestions so items that start with the query come first (case-insensitive)
+            try {
+                const qLower = keyword.toLowerCase();
+                suggestions.sort((a, b) => {
+                    const ta = (typeof a === 'string' ? a : (a.tieu_de || a.title || '')).toLowerCase();
+                    const tb = (typeof b === 'string' ? b : (b.tieu_de || b.title || '')).toLowerCase();
+                    const aStarts = ta.startsWith(qLower) ? 0 : 1;
+                    const bStarts = tb.startsWith(qLower) ? 0 : 1;
+                    if (aStarts !== bStarts) return aStarts - bStarts;
+                    return ta.localeCompare(tb);
+                });
+            } catch (e) {
+                console.warn('Suggestion sort failed', e);
+            }
+
             // Tạo và gắn các thẻ LI vào danh sách gợi ý
             suggestions.forEach(item => {
                 let li = document.createElement("li");
