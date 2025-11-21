@@ -404,81 +404,168 @@
 
 
 /* ========================================================== */
-/* KHU VỰC GỢI Ý TÌM KIẾM (KIỂU YOUTUBE) */
+/* 1. KHU VỰC THANH TÌM KIẾM (Cần có để .suggestions căn chỉnh đúng) */
+/* ========================================================== */
+
+/* Container chính của Form */
+.search-container {
+    /* Điều chỉnh width cho form tại đây, ví dụ: width: fit-content; */
+}
+
+/* Khung chứa Input và Button */
+.search-wrapper {
+    /* Đảm bảo khung này có style nền, border-radius, v.v. */
+    display: flex;
+    align-items: center;
+    background-color: #ffffff; /* Thường là màu trắng trên thanh navbar */
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    /* Dùng box-shadow nhẹ nếu muốn */
+}
+
+/* Ô input */
+.search-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: 10px 15px;
+    background: transparent;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Nút tìm kiếm */
+.search-button {
+    background: transparent; /* Thường không có nền trong ô search */
+    color: #555;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* ========================================================== */
+/* 1. KHU VỰC THANH TÌM KIẾM (Cần có để .suggestions căn chỉnh đúng) */
+/* ========================================================== */
+
+/* Khung chứa Input và Button */
+.search-wrapper {
+    position: relative; /* BẮT BUỘC: Đảm bảo .suggestions căn chỉnh theo khung này */
+    display: flex;
+    align-items: center;
+    /* Thêm style cho khung search (ví dụ: background, border-radius) */
+    background-color: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+/* Ô input */
+.search-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: 10px 15px;
+    background: transparent;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Nút tìm kiếm */
+.search-button {
+    background: transparent;
+    color: #555;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+
+/* ========================================================== */
+/* 2. KHU VỰC GỢI Ý TÌM KIẾM (KIỂU OVERLAY RỘNG) */
 /* ========================================================== */
 
 /* Vùng gợi ý (dropdown) */
 .suggestions {
     position: absolute;
-    top: calc(100% + 4px); /* Nằm sát ngay dưới khung search */
-    left: 0;
-    width: 100%; /* Rộng bằng khung search */
+    top: calc(100% + 4px); /* Nằm ngay dưới khung search */
+    
+    /* Căn lề trái của .search-wrapper */
+    left: 0; 
+    
+    /* BỎ CĂN GIỮA: Loại bỏ transform: translateX(-50%) */
+    transform: none; 
+    
+    /* Đặt độ rộng cố định lớn hơn ô input (Tràn ra khỏi khung tìm kiếm) */
+    width: 600px; 
 
     background: #ffffff;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 8px 0;
     margin: 0;
     list-style: none;
-    display: none; /* Mặc định ẩn, sẽ hiện bằng JS */
+    display: none; 
     overflow: hidden;
-    z-index: 99999;
+    z-index: 99999; 
 
     /* Giới hạn chiều cao */
-    max-height: 320px; 
+    max-height: 500px; 
     overflow-y: auto;
 
-    /* Bóng đẹp (giữ nguyên style của bạn) */
-    box-shadow:
-        0 3px 10px rgba(0, 0, 0, 0.05),
-        0 12px 32px rgba(0, 0, 0, 0.10);
+    /* Bóng mượt */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.20); 
 
     /* Animation mở dropdown */
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(6px); /* Đã bỏ translateX */
     animation: dropdownShow 0.25s ease forwards;
 }
 
 /* Item gợi ý */
 .suggestions li {
-    /* Dùng flexbox để căn icon và text */
     display: flex;
     align-items: center;
-
+    
     padding: 10px 20px;
     font-size: 16px; 
     cursor: pointer;
     color: #0f0f0f; 
     transition: background 0.18s ease;
-    /* Bỏ border-bottom */
 }
 
-/* Icon Kính lúp (hoặc Lịch sử) cho mỗi gợi ý */
+/* Icon Kính lúp cho mỗi gợi ý */
+/* Icon Kính lúp cho mỗi gợi ý */
+/* Icon Kính lúp cho mỗi gợi ý (ĐÃ CẬP NHẬT) */
 .suggestions li::before {
-    content: "🔍"; /* Thay bằng icon lịch sử nếu muốn: content: "↻"; */
+    /* Mã Unicode cho icon "Magnifying Glass" */
+    content: "\f002"; 
+    
+    /* Thiết lập Font Awesome */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900; /* Dùng phiên bản Solid */
+    
     font-size: 18px; 
     margin-right: 16px; 
     opacity: 0.5;
     line-height: 1;
 }
-
-/* Hover kiểu YouTube (màu xám nhạt) */
+/* Hover kiểu YouTube */
 .suggestions li:hover {
     background: #f0f0f0; 
-    padding-left: 20px; /* Giữ nguyên padding khi hover */
 }
 
 
 /* ========================================================== */
-/* ANIMATION */
+/* 3. ANIMATION */
 /* ========================================================== */
 
 @keyframes dropdownShow {
     from {
         opacity: 0;
-        transform: translateY(6px);
+        transform: translateY(6px); /* Đã bỏ translateX */
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0); /* Đã bỏ translateX */
     }
 }

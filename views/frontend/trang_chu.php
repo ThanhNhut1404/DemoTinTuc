@@ -29,6 +29,7 @@ if (!empty($allAds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang chủ - Website Tin Tức</title>
     <link rel="stylesheet" href="../views/frontend/frontend.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --primary: #005fa3;
@@ -724,7 +725,63 @@ if (!empty($allAds)) {
         }
     </style>
 </head>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const searchBox = document.getElementById("searchBox");
+    const suggestionsBox = document.getElementById("suggestions");
+    const searchForm = document.getElementById("searchForm"); 
 
+    // Hàm gọi API lấy gợi ý và hiển thị
+    searchBox.addEventListener("keyup", async () => {
+        let keyword = searchBox.value.trim();
+
+        if (keyword.length < 1) {
+            suggestionsBox.style.display = "none";
+            return;
+        }
+
+        // Gọi API để lấy dữ liệu gợi ý
+        // Đảm bảo URL này trả về một mảng JSON (ví dụ: ["gợi ý 1", "gợi ý 2"])
+        const response = await fetch(`index.php?action=suggest&q=${keyword}`);
+        const suggestions = await response.json();
+
+        suggestionsBox.innerHTML = "";
+
+        if (suggestions.length === 0) {
+            suggestionsBox.style.display = "none";
+            return;
+        }
+
+        // Tạo và gắn các thẻ LI vào danh sách gợi ý
+        suggestions.forEach(item => {
+            let li = document.createElement("li");
+            li.textContent = item; // CSS ::before sẽ tự thêm icon
+            
+            // Xử lý sự kiện click: BẤM LÀ TÌM KIẾM NGAY!
+            li.onclick = () => {
+                // 1. Điền từ khóa vào ô tìm kiếm
+                searchBox.value = item; 
+                
+                // 2. Ẩn danh sách gợi ý
+                suggestionsBox.style.display = "none";
+                
+                // 3. TỰ ĐỘNG GỬI FORM (Chuyển hướng đến trang tìm kiếm)
+                searchForm.submit(); 
+            };
+            suggestionsBox.appendChild(li);
+        });
+
+        suggestionsBox.style.display = "block";
+    });
+    
+    // Ẩn gợi ý khi click ra ngoài ô tìm kiếm
+    document.addEventListener('click', function(event) {
+        if (!searchBox.contains(event.target) && !suggestionsBox.contains(event.target)) {
+            suggestionsBox.style.display = 'none';
+        }
+    });
+});
+</script>
 
 <body>
 
@@ -746,9 +803,21 @@ if (!empty($allAds)) {
 
     <header>
         <nav class="auth-nav">
+<form id="searchForm" action="index.php" method="get" class="search-container">
+    <input type="hidden" name="action" value="search">
 
-          
-
+    <div class="search-wrapper">
+        <input type="text" 
+                id="searchBox" 
+                name="q" 
+                placeholder="Bạn muốn tìm gì hôm nay?" 
+                autocomplete="off" 
+                class="search-input">
+        <button type="submit" class="search-button">🔍</button>
+        
+        <ul id="suggestions" class="suggestions"></ul>
+    </div>
+</form>
 
 
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
