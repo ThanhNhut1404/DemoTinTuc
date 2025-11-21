@@ -741,38 +741,67 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Gọi API để lấy dữ liệu gợi ý
-        // Đảm bảo URL này trả về một mảng JSON (ví dụ: ["gợi ý 1", "gợi ý 2"])
-        const response = await fetch(`index.php?action=suggest&q=${keyword}`);
-        const suggestions = await response.json();
+        try {
+            // Gọi API để lấy dữ liệu gợi ý (encode query)
+            const response = await fetch(`index.php?action=suggest&q=${encodeURIComponent(keyword)}`);
+            if (!response.ok) throw new Error('Network response not ok');
+            const suggestions = await response.json();
 
-        suggestionsBox.innerHTML = "";
+            // ensure suggestions container is attached to body so it won't be clipped by parents
+            if (!document.body.contains(suggestionsBox)) document.body.appendChild(suggestionsBox);
+            suggestionsBox.innerHTML = "";
 
-        if (suggestions.length === 0) {
-            suggestionsBox.style.display = "none";
-            return;
-        }
+            if (!Array.isArray(suggestions) || suggestions.length === 0) {
+                // show a single "no results" item to avoid a blank overlay
+                let li = document.createElement('li');
+                li.textContent = 'Không tìm thấy kết quả';
+                li.style.cssText = 'padding:10px 14px;font-size:15px;color:#6b7280;cursor:default;opacity:0.85;border-bottom:none;';
+                suggestionsBox.appendChild(li);
+                positionSuggestions();
+                suggestionsBox.style.display = 'block';
+                return;
+            }
 
-        // Tạo và gắn các thẻ LI vào danh sách gợi ý
-        suggestions.forEach(item => {
-            let li = document.createElement("li");
-            li.textContent = item; // CSS ::before sẽ tự thêm icon
-            
-            // Xử lý sự kiện click: BẤM LÀ TÌM KIẾM NGAY!
-            li.onclick = () => {
-                // 1. Điền từ khóa vào ô tìm kiếm
-                searchBox.value = item; 
-                
-                // 2. Ẩn danh sách gợi ý
-                suggestionsBox.style.display = "none";
-                
-                // 3. TỰ ĐỘNG GỬI FORM (Chuyển hướng đến trang tìm kiếm)
-                searchForm.submit(); 
-            };
+            // Tạo và gắn các thẻ LI vào danh sách gợi ý
+            suggestions.forEach(item => {
+                let li = document.createElement("li");
+                // Hỗ trợ cả mảng chuỗi hoặc mảng object {id, tieu_de}
+                let text = typeof item === 'string' ? item : (item.tieu_de || item.title || JSON.stringify(item));
+                li.textContent = text;
+                // inline styles to avoid external CSS override
+                li.style.cssText = 'display:flex;align-items:center;padding:10px 14px;font-size:15px;color:#0f1724;cursor:pointer;border-bottom:1px solid rgba(15,23,36,0.06);transition:background .12s ease,transform .12s ease;';
+                // hover effects via events (inline so not dependent on stylesheet)
+                li.onmouseenter = () => { li.style.background = 'linear-gradient(90deg, rgba(0,95,163,0.06), rgba(0,120,215,0.03))'; li.style.transform = 'translateX(4px)'; li.style.color = '#003f70'; };
+                li.onmouseleave = () => { li.style.background = 'transparent'; li.style.transform = 'none'; li.style.color = '#0f1724'; };
+
+                // Xử lý sự kiện click: BẤM LÀ TÌM KIẾM NGAY!
+                li.onclick = () => {
+                    // 1. Điền từ khóa vào ô tìm kiếm
+                    searchBox.value = text;
+
+                    // 2. Ẩn danh sách gợi ý
+                    suggestionsBox.style.display = "none";
+
+                    // 3. TỰ ĐỘNG GỬI FORM (Chuyển hướng đến trang tìm kiếm)
+                    searchForm.submit();
+                };
+                suggestionsBox.appendChild(li);
+            });
+
+            // position the dropdown under the wrapper to avoid clipping
+            positionSuggestions();
+            suggestionsBox.style.display = "block";
+
+        } catch (err) {
+            console.error('Suggest fetch error', err);
+            suggestionsBox.innerHTML = '';
+            let li = document.createElement('li');
+            li.textContent = 'Lỗi khi tải gợi ý';
+            li.style.cssText = 'padding:10px 14px;font-size:15px;color:#b91c1c;cursor:default;opacity:0.9;border-bottom:none;';
             suggestionsBox.appendChild(li);
-        });
-
-        suggestionsBox.style.display = "block";
+            positionSuggestions();
+            suggestionsBox.style.display = 'block';
+        }
     });
     
     // Ẩn gợi ý khi click ra ngoài ô tìm kiếm
@@ -781,6 +810,28 @@ document.addEventListener("DOMContentLoaded", () => {
             suggestionsBox.style.display = 'none';
         }
     });
+
+    // reposition suggestions under the input; use fixed positioning to avoid clipping
+    function positionSuggestions() {
+        try {
+            const wrapper = searchBox.closest('.search-wrapper') || searchBox.parentElement;
+            const rect = wrapper.getBoundingClientRect();
+            // attach to body to escape parent overflow
+            if (!document.body.contains(suggestionsBox)) document.body.appendChild(suggestionsBox);
+            suggestionsBox.style.position = 'fixed';
+            suggestionsBox.style.left = rect.left + 'px';
+            suggestionsBox.style.top = (rect.bottom + 6) + 'px';
+            suggestionsBox.style.width = Math.min(rect.width, 600) + 'px';
+            suggestionsBox.style.maxWidth = '90%';
+        } catch (e) {
+            // fallback: let CSS handle positioning
+            console.warn('positionSuggestions failed', e);
+        }
+    }
+
+    // update position on scroll/resize while suggestions are visible
+    window.addEventListener('scroll', () => { if (suggestionsBox.style.display === 'block') positionSuggestions(); }, { passive: true });
+    window.addEventListener('resize', () => { if (suggestionsBox.style.display === 'block') positionSuggestions(); });
 });
 
 </script>
@@ -816,11 +867,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 autocomplete="off" 
                 class="search-input">
         <button type="submit" class="search-button">🔍</button>
-        
-        <ul id="suggestions" class="suggestions"></ul>
+           <ul id="suggestions" class="suggestions" style="position:fixed;display:none;z-index:99999;background:rgba(255,255,255,0.98);border-radius:12px;box-shadow:0 10px 30px rgba(8,20,40,0.18);backdrop-filter:blur(6px);max-height:360px;overflow:auto;padding:6px 0;margin:0;list-style:none;"> </ul>
     </div>
 </form>
-
 
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
             <a href="index.php?action=register" class="auth-link">Đăng ký</a>
