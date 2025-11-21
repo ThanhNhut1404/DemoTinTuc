@@ -8,6 +8,19 @@ $tinNoiBat = isset($tinNoiBat) && is_array($tinNoiBat) ? $tinNoiBat : [];
 $tinMoiNhat = isset($tinMoiNhat) && is_array($tinMoiNhat) ? $tinMoiNhat : [];
 $tinXemNhieu = isset($tinXemNhieu) && is_array($tinXemNhieu) ? $tinXemNhieu : [];
 $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChuyenMuc) ? $baiVietTheoChuyenMuc : [];
+
+// Prepare unified ads list (take up to 4 ads from available left/right ad arrays)
+$allAds = array_values(array_filter(array_merge($quangCaoTrai, $quangCaoPhai)));
+$ads = [];
+if (!empty($allAds)) {
+    // take first 4, or repeat if less than 4
+    $take = array_slice($allAds, 0, 4);
+    while (count($take) < 4) {
+        $take = array_merge($take, $allAds);
+        $take = array_slice($take, 0, 4);
+    }
+    $ads = $take;
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -16,6 +29,7 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang chủ - Website Tin Tức</title>
     <link rel="stylesheet" href="../views/frontend/frontend.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --primary: #005fa3;
@@ -275,11 +289,102 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
             overflow: hidden;
             border-radius: 12px;
             box-shadow: var(--shadow);
+            transition: transform 0.6s ease;
+            will-change: transform;
+            touch-action: pan-y; /* allow vertical scroll on touch, handle horizontal via JS */
+            cursor: grab;
         }
 
         .slide-item {
             min-width: 100%;
             position: relative;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Top5 grid (show 5 images at once) */
+        .top5-grid {
+            display: flex;
+            gap: 12px;
+        }
+
+        .top5-item {
+            flex: 0 0 calc((100% - 48px) / 5);
+            background: linear-gradient(180deg, #fff, #fafafa);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 6px 18px rgba(10,20,30,0.06);
+            transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, filter .35s ease;
+            will-change: transform;
+        }
+
+        .top5-item img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+            transition: transform .45s ease, filter .35s ease;
+        }
+
+        /* top badge removed to keep single title only */
+
+        .top5-item:hover img {
+            transform: scale(1.06);
+            filter: brightness(.95);
+        }
+
+        .top5-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 18px 40px rgba(10,20,30,0.12);
+        }
+
+        .top5-info {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 12px 14px;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 60% , rgba(0,0,0,0.7) 100%);
+            color: white;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .top5-info h4 {
+            margin: 0;
+            font-size: 0.98em;
+            line-height: 1.2;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Title is shown below image (visible) */
+
+        .top5-meta {
+            margin-left: auto;
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 992px) {
+            .top5-item { flex: 0 0 calc((100% - 24px) / 3); }
+        }
+
+        @media (max-width: 768px) {
+            .top5-item { flex: 0 0 calc((100% - 12px) / 2); }
+            .top5-item img { height: 160px; }
+        }
+
+        /* subtle hover focus for keyboard accessibility */
+        .top5-item:focus-within {
+            outline: 2px solid rgba(0,95,163,0.15);
+            transform: translateY(-6px) scale(1.01);
         }
 
         .slide-item img {
@@ -396,6 +501,42 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
         .qc-right img:hover {
             transform: scale(1.03);
         }
+
+        /* ===== AD COLUMNS (Left & Right slots) ===== */
+        .ad-columns, .ad-columns-right {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: fit-content;
+        }
+
+        .ad-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ad-slot {
+            overflow: hidden;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-light);
+        }
+
+        .ad-slot .ad-link { display:block; }
+        .ad-slot .ad-img {
+            display:block;
+            width:100%;
+            height:600px; /* tăng chiều cao quảng cáo lên gấp 5 lần (120px -> 600px) */
+            object-fit:cover;
+            transition: transform .25s ease;
+        }
+
+        .ad-slot .ad-link:hover .ad-img { transform: scale(1.03); }
 
         /* ===== CHUYÊN MỤC - SCROLL NGANG ĐẸP ===== */
         .chuyen-muc-wrapper {
@@ -584,6 +725,130 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
         }
     </style>
 </head>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const searchBox = document.getElementById("searchBox");
+    const suggestionsBox = document.getElementById("suggestions");
+    const searchForm = document.getElementById("searchForm"); 
+
+    // Hàm gọi API lấy gợi ý và hiển thị
+    searchBox.addEventListener("keyup", async () => {
+        let keyword = searchBox.value.trim();
+
+        if (keyword.length < 1) {
+            suggestionsBox.style.display = "none";
+            return;
+        }
+
+        try {
+            // Gọi API để lấy dữ liệu gợi ý (encode query)
+            const response = await fetch(`index.php?action=suggest&q=${encodeURIComponent(keyword)}`);
+            if (!response.ok) throw new Error('Network response not ok');
+            const suggestions = await response.json();
+
+            // ensure suggestions container is attached to body so it won't be clipped by parents
+            if (!document.body.contains(suggestionsBox)) document.body.appendChild(suggestionsBox);
+            suggestionsBox.innerHTML = "";
+
+            if (!Array.isArray(suggestions) || suggestions.length === 0) {
+                // show a single "no results" item to avoid a blank overlay
+                let li = document.createElement('li');
+                li.textContent = 'Không tìm thấy kết quả';
+                li.style.cssText = 'padding:10px 14px;font-size:15px;color:#6b7280;cursor:default;opacity:0.85;border-bottom:none;';
+                suggestionsBox.appendChild(li);
+                positionSuggestions();
+                suggestionsBox.style.display = 'block';
+                return;
+            }
+
+            // Sort suggestions so items that start with the query come first (case-insensitive)
+            try {
+                const qLower = keyword.toLowerCase();
+                suggestions.sort((a, b) => {
+                    const ta = (typeof a === 'string' ? a : (a.tieu_de || a.title || '')).toLowerCase();
+                    const tb = (typeof b === 'string' ? b : (b.tieu_de || b.title || '')).toLowerCase();
+                    const aStarts = ta.startsWith(qLower) ? 0 : 1;
+                    const bStarts = tb.startsWith(qLower) ? 0 : 1;
+                    if (aStarts !== bStarts) return aStarts - bStarts;
+                    return ta.localeCompare(tb);
+                });
+            } catch (e) {
+                console.warn('Suggestion sort failed', e);
+            }
+
+            // Tạo và gắn các thẻ LI vào danh sách gợi ý
+            suggestions.forEach(item => {
+                let li = document.createElement("li");
+                // Hỗ trợ cả mảng chuỗi hoặc mảng object {id, tieu_de}
+                let text = typeof item === 'string' ? item : (item.tieu_de || item.title || JSON.stringify(item));
+                li.textContent = text;
+                // inline styles to avoid external CSS override
+                li.style.cssText = 'display:flex;align-items:center;padding:10px 14px;font-size:15px;color:#0f1724;cursor:pointer;border-bottom:1px solid rgba(15,23,36,0.06);transition:background .12s ease,transform .12s ease;';
+                // hover effects via events (inline so not dependent on stylesheet)
+                li.onmouseenter = () => { li.style.background = 'linear-gradient(90deg, rgba(0,95,163,0.06), rgba(0,120,215,0.03))'; li.style.transform = 'translateX(4px)'; li.style.color = '#003f70'; };
+                li.onmouseleave = () => { li.style.background = 'transparent'; li.style.transform = 'none'; li.style.color = '#0f1724'; };
+
+                // Xử lý sự kiện click: BẤM LÀ TÌM KIẾM NGAY!
+                li.onclick = () => {
+                    // 1. Điền từ khóa vào ô tìm kiếm
+                    searchBox.value = text;
+
+                    // 2. Ẩn danh sách gợi ý
+                    suggestionsBox.style.display = "none";
+
+                    // 3. TỰ ĐỘNG GỬI FORM (Chuyển hướng đến trang tìm kiếm)
+                    searchForm.submit();
+                };
+                suggestionsBox.appendChild(li);
+            });
+
+            // position the dropdown under the wrapper to avoid clipping
+            positionSuggestions();
+            suggestionsBox.style.display = "block";
+
+        } catch (err) {
+            console.error('Suggest fetch error', err);
+            suggestionsBox.innerHTML = '';
+            let li = document.createElement('li');
+            li.textContent = 'Lỗi khi tải gợi ý';
+            li.style.cssText = 'padding:10px 14px;font-size:15px;color:#b91c1c;cursor:default;opacity:0.9;border-bottom:none;';
+            suggestionsBox.appendChild(li);
+            positionSuggestions();
+            suggestionsBox.style.display = 'block';
+        }
+    });
+    
+    // Ẩn gợi ý khi click ra ngoài ô tìm kiếm
+    document.addEventListener('click', function(event) {
+        if (!searchBox.contains(event.target) && !suggestionsBox.contains(event.target)) {
+            suggestionsBox.style.display = 'none';
+        }
+    });
+
+    // reposition suggestions under the input; use fixed positioning to avoid clipping
+    function positionSuggestions() {
+        try {
+            const wrapper = searchBox.closest('.search-wrapper') || searchBox.parentElement;
+            const rect = wrapper.getBoundingClientRect();
+            // attach to body to escape parent overflow
+            if (!document.body.contains(suggestionsBox)) document.body.appendChild(suggestionsBox);
+            suggestionsBox.style.position = 'fixed';
+            suggestionsBox.style.left = rect.left + 'px';
+            suggestionsBox.style.top = (rect.bottom + 6) + 'px';
+            suggestionsBox.style.width = Math.min(rect.width, 600) + 'px';
+            suggestionsBox.style.maxWidth = '90%';
+        } catch (e) {
+            // fallback: let CSS handle positioning
+            console.warn('positionSuggestions failed', e);
+        }
+    }
+
+    // update position on scroll/resize while suggestions are visible
+    window.addEventListener('scroll', () => { if (suggestionsBox.style.display === 'block') positionSuggestions(); }, { passive: true });
+    window.addEventListener('resize', () => { if (suggestionsBox.style.display === 'block') positionSuggestions(); });
+});
+</script>
+
 <body>
 
     <!-- BANNER SLIDE -->
@@ -604,16 +869,20 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
 
     <header>
         <nav class="auth-nav">
-
-          <form id="searchForm" action="index.php" method="get" class="search-container">
+<form id="searchForm" action="index.php" method="get" class="search-container">
     <input type="hidden" name="action" value="search">
 
     <div class="search-wrapper">
-        <input type="text" id="searchBox" name="q" placeholder="Bạn muốn tìm gì hôm nay?" autocomplete="off" class="search-input">
+        <input type="text" 
+                id="searchBox" 
+                name="q" 
+                placeholder="Bạn muốn tìm gì hôm nay?" 
+                autocomplete="off" 
+                class="search-input">
         <button type="submit" class="search-button">🔍</button>
+           <ul id="suggestions" class="suggestions" style="position:fixed;display:none;z-index:99999;background:rgba(255,255,255,0.98);border-radius:12px;box-shadow:0 10px 30px rgba(8,20,40,0.18);backdrop-filter:blur(6px);max-height:360px;overflow:auto;padding:6px 0;margin:0;list-style:none;"> </ul>
     </div>
 </form>
-
 
             <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
             <a href="index.php?action=register" class="auth-link">Đăng ký</a>
@@ -631,14 +900,18 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
     </header>
 
     <main>
-        <aside class="category-list">
-            <div class="section">
-                <h2>Chuyên mục</h2>
-                <ul class="category-menu">
-                    <?php foreach ($chuyenMuc as $cm): ?>
-                        <li><a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>"><?= htmlspecialchars($cm['ten_chuyen_muc']) ?></a></li>
-                    <?php endforeach; ?>
-                </ul>
+        <aside class="ad-columns">
+            <div class="ad-column left-ads">
+                <div class="ad-slot" data-ad-slot="0">
+                    <a class="ad-link" href="#" target="_blank">
+                        <img class="ad-img" src="" alt="">
+                    </a>
+                </div>
+                <div class="ad-slot" data-ad-slot="1">
+                    <a class="ad-link" href="#" target="_blank">
+                        <img class="ad-img" src="" alt="">
+                    </a>
+                </div>
             </div>
         </aside>
 
@@ -646,17 +919,16 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
             <!-- Tin nổi bật -->
             <div class="section">
                 <h2>Top 5 tin nổi bật</h2>
-                <div class="slide" id="highlight-slide">
+                <div class="top5-grid" id="highlight-grid">
                     <?php foreach ($tinNoiBat as $tin): ?>
-                        <div class="slide-item">
-                            <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="">
-                            <div class="info">
-                                <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>">
-                                    <?= htmlspecialchars($tin['tieu_de']) ?>
-                                </a>
-                                <small>Ngày: <?= date('d/m/Y', strtotime($tin['ngay_dang'])) ?> | <?= $tin['luot_xem'] ?> lượt xem</small>
-                            </div>
-                        </div>
+                        <article class="top5-item">
+                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="top5-link">
+                                <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
+                                <div class="top5-info">
+                                    <h4><?= htmlspecialchars($tin['tieu_de']) ?></h4>
+                                </div>
+                            </a>
+                        </article>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -694,15 +966,20 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
             </div>
         </div>
 
-        <!-- Quảng cáo phải -->
-        <aside>
-            <?php foreach ($quangCaoPhai as $index => $qc): ?>
-                <div class="qc-item qc-right <?= $index === 0 ? 'active' : '' ?>">
-                    <a href="<?= htmlspecialchars($qc['lien_ket']) ?>" target="_blank">
-                        <img src="<?= htmlspecialchars($qc['hinh_anh']) ?>" alt="<?= htmlspecialchars($qc['tieu_de']) ?>">
+        <!-- Quảng cáo phải (2 slots) -->
+        <aside class="ad-columns-right">
+            <div class="ad-column right-ads">
+                <div class="ad-slot" data-ad-slot="2">
+                    <a class="ad-link" href="#" target="_blank">
+                        <img class="ad-img" src="" alt="">
                     </a>
                 </div>
-            <?php endforeach; ?>
+                <div class="ad-slot" data-ad-slot="3">
+                    <a class="ad-link" href="#" target="_blank">
+                        <img class="ad-img" src="" alt="">
+                    </a>
+                </div>
+            </div>
         </aside>
     </main>
 
@@ -735,10 +1012,12 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
             </div>
         <?php endforeach; ?>
     </div>
+    
 
     <footer>
         © <?= date('Y') ?> Website Tin Tức. All rights reserved.
     </footer>
+    
 
     <script>
         // Banner Slide
@@ -757,12 +1036,51 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
             showBanner(currentBanner);
         }, 5000);
 
-        // Quảng cáo
-        const rightAds = document.querySelectorAll('.qc-right');
-        let adIndex = 0;
+        // Quảng cáo: populate 4 ad slots (2 trái, 2 phải) và xoay theo cặp
+        const ads = <?php echo json_encode(isset($ads) ? $ads : []); ?>;
+        const adSlots = Array.from(document.querySelectorAll('.ad-slot'));
+        let adIdx = 0; // start index in ads
+
+        function normalizeImgPath(src) {
+            if (!src) return '';
+            // nếu là URL đầy đủ thì giữ nguyên
+            if (/^(https?:)?\/\//.test(src) || src.startsWith('/')) return src;
+            // nếu có đường dẫn tương đối (chứa /) giữ nguyên
+            if (src.indexOf('/') !== -1) return src;
+            // nếu chỉ filename -> prefix uploads
+            return '../uploads/' + src;
+        }
+
+        function populateAdSlots() {
+            if (!adSlots.length) return;
+            if (!ads || !ads.length) {
+                // fallback: hide slots or show placeholder
+                adSlots.forEach(s => {
+                    const img = s.querySelector('.ad-img');
+                    const link = s.querySelector('.ad-link');
+                    img.src = '../uploads/default_ads.jpg';
+                    link.href = '#';
+                });
+                return;
+            }
+
+            for (let i = 0; i < adSlots.length; i++) {
+                const ad = ads[(adIdx + i) % ads.length] || {};
+                const link = adSlots[i].querySelector('.ad-link');
+                const img = adSlots[i].querySelector('.ad-img');
+                link.href = ad['lien_ket'] ? ad['lien_ket'] : '#';
+                img.src = normalizeImgPath(ad['hinh_anh'] ? ad['hinh_anh'] : '');
+                img.alt = ad['tieu_de'] ? ad['tieu_de'] : 'Quảng cáo';
+            }
+        }
+
+        // populate initially
+        populateAdSlots();
+
+        // rotate every 5s, shift by 2 (luân phiên theo cặp)
         setInterval(() => {
-            rightAds.forEach((ad, i) => ad.classList.toggle('active', i === adIndex));
-            adIndex = (adIndex + 1) % rightAds.length;
+            adIdx = (adIdx + 2) % (ads.length || 1);
+            populateAdSlots();
         }, 5000);
 
         // Dropdown
@@ -787,8 +1105,8 @@ $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChu
             const container = document.getElementById('scroll-' + id);
             container.scrollBy({ left: 300, behavior: 'smooth' });
         }
-
         // Tự động ẩn nút khi hết nội dung (tùy chọn nâng cao)
     </script>
+    
 </body>
 </html>

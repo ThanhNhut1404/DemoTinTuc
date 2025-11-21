@@ -14,6 +14,9 @@
             text-align: center;
         }
 
+        /* Ensure header and nav don't clip absolute dropdowns */
+        header, .auth-nav { overflow: visible; }
+
         h1 {
             margin: 0;
             font-size: 28px;
@@ -219,19 +222,18 @@
         .auth-link {
             text-decoration: none;
             color: #fff;
-            background-color: #28a745;
-            /* xanh lá nhẹ */
+            background: linear-gradient(90deg, #005fa3, #0078d7);
             padding: 8px 16px;
             border-radius: 8px;
-            font-weight: 500;
+            font-weight: 600;
             font-family: 'Segoe UI', sans-serif;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+            box-shadow: 0 4px 12px rgba(0, 95, 163, 0.12);
         }
 
         .auth-link:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(0, 95, 163, 0.16);
         }
 /* ====== NAVIGATION BAR ====== */
 .main-nav {
@@ -352,4 +354,224 @@
     cursor: pointer;
     color: #333;
 }
+/* ========================================================== */
+/* KHU VỰC THANH TÌM KIẾM (ĐẢM BẢO CẤU TRÚC VÀ VỊ TRÍ) */
+/* ========================================================== */
 
+/* Container chính của Form */
+.search-container {
+    /* Đặt các style về độ rộng (width) và căn giữa (margin: auto) của form tại đây */
+    /* width: 500px; */ 
+    /* margin: 0 auto; */
+}
+
+/* Khung chứa Input và Button */
+.search-wrapper {
+    position: relative; /* RẤT QUAN TRỌNG: Để .suggestions có thể căn chỉnh tuyệt đối */
+    display: flex;
+    align-items: center;
+    /* Thêm style cho khung search (ví dụ: background, border, border-radius) */
+    background-color: #f1f1f1; /* Màu nền nhẹ cho khung search */
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    padding: 4px;
+}
+
+/* Ô input */
+.search-input {
+    flex-grow: 1; /* Input chiếm hết không gian còn lại */
+    border: none;
+    outline: none; /* Bỏ viền khi focus */
+    padding: 10px 15px;
+    background: transparent;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Nút tìm kiếm */
+.search-button {
+    background: #4a90e2; /* Màu xanh của nút */
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s;
+}
+
+.search-button:hover {
+    background: #3a76c0;
+}
+
+
+/* ========================================================== */
+/* 1. KHU VỰC THANH TÌM KIẾM (Cần có để .suggestions căn chỉnh đúng) */
+/* ========================================================== */
+
+/* Container chính của Form */
+.search-container {
+    /* container for search; keep no visual rules here so it's flexible */
+    display: inline-block;
+}
+
+/* Khung chứa Input và Button */
+.search-wrapper {
+    /* Đảm bảo khung này có style nền, border-radius, v.v. */
+    display: flex;
+    align-items: center;
+    background-color: #ffffff; /* Thường là màu trắng trên thanh navbar */
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    /* Dùng box-shadow nhẹ nếu muốn */
+}
+
+/* Ô input */
+.search-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: 10px 15px;
+    background: transparent;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Nút tìm kiếm */
+.search-button {
+    background: transparent; /* Thường không có nền trong ô search */
+    color: #555;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* ========================================================== */
+/* 1. KHU VỰC THANH TÌM KIẾM (Cần có để .suggestions căn chỉnh đúng) */
+/* ========================================================== */
+
+/* Khung chứa Input và Button */
+.search-wrapper {
+    position: relative; /* BẮT BUỘC: Đảm bảo .suggestions căn chỉnh theo khung này */
+    display: flex;
+    align-items: center;
+    /* Thêm style cho khung search (ví dụ: background, border-radius) */
+    background-color: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+
+    /* lift wrapper so dropdown can be on top */
+    z-index: 99998;
+}
+
+/* Ô input */
+.search-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: 10px 15px;
+    background: transparent;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Nút tìm kiếm */
+.search-button {
+    background: transparent;
+    color: #555;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+
+/* ========================================================== */
+/* 2. KHU VỰC GỢI Ý TÌM KIẾM (KIỂU OVERLAY RỘNG) */
+/* ========================================================== */
+
+/* Vùng gợi ý (dropdown) */
+.suggestions {
+    position: absolute;
+    top: calc(100% + 6px); /* just below the search wrapper */
+    left: 0;
+    /* Make dropdown match input width but stay usable on large screens */
+    width: 100%;
+    max-width: 600px;
+    box-sizing: border-box;
+
+    background: rgba(255,255,255,0.96);
+    border-radius: 12px;
+    padding: 6px 6px;
+    margin: 0;
+    list-style: none;
+    display: none;
+    z-index: 9999;
+
+    /* scroll when many items */
+    max-height: 360px;
+    overflow-y: auto;
+
+    /* visual */
+    box-shadow: 0 10px 30px rgba(8,20,40,0.18);
+    opacity: 0;
+    transform: translateY(6px);
+    animation: dropdownShow 0.18s ease forwards;
+    backdrop-filter: blur(6px);
+
+    /* ensure suggestions float above header/content */
+    z-index: 99999;
+}
+
+/* Item gợi ý */
+.suggestions li {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    font-size: 15px;
+    cursor: pointer;
+    color: #0f1724; /* dark slate for good contrast */
+    transition: background 0.14s ease, color 0.14s ease, transform 0.12s ease;
+    border-bottom: 1px solid rgba(15,23,36,0.06);
+}
+
+/* Icon Kính lúp cho mỗi gợi ý */
+/* Icon Kính lúp cho mỗi gợi ý */
+/* Icon Kính lúp cho mỗi gợi ý (ĐÃ CẬP NHẬT) */
+.suggestions li::before {
+    content: "\f002"; /* FontAwesome magnifier */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 16px;
+    margin-right: 12px;
+    opacity: 0.9;
+    color: #0078d7;
+    width: 18px;
+    text-align: center;
+    line-height: 1;
+}
+/* Hover kiểu YouTube */
+.suggestions li:hover {
+    background: linear-gradient(90deg, rgba(0,95,163,0.06), rgba(0,120,215,0.03));
+    color: #003f70;
+    transform: translateX(4px);
+}
+
+.suggestions li:last-child { border-bottom: none; }
+
+
+/* ========================================================== */
+/* 3. ANIMATION */
+/* ========================================================== */
+
+@keyframes dropdownShow {
+    from {
+        opacity: 0;
+        transform: translateY(6px); /* Đã bỏ translateX */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0); /* Đã bỏ translateX */
+    }
+}

@@ -4,6 +4,19 @@ $totalPages = $totalPages ?? 1;
 use Website\TinTuc\Models\QuangcaoModel;
 $qcModel = new QuangcaoModel();
 $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
+$dsQuangCaoTrangChu = $qcModel->getQuangCaoTheoViTri('Trang_chu');
+
+// Prepare unified ads list for rotating slots (ensure 4 items)
+$allAds = array_values(array_filter(array_merge($dsQuangCao, $dsQuangCaoTrangChu)));
+$ads = [];
+if (!empty($allAds)) {
+    $take = array_slice($allAds, 0, 4);
+    while (count($take) < 4) {
+        $take = array_merge($take, $allAds);
+        $take = array_slice($take, 0, 4);
+    }
+    $ads = $take;
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -12,22 +25,45 @@ $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?> - Website Tin Tức</title>
     <link rel="stylesheet" href="../views/frontend/frontend.css">
+    <style>
+    /* Local tweaks for category page layout */
+    main { display:flex; gap:18px; align-items:flex-start; }
+    main > aside { width:22%; }
+    main > section { width:56%; }
+    .tin-link { display:block; text-decoration:none; color:inherit; }
+    .tin { padding:12px; transition: transform .18s ease, box-shadow .18s ease; }
+    .tin:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+    .title { font-size:1.05em; color:#005fa3; margin:0 0 6px 0; }
+    /* Ad image sizing (consistent with homepage) */
+    .ad-img { width:100%; height:600px; object-fit:cover; border-radius:6px; display:block; }
+    .ad-slot { overflow:hidden; }
+    </style>
 </head>
 
 <body>
     <!-- === HEADER === -->
     <header>
-        <h1><?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?></h1>
-        <div class="auth-nav">
-            <a href="index.php" class="auth-link">🏠 Trang chủ</a>
-        </div>
+        <nav class="auth-nav" style="justify-content:space-between;align-items:center;">
+            <div>
+                <a href="index.php" class="auth-link">🏠 Trang chủ</a>
+                <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
+            </div>
+
+            <!-- search removed as requested -->
+        </nav>
+            <div style="text-align:center;padding:18px 0 6px 0;">
+                <h1 style="margin:6px 0 4px;font-size:34px;letter-spacing:0.6px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.25);">
+                    <?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?>
+                </h1>
+                <p style="color:#e8f0fb;margin:0;font-weight:500;">Danh sách bài viết theo chuyên mục</p>
+            </div>
     </header>
 
     <!-- === MAIN CONTENT === -->
     <main>
         <!-- Cột trái: Danh sách chuyên mục -->
         <aside class="category-list">
-            <h2>📂 Chuyên mục</h2>
+            <h2>Chuyên mục</h2>
             <ul class="category-menu">
                 <?php
 
@@ -38,13 +74,22 @@ $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
                 foreach ($dsChuyenMuc as $cm):
                 ?>
                     <li>
-                        <a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>"
-                            <?= ($cm['id'] == $chuyenMuc['id']) ? 'style="font-weight:bold;color:#005fa3;"' : '' ?>>
+                        <a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>" <?= ($cm['id'] == $chuyenMuc['id']) ? 'style="font-weight:bold;color:#005fa3;"' : '' ?>>
                             <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
                         </a>
                     </li>
                 <?php endforeach; ?>
             </ul>
+
+            <!-- Left ad slots (2) -->
+            <div style="margin-top:14px;">
+                <div class="ad-slot" data-ad-slot="0" style="margin-bottom:10px;">
+                    <a class="ad-link" href="#" target="_blank"><img class="ad-img" src="" alt=""></a>
+                </div>
+                <div class="ad-slot" data-ad-slot="1">
+                    <a class="ad-link" href="#" target="_blank"><img class="ad-img" src="" alt=""></a>
+                </div>
+            </div>
         </aside>
 
         <!-- Cột giữa: Danh sách bài viết -->
@@ -70,16 +115,16 @@ $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
                 <p>❌ Chưa có bài viết nào trong chuyên mục này.</p>
             <?php else: ?>
                 <?php foreach ($baiViet as $tin): ?>
-                    <div class="tin">
-                        <img src="<?= htmlspecialchars($tin['anh_dai_dien'] ?? 'uploads/no_image.png') ?>" alt="">
-                        <div>
-                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>">
-                                <b><?= htmlspecialchars($tin['tieu_de']) ?></b>
-                            </a>
-                            <small>📅 <?= htmlspecialchars($tin['ngay_dang']) ?> | 👁 <?= htmlspecialchars($tin['luot_xem']) ?></small>
-                            <p><?= htmlspecialchars(mb_substr(strip_tags($tin['noi_dung']), 0, 100)) ?>...</p>
+                    <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
+                        <div class="tin">
+                            <img src="<?= htmlspecialchars($tin['anh_dai_dien'] ?? 'uploads/no_image.png') ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
+                            <div>
+                                <h3 class="title"><?= htmlspecialchars($tin['tieu_de']) ?></h3>
+                                <small>📅 <?= htmlspecialchars($tin['ngay_dang']) ?> | 👁 <?= htmlspecialchars($tin['luot_xem']) ?></small>
+                                <p><?= htmlspecialchars(mb_substr(strip_tags($tin['noi_dung']), 0, 140)) ?>...</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             <?php endif; ?>
 
@@ -99,23 +144,15 @@ $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
             <?php endif; ?>
         </section>
 
-        <!-- Cột phải: Quảng cáo -->
+        <!-- Cột phải: Quảng cáo (2 slot) -->
         <aside class="category-list">
-            <h2>Quảng cáo</h2>
-            <div class="quangcao-sidebar">
-                <?php foreach ($dsQuangCao as $index => $qc): ?>
-                    <?php
-                    // Nếu không có ảnh thì dùng ảnh mặc định
-                    $img = !empty($qc['hinh_anh']) ? $qc['hinh_anh'] : 'uploads/default_ads.jpg';
-                    // Nếu không có link thì để #
-                    $link = !empty($qc['lien_ket']) ? $qc['lien_ket'] : '#';
-                    ?>
-                    <div class="qc-item <?= $index >= 4 ? 'hidden' : '' ?>">
-                        <a href="<?= htmlspecialchars($link) ?>" target="_blank">
-                            <img src="<?= htmlspecialchars($img) ?>" alt="Quảng cáo">
-                        </a>
-                    </div>
-                <?php endforeach; ?>
+            <div style="margin-top:14px;">
+                <div class="ad-slot" data-ad-slot="2" style="margin-bottom:10px;">
+                    <a class="ad-link" href="#" target="_blank"><img class="ad-img" src="" alt=""></a>
+                </div>
+                <div class="ad-slot" data-ad-slot="3">
+                    <a class="ad-link" href="#" target="_blank"><img class="ad-img" src="" alt=""></a>
+                </div>
             </div>
         </aside>
     </main>
@@ -124,24 +161,45 @@ $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
     <footer>
         © <?= date('Y') ?> Website Tin Tức. All rights reserved.
     </footer>
+    
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            let items = document.querySelectorAll(".qc-item");
-            let visibleCount = 4;
-            let startIndex = 0;
+            const ads = <?= json_encode($ads) ?> || [];
+            // Normalize image path: prefer absolute or uploads/ prefix
+            function normalizeImgPath(p) {
+                if (!p) return 'uploads/default_ads.jpg';
+                if (p.startsWith('http') || p.startsWith('/')) return p;
+                if (p.startsWith('uploads/') || p.startsWith('../uploads/')) return p;
+                return 'uploads/' + p;
+            }
 
-            setInterval(() => {
-                // Ẩn tất cả
-                items.forEach(item => item.classList.add("hidden"));
-
-                // Hiển thị 4 quảng cáo tiếp theo
-                for (let i = 0; i < visibleCount; i++) {
-                    let idx = (startIndex + i) % items.length;
-                    items[idx].classList.remove("hidden");
+            function populateSlots(startIndex = 0) {
+                const slots = document.querySelectorAll('.ad-slot');
+                for (let i = 0; i < slots.length; i++) {
+                    const slot = slots[i];
+                    const ad = ads[(startIndex + i) % Math.max(ads.length,1)];
+                    const link = slot.querySelector('.ad-link');
+                    const img = slot.querySelector('.ad-img');
+                    if (ad) {
+                        link.href = ad.lien_ket && ad.lien_ket.trim() !== '' ? ad.lien_ket : '#';
+                        img.src = normalizeImgPath(ad.hinh_anh);
+                        img.alt = ad.ten_quang_cao || 'Quảng cáo';
+                    } else {
+                        link.href = '#';
+                        img.src = 'uploads/default_ads.jpg';
+                        img.alt = 'Quảng cáo';
+                    }
                 }
+            }
 
-                startIndex = (startIndex + visibleCount) % items.length;
-            }, 5000); // đổi quảng cáo mỗi 5 giây
+            // rotate by pairs every 5s
+            let adIdx = 0;
+            if (ads.length > 0) populateSlots(adIdx);
+            setInterval(() => {
+                adIdx = (adIdx + 2) % Math.max(ads.length,2);
+                populateSlots(adIdx);
+            }, 5000);
         });
     </script>
 </body>

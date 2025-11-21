@@ -28,7 +28,7 @@ class ChuyenMucController
 
         // ✅ Phân trang
         $page = $_GET['page'] ?? 1;
-        $limit = 5;
+        $limit = 10;
         $offset = ($page - 1) * $limit;
 
         // ✅ Lấy danh sách bài viết có áp dụng bộ lọc
