@@ -126,5 +126,6 @@ switch ($action) {
 }
 
 // Quay lại trang chi tiết
-header("Location: ../views/chi_tiet_bai_viet.php?id=$id_bai_viet");
+header("Location: /DemoTinTuc/views/chi_tiet_bai_viet.php?id=$id_bai_viet");
+
 exit;
