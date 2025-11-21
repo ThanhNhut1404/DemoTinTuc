@@ -12,15 +12,37 @@ $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?> - Website Tin Tức</title>
     <link rel="stylesheet" href="../views/frontend/frontend.css">
+    <style>
+    /* Local tweaks for category page */
+    .search-container { margin-right: auto; }
+    .search-input { padding: 8px 12px; border-radius: 6px; border: none; width: 280px; }
+    .search-button { margin-left:6px; padding:8px 10px; border-radius:6px; background:#0069d9; color:#fff; border:none; cursor:pointer; }
+    .tin-link { display:block; text-decoration:none; color:inherit; }
+    .tin { padding:12px; transition: transform .18s ease, box-shadow .18s ease; }
+    .tin:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+    .title { font-size:1.05em; color:#005fa3; margin:0 0 6px 0; }
+    </style>
 </head>
 
 <body>
     <!-- === HEADER === -->
     <header>
-        <h1><?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?></h1>
-        <div class="auth-nav">
+        <nav class="auth-nav">
+
+          <form id="searchForm" action="index.php" method="get" class="search-container">
+    <input type="hidden" name="action" value="search">
+
+    <div class="search-wrapper">
+        <input type="text" id="searchBox" name="q" placeholder="Bạn muốn tìm gì hôm nay?" autocomplete="off" class="search-input">
+        <button type="submit" class="search-button">🔍</button>
+    </div>
+</form>
+
             <a href="index.php" class="auth-link">🏠 Trang chủ</a>
-        </div>
+            <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
+        </nav>
+        <h1><?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?></h1>
+        <p style="color:#555;">Danh sách bài viết theo chuyên mục - <?= htmlspecialchars($tenChuyenMuc ?? '') ?></p>
     </header>
 
     <!-- === MAIN CONTENT === -->
@@ -70,16 +92,16 @@ $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
                 <p>❌ Chưa có bài viết nào trong chuyên mục này.</p>
             <?php else: ?>
                 <?php foreach ($baiViet as $tin): ?>
-                    <div class="tin">
-                        <img src="<?= htmlspecialchars($tin['anh_dai_dien'] ?? 'uploads/no_image.png') ?>" alt="">
-                        <div>
-                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>">
-                                <b><?= htmlspecialchars($tin['tieu_de']) ?></b>
-                            </a>
-                            <small>📅 <?= htmlspecialchars($tin['ngay_dang']) ?> | 👁 <?= htmlspecialchars($tin['luot_xem']) ?></small>
-                            <p><?= htmlspecialchars(mb_substr(strip_tags($tin['noi_dung']), 0, 100)) ?>...</p>
+                    <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
+                        <div class="tin">
+                            <img src="<?= htmlspecialchars($tin['anh_dai_dien'] ?? 'uploads/no_image.png') ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
+                            <div>
+                                <h3 class="title"><?= htmlspecialchars($tin['tieu_de']) ?></h3>
+                                <small>📅 <?= htmlspecialchars($tin['ngay_dang']) ?> | 👁 <?= htmlspecialchars($tin['luot_xem']) ?></small>
+                                <p><?= htmlspecialchars(mb_substr(strip_tags($tin['noi_dung']), 0, 140)) ?>...</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             <?php endif; ?>
 
