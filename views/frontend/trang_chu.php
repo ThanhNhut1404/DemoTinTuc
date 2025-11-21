@@ -722,6 +722,7 @@ if (!empty($allAds)) {
                 width: 100px;
                 height: 80px;
             }
+            
         }
     </style>
 </head>
@@ -781,6 +782,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
 </script>
 
 <body>
