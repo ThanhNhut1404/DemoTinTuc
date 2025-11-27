@@ -257,6 +257,31 @@ public function searchAll($keyword)
 }
 
 
+    // --- Đếm tổng số bài viết (cho dashboard) ---
+    public function countAll(): int
+    {
+        try {
+            $stmt = $this->conn->query("SELECT COUNT(*) FROM bai_viet");
+            return (int)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('Lỗi countAll BaiVietModel: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // --- Tổng lượt xem tất cả bài viết ---
+    public function totalViews(): int
+    {
+        try {
+            $stmt = $this->conn->query("SELECT COALESCE(SUM(luot_xem),0) FROM bai_viet");
+            return (int)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('Lỗi totalViews BaiVietModel: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+
 }
 
 
