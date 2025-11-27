@@ -10,17 +10,48 @@ $tinXemNhieu = isset($tinXemNhieu) && is_array($tinXemNhieu) ? $tinXemNhieu : []
 $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChuyenMuc) ? $baiVietTheoChuyenMuc : [];
 
 // Prepare unified ads list (take up to 4 ads from available left/right ad arrays)
+// Prepare unified ads list (take up to 6 ads: 3 left + 3 right slots)
 $allAds = array_values(array_filter(array_merge($quangCaoTrai, $quangCaoPhai)));
 $ads = [];
 if (!empty($allAds)) {
-    // take first 4, or repeat if less than 4
-    $take = array_slice($allAds, 0, 4);
-    while (count($take) < 4) {
+    // take first 6, or repeat if less than 6
+    $take = array_slice($allAds, 0, 6);
+    while (count($take) < 6) {
         $take = array_merge($take, $allAds);
-        $take = array_slice($take, 0, 4);
+        $take = array_slice($take, 0, 6);
     }
     $ads = $take;
 }
+// Helper: chuẩn hóa đường dẫn ảnh
+function img_url($src)
+{
+    $src = trim((string)$src);
+    if ($src === '') return 'uploads/no_image.png';
+
+    // full URL or protocol-less
+    if (preg_match('#^(https?:)?//#i', $src)) return $src;
+
+    // absolute path on domain (keep as-is)
+    if (strpos($src, '/') === 0) return $src;
+
+    // If value already contains 'uploads/' anywhere, normalize to 'uploads/...'
+    if (stripos($src, 'uploads/') !== false) {
+        $pos = stripos($src, 'uploads/');
+        return substr($src, $pos);
+    }
+
+    // otherwise assume filename -> prefix ../uploads/
+    // Use same uploads path as backend views
+    return 'uploads/' . ltrim($src, '/');
+}
+
+// normalize ads hinh_anh for JS usage (so JS can use the URL directly)
+foreach ($ads as &$adNorm) {
+    if (isset($adNorm['hinh_anh'])) {
+        $adNorm['hinh_anh'] = img_url($adNorm['hinh_anh']);
+    }
+}
+unset($adNorm);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -856,7 +887,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <?php foreach ($banners as $index => $b): ?>
             <div class="banner-slide <?= $index === 0 ? 'active' : '' ?>">
                 <a href="<?= htmlspecialchars($b['lien_ket']) ?>" target="_blank">
-                    <img src="<?= htmlspecialchars($b['hinh_banner']) ?>" alt="<?= htmlspecialchars($b['mo_ta'] ?? '') ?>">
+                    <img src="<?= htmlspecialchars(img_url($b['hinh_banner'])) ?>" alt="<?= htmlspecialchars($b['mo_ta'] ?? '') ?>">
                 </a>
             </div>
         <?php endforeach; ?>
@@ -912,6 +943,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         <img class="ad-img" src="" alt="">
                     </a>
                 </div>
+                <div class="ad-slot" data-ad-slot="2">
+                    <a class="ad-link" href="#" target="_blank">
+                        <img class="ad-img" src="" alt="">
+                    </a>
+                </div>
             </div>
         </aside>
 
@@ -923,7 +959,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <?php foreach ($tinNoiBat as $tin): ?>
                         <article class="top5-item">
                             <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="top5-link">
-                                <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
+                                <img src="<?= htmlspecialchars(img_url($tin['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
                                 <div class="top5-info">
                                     <h4><?= htmlspecialchars($tin['tieu_de']) ?></h4>
                                 </div>
@@ -939,7 +975,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <?php foreach ($tinMoiNhat as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
                         <div class="tin">
-                            <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="">
+                            <img src="<?= htmlspecialchars(img_url($tin['anh_dai_dien'])) ?>" alt="">
                             <div>
                                 <p class="title"><?= htmlspecialchars($tin['tieu_de']) ?></p>
                                 <small>Ngày đăng: <?= date('d/m/Y H:i', strtotime($tin['ngay_dang'])) ?></small>
@@ -955,7 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <?php foreach ($tinXemNhieu as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
                         <div class="tin">
-                            <img src="<?= htmlspecialchars($tin['anh_dai_dien']) ?>" alt="">
+                            <img src="<?= htmlspecialchars(img_url($tin['anh_dai_dien'])) ?>" alt="">
                             <div>
                                 <p class="title"><?= htmlspecialchars($tin['tieu_de']) ?></p>
                                 <small><?= number_format($tin['luot_xem']) ?> lượt xem</small>
@@ -969,12 +1005,17 @@ document.addEventListener("DOMContentLoaded", () => {
         <!-- Quảng cáo phải (2 slots) -->
         <aside class="ad-columns-right">
             <div class="ad-column right-ads">
-                <div class="ad-slot" data-ad-slot="2">
+                <div class="ad-slot" data-ad-slot="3">
                     <a class="ad-link" href="#" target="_blank">
                         <img class="ad-img" src="" alt="">
                     </a>
                 </div>
-                <div class="ad-slot" data-ad-slot="3">
+                <div class="ad-slot" data-ad-slot="4">
+                    <a class="ad-link" href="#" target="_blank">
+                        <img class="ad-img" src="" alt="">
+                    </a>
+                </div>
+                <div class="ad-slot" data-ad-slot="5">
                     <a class="ad-link" href="#" target="_blank">
                         <img class="ad-img" src="" alt="">
                     </a>
@@ -999,7 +1040,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <?php if (!empty($baiViet)): ?>
                         <?php foreach ($baiViet as $bv): ?>
                             <article class="bai-viet-item">
-                                <img src="../uploads/<?= htmlspecialchars($bv['anh_dai_dien']) ?>" alt="">
+                                <img src="<?= htmlspecialchars(img_url($bv['anh_dai_dien'])) ?>" alt="">
                                 <h4><?= htmlspecialchars($bv['tieu_de']) ?></h4>
                                 <p><?= htmlspecialchars($bv['mo_ta_ngan']) ?></p>
                                 <a href="index.php?action=chi_tiet_bai_viet&id=<?= $bv['id'] ?>">Xem thêm</a>
@@ -1041,16 +1082,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const adSlots = Array.from(document.querySelectorAll('.ad-slot'));
         let adIdx = 0; // start index in ads
 
-        function normalizeImgPath(src) {
-            if (!src) return '';
-            // nếu là URL đầy đủ thì giữ nguyên
-            if (/^(https?:)?\/\//.test(src) || src.startsWith('/')) return src;
-            // nếu có đường dẫn tương đối (chứa /) giữ nguyên
-            if (src.indexOf('/') !== -1) return src;
-            // nếu chỉ filename -> prefix uploads
-            return '../uploads/' + src;
-        }
-
         function populateAdSlots() {
             if (!adSlots.length) return;
             if (!ads || !ads.length) {
@@ -1069,7 +1100,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const link = adSlots[i].querySelector('.ad-link');
                 const img = adSlots[i].querySelector('.ad-img');
                 link.href = ad['lien_ket'] ? ad['lien_ket'] : '#';
-                img.src = normalizeImgPath(ad['hinh_anh'] ? ad['hinh_anh'] : '');
+                // hinh_anh đã được chuẩn hóa bởi PHP img_url() function
+                img.src = ad['hinh_anh'] ? ad['hinh_anh'] : '../uploads/default_ads.jpg';
                 img.alt = ad['tieu_de'] ? ad['tieu_de'] : 'Quảng cáo';
             }
         }
