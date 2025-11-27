@@ -140,17 +140,15 @@ button:hover { background: #0056b3; }
   100%{opacity:0; height:0; margin:0; padding:0;}
 }
 
-.comment-box {
-  border:1px solid #ddd;
-  border-radius:8px;
-  padding:12px;
-  margin-bottom:10px;
-  transition: 0.3s;
+/* ✅ Tab rỗng đẹp */
+.empty-box {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  padding: 20px 0;
 }
-.comment-box:hover { background:#f9f9f9; }
-.comment-box small { color:#666; }
 
-/* 🔹 Giao diện chọn giới tính đẹp */
+/* ✅ Giao diện giới tính */
 .gender-group {
   display: flex;
   justify-content: center;
@@ -188,7 +186,6 @@ button:hover { background: #0056b3; }
   font-size: 14px;
 }
 
-/* ✅ Căn giữa 2 nút */
 .button-group {
   display: flex;
   justify-content: center;
@@ -214,6 +211,7 @@ button:hover { background: #0056b3; }
 
 <div class="container">
 
+  <!-- ✅ TAB 1: Cập nhật thông tin -->
   <div id="contentProfile" class="tab-content active">
     <h2>Cập nhật thông tin cá nhân</h2>
 
@@ -243,30 +241,65 @@ button:hover { background: #0056b3; }
         <?php $gioiTinh = $user['gioi_tinh'] ?? ''; ?>
         <label class="gender-option <?= ($gioiTinh == 'Nam') ? 'active' : '' ?>">
           <input type="radio" name="gioi_tinh" value="Nam" <?= ($gioiTinh == 'Nam') ? 'checked' : '' ?>>
-          <span>👨 Nam</span>
+          <span> Nam</span>
         </label>
         <label class="gender-option <?= ($gioiTinh == 'Nữ') ? 'active' : '' ?>">
           <input type="radio" name="gioi_tinh" value="Nữ" <?= ($gioiTinh == 'Nữ') ? 'checked' : '' ?>>
-          <span>👩 Nữ</span>
+          <span> Nữ</span>
         </label>
       </div>
 
       <div class="button-group">
-        <button type="submit">💾 Lưu thay đổi</button>
+        <button type="submit"> Lưu thay đổi</button>
         <button type="button" class="btn-cancel" onclick="window.location.reload()"> Hủy bỏ</button>
       </div>
     </form>
   </div>
 
+  <!-- ✅ TAB 2: Đã thích / đã lưu -->
+  <div id="contentLiked" class="tab-content">
+    <h2>Bài viết đã thích / đã lưu</h2>
+    <div class="empty-box">Chưa có dữ liệu...</div>
+  </div>
+
+  <!-- ✅ TAB 3: Bình luận của tôi -->
+  <div id="contentComments" class="tab-content">
+    <h2>Bình luận của tôi</h2>
+    <div class="empty-box">Chưa có bình luận...</div>
+  </div>
+
 </div>
 
 <script>
+// ✅ Xem trước ảnh đại diện
 function previewImage(event) {
   const reader = new FileReader();
   reader.onload = () => document.getElementById('avatarPreview').src = reader.result;
   reader.readAsDataURL(event.target.files[0]);
 }
 
+// ✅ Chuyển tab
+document.querySelectorAll("nav a").forEach(tab => {
+  tab.addEventListener("click", () => {
+
+    document.querySelectorAll("nav a").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+    if (tab.id === "tabProfile") {
+      document.getElementById("contentProfile").classList.add("active");
+    } 
+    else if (tab.id === "tabLiked") {
+      document.getElementById("contentLiked").classList.add("active");
+    }
+    else if (tab.id === "tabComments") {
+      document.getElementById("contentComments").classList.add("active");
+    }
+  });
+});
+
+// ✅ Giới tính
 document.querySelectorAll('.gender-option input').forEach(radio => {
   radio.addEventListener('change', () => {
     document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('active'));
