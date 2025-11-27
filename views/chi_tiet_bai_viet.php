@@ -97,7 +97,7 @@ if (isset($_SESSION['id_nguoi_dung'])) {
         </div>
 
         <?php if (!empty($bv['anh_dai_dien'])): ?>
-            <img src="../<?php echo htmlspecialchars($bv['anh_dai_dien']); ?>" alt="Ảnh đại diện" class="mb-3 img-fluid">
+            <img src="<?= htmlspecialchars(img_url($bv['anh_dai_dien'])) ?>" alt="Ảnh đại diện" class="mb-3 img-fluid">
         <?php endif; ?>
 
         <p><em><?php echo htmlspecialchars($bv['mo_ta_ngan']); ?></em></p>
@@ -170,7 +170,7 @@ if (isset($_SESSION['id_nguoi_dung'])) {
                     <a href="chi_tiet_bai_viet.php?id=<?php echo $r['id']; ?>" class="text-decoration-none text-dark">
                         <div class="card mb-3">
                             <?php if ($r['anh_dai_dien']): ?>
-                                <img src="../<?php echo $r['anh_dai_dien']; ?>" class="card-img-top">
+                                <img src="<?= htmlspecialchars(img_url($r['anh_dai_dien'])) ?>" class="card-img-top">
                             <?php endif; ?>
                             <div class="card-body">
                                 <p class="card-text"><?php echo htmlspecialchars($r['tieu_de']); ?></p>
