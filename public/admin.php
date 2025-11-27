@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Entrypoint thử nghiệm cho module Quản lý thành viên (chỉ dùng trong môi trường dev)
 // Bảo vệ: mặc định yêu cầu biến môi trường APP_ENV=dev. Tuy nhiên để tiện dev cục bộ
 // (chạy qua XAMPP/Apache trên localhost) cho phép truy cập khi request đến từ localhost.
@@ -17,6 +18,8 @@ if (! $isDevEnv && ! $isLocalRequest) {
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Website\TinTuc\Controllers\ThanhVienController;
+use Website\TinTuc\Controllers\BaiVietController;
+use Website\TinTuc\Controllers\QuangCaoController;
 
 $action = $_GET['action'] ?? 'index';
 $controller = new ThanhVienController();
@@ -50,13 +53,76 @@ switch ($action) {
         $controller->index();
         break;
 
+    case 'bai_viet':
+        // Quản lí bài viết - delegating to BaiVietController
+        $baiVietController = new BaiVietController();
+        $baiVietController->index();
+        break;
+
+    // Quản lý quảng cáo
+    case 'quang_cao':
+        $qcController = new QuangCaoController();
+        $qcController->index();
+        break;
+
+    case 'qc_create':
+        $qcController = new QuangCaoController();
+        $qcController->create();
+        break;
+
+    case 'qc_store':
+        $qcController = new QuangCaoController();
+        $qcController->store();
+        break;
+
+    case 'qc_edit':
+        $qcController = new QuangCaoController();
+        $qcController->edit($_GET['id'] ?? 0);
+        break;
+
+    case 'qc_update':
+        $qcController = new QuangCaoController();
+        $qcController->update($_GET['id'] ?? ($_POST['id'] ?? 0));
+        break;
+
+    case 'qc_delete':
+        $qcController = new QuangCaoController();
+        $qcController->delete($_GET['id'] ?? 0);
+        break;
+
+    // Các hành động quản trị cho bài viết
+    case 'create':
+        $baiVietController = new BaiVietController();
+        $baiVietController->create();
+        break;
+
+    case 'store':
+        $baiVietController = new BaiVietController();
+        $baiVietController->store();
+        break;
+
+    case 'edit':
+        $baiVietController = new BaiVietController();
+        $baiVietController->edit($_GET['id'] ?? 0);
+        break;
+
+    case 'update':
+        $baiVietController = new BaiVietController();
+        $baiVietController->update($_POST['id'] ?? 0);
+        break;
+
+    case 'delete':
+        $baiVietController = new BaiVietController();
+        $baiVietController->delete($_GET['id'] ?? 0);
+        break;
+
     case 'userPage':
         $controller->userPage();
         break;
 
     case 'updateProfile':
         $controller->updateProfile();
-        break;
+        break;    
 
     default:
         echo "Action không tồn tại in admin.php";
