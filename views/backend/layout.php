@@ -21,7 +21,7 @@ $fragments = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Admin</title>
-    <link rel="stylesheet" href="/DemoTinTuc/public/assets/admin.css">
+    <link rel="stylesheet" href="/DemoTinTuc/public/assets/admin.css?v=<?= time() ?>">
 </head>
 <body>
     <div class="admin-wrap">

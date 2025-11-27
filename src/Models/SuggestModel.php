@@ -24,7 +24,8 @@ class SuggestModel
     ";
 
     $stmt = $this->conn->prepare($sql);
-    $stmt->execute(["kw" => "$keyword%"]); // CHỈ LỌC TỪ BẮT ĐẦU
+    // match anywhere in title for more flexible suggestions
+    $stmt->execute(["kw" => "%$keyword%"]); 
     return $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
 

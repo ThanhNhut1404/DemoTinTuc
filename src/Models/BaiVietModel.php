@@ -25,6 +25,24 @@ class BaiVietModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // --- Lấy các bài chờ duyệt ---
+    public function getPending()
+    {
+        // Chuẩn hóa: kiểm tra giá trị chuỗi 'cho_duyet' (không phân biệt hoa thường)
+        $sql = "SELECT * FROM bai_viet WHERE LOWER(TRIM(trang_thai)) = 'cho_duyet' OR trang_thai = '0' ORDER BY id DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // --- Cập nhật trạng thái của bài viết ---
+    public function updateStatus($id, $status)
+    {
+        $sql = "UPDATE bai_viet SET trang_thai = :trang_thai WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['trang_thai' => $status, 'id' => (int)$id]);
+    }
+
     // --- Tìm bài viết theo ID ---
     public function find($id)
     {
@@ -255,6 +273,31 @@ public function searchAll($keyword)
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
+    // --- Đếm tổng số bài viết (cho dashboard) ---
+    public function countAll(): int
+    {
+        try {
+            $stmt = $this->conn->query("SELECT COUNT(*) FROM bai_viet");
+            return (int)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('Lỗi countAll BaiVietModel: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // --- Tổng lượt xem tất cả bài viết ---
+    public function totalViews(): int
+    {
+        try {
+            $stmt = $this->conn->query("SELECT COALESCE(SUM(luot_xem),0) FROM bai_viet");
+            return (int)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('Lỗi totalViews BaiVietModel: ' . $e->getMessage());
+            return 0;
+        }
+    }
 
 
 }

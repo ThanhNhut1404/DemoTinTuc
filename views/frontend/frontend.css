@@ -14,6 +14,9 @@
             text-align: center;
         }
 
+        /* Ensure header and nav don't clip absolute dropdowns */
+        header, .auth-nav { overflow: visible; }
+
         h1 {
             margin: 0;
             font-size: 28px;
@@ -408,7 +411,8 @@
 
 /* Container chính của Form */
 .search-container {
-    /* Điều chỉnh width cho form tại đây, ví dụ: width: fit-content; */
+    /* container for search; keep no visual rules here so it's flexible */
+    display: inline-block;
 }
 
 /* Khung chứa Input và Button */
@@ -456,6 +460,9 @@
     background-color: #ffffff;
     border-radius: 20px;
     border: 1px solid #ccc;
+
+    /* lift wrapper so dropdown can be on top */
+    z-index: 99998;
 }
 
 /* Ô input */
@@ -487,71 +494,71 @@
 /* Vùng gợi ý (dropdown) */
 .suggestions {
     position: absolute;
-    top: calc(100% + 4px); /* Nằm ngay dưới khung search */
-    
-    /* Căn lề trái của .search-wrapper */
-    left: 0; 
-    
-    /* BỎ CĂN GIỮA: Loại bỏ transform: translateX(-50%) */
-    transform: none; 
-    
-    /* Đặt độ rộng cố định lớn hơn ô input (Tràn ra khỏi khung tìm kiếm) */
-    width: 600px; 
+    top: calc(100% + 6px); /* just below the search wrapper */
+    left: 0;
+    /* Make dropdown match input width but stay usable on large screens */
+    width: 100%;
+    max-width: 600px;
+    box-sizing: border-box;
 
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 8px 0;
+    background: rgba(255,255,255,0.96);
+    border-radius: 12px;
+    padding: 6px 6px;
     margin: 0;
     list-style: none;
-    display: none; 
-    overflow: hidden;
-    z-index: 99999; 
+    display: none;
+    z-index: 9999;
 
-    /* Giới hạn chiều cao */
-    max-height: 500px; 
+    /* scroll when many items */
+    max-height: 360px;
     overflow-y: auto;
 
-    /* Bóng mượt */
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.20); 
-
-    /* Animation mở dropdown */
+    /* visual */
+    box-shadow: 0 10px 30px rgba(8,20,40,0.18);
     opacity: 0;
-    transform: translateY(6px); /* Đã bỏ translateX */
-    animation: dropdownShow 0.25s ease forwards;
+    transform: translateY(6px);
+    animation: dropdownShow 0.18s ease forwards;
+    backdrop-filter: blur(6px);
+
+    /* ensure suggestions float above header/content */
+    z-index: 99999;
 }
 
 /* Item gợi ý */
 .suggestions li {
     display: flex;
     align-items: center;
-    
-    padding: 10px 20px;
-    font-size: 16px; 
+    padding: 10px 14px;
+    font-size: 15px;
     cursor: pointer;
-    color: #0f0f0f; 
-    transition: background 0.18s ease;
+    color: #0f1724; /* dark slate for good contrast */
+    transition: background 0.14s ease, color 0.14s ease, transform 0.12s ease;
+    border-bottom: 1px solid rgba(15,23,36,0.06);
 }
 
 /* Icon Kính lúp cho mỗi gợi ý */
 /* Icon Kính lúp cho mỗi gợi ý */
 /* Icon Kính lúp cho mỗi gợi ý (ĐÃ CẬP NHẬT) */
 .suggestions li::before {
-    /* Mã Unicode cho icon "Magnifying Glass" */
-    content: "\f002"; 
-    
-    /* Thiết lập Font Awesome */
+    content: "\f002"; /* FontAwesome magnifier */
     font-family: "Font Awesome 6 Free";
-    font-weight: 900; /* Dùng phiên bản Solid */
-    
-    font-size: 18px; 
-    margin-right: 16px; 
-    opacity: 0.5;
+    font-weight: 900;
+    font-size: 16px;
+    margin-right: 12px;
+    opacity: 0.9;
+    color: #0078d7;
+    width: 18px;
+    text-align: center;
     line-height: 1;
 }
 /* Hover kiểu YouTube */
 .suggestions li:hover {
-    background: #f0f0f0; 
+    background: linear-gradient(90deg, rgba(0,95,163,0.06), rgba(0,120,215,0.03));
+    color: #003f70;
+    transform: translateX(4px);
 }
+
+.suggestions li:last-child { border-bottom: none; }
 
 
 /* ========================================================== */

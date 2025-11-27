@@ -15,53 +15,122 @@ class BaiVietController
 
     public function index()
     {
-        $baiviets = $this->model->all();
-        include __DIR__ . '/../../views/backend/danhsach_baiviet.php';
+        // Handle approval POST (from fragment forms)
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['sub']) && $_GET['sub'] === 'duyet_action') {
+            $id = $_POST['id'] ?? null;
+            $actionType = $_POST['action_type'] ?? '';
+            if ($id) {
+                if ($actionType === 'approve') {
+                    $this->model->updateStatus($id, 'Da_dang');
+                    $_SESSION['flash'] = "Đã duyệt bài viết #{$id}.";
+                } elseif ($actionType === 'reject') {
+                    $this->model->updateStatus($id, 'Tu_choi');
+                    $_SESSION['flash'] = "Đã từ chối bài viết #{$id}.";
+                }
+            }
+            header('Location: admin.php?action=bai_viet&sub=duyet');
+            exit;
+        }
+
+        // If viewing the approval subpage, only load pending posts
+        if (isset($_GET['sub']) && $_GET['sub'] === 'duyet') {
+            $baiviets = $this->model->getPending();
+        } else {
+            $baiviets = $this->model->all();
+        }
+        // Render inside admin layout so it appears in the content frame
+        $_GET['sub'] = $_GET['sub'] ?? 'danhsach';
+        // ensure layout uses the bai_viet fragment
+        $_GET['action'] = 'bai_viet';
+        include __DIR__ . '/../../views/backend/layout.php';
     }
 
     public function create()
     {
-        include __DIR__ . '/../../views/backend/them_baiviet.php';
+        // render 'them' fragment inside admin layout
+        $_GET['sub'] = 'them';
+        // ensure layout chooses bai_viet
+        $_GET['action'] = 'bai_viet';
+        include __DIR__ . '/../../views/backend/layout.php';
     }
 
     public function store()
     {
         $data = [
-            'tieu_de' => $_POST['tieu_de'],
-            'mo_ta' => $_POST['mo_ta'],
-            'noi_dung' => $_POST['noi_dung'],
+            'tieu_de' => $_POST['tieu_de'] ?? '',
+            'mo_ta_ngan' => $_POST['mo_ta_ngan'] ?? '',
+            'noi_dung' => $_POST['noi_dung'] ?? '',
             'anh_dai_dien' => $_FILES['anh_dai_dien']['name'] ?? '',
-            'id_chuyen_muc' => $_POST['id_chuyen_muc'],
-            'tag' => $_POST['tag'],
+            'id_chuyen_muc' => $_POST['id_chuyen_muc'] ?? 0,
             'la_noi_bat' => isset($_POST['la_noi_bat']) ? 1 : 0,
-            'trang_thai' => $_POST['trang_thai'],
+            'trang_thai' => $_POST['trang_thai'] ?? 'nhap',
             'ngay_dang' => $_POST['ngay_dang'] ?? date('Y-m-d H:i:s'),
+            'id_tac_gia' => $_SESSION['user_id'] ?? null,
         ];
 
         if (!empty($_FILES['anh_dai_dien']['name'])) {
-            move_uploaded_file($_FILES['anh_dai_dien']['tmp_name'], __DIR__ . '/../../../public/uploads/' . $_FILES['anh_dai_dien']['name']);
+            $fileName = basename($_FILES['anh_dai_dien']['name']);
+            // sanitize filename (replace unsafe chars)
+            $fileName = preg_replace('/[^A-Za-z0-9_.-]/u', '_', $fileName);
+            $uploadDir = __DIR__ . '/../../public/uploads/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            move_uploaded_file($_FILES['anh_dai_dien']['tmp_name'], $uploadDir . $fileName);
+            // update data with sanitized name
+            $data['anh_dai_dien'] = $fileName;
         }
 
         $this->model->create($data);
-        header('Location: index.php?action=list');
+        header('Location: admin.php?action=bai_viet');
     }
 
     public function edit($id)
     {
         $baiviet = $this->model->find($id);
-        include __DIR__ . '/../../views/backend/sua_baiviet.php';
+        // render 'sua' fragment inside admin layout
+        $_GET['sub'] = 'sua';
+        // make layout include the bai_viet fragment which will load the 'sua' subfragment
+        $_GET['action'] = 'bai_viet';
+        include __DIR__ . '/../../views/backend/layout.php';
     }
 
     public function update($id)
     {
-        $this->model->update($id, $_POST);
-        header('Location: index.php?action=list');
+        // map POST to expected DB columns
+        $fileName = $_FILES['anh_dai_dien']['name'] ?? '';
+            if (!empty($fileName)) {
+                $fileName = basename($fileName);
+                $fileName = preg_replace('/[^A-Za-z0-9_.-]/u', '_', $fileName);
+                $uploadDir = __DIR__ . '/../../public/uploads/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                move_uploaded_file($_FILES['anh_dai_dien']['tmp_name'], $uploadDir . $fileName);
+        } else {
+            $fileName = $_POST['existing_anh'] ?? '';
+        }
+
+        $updateData = [
+            'tieu_de' => $_POST['tieu_de'] ?? '',
+            'mo_ta_ngan' => $_POST['mo_ta_ngan'] ?? '',
+            'noi_dung' => $_POST['noi_dung'] ?? '',
+                'anh_dai_dien' => $fileName,
+            'id_chuyen_muc' => $_POST['id_chuyen_muc'] ?? 0,
+            'la_noi_bat' => isset($_POST['la_noi_bat']) ? 1 : 0,
+            'trang_thai' => $_POST['trang_thai'] ?? 'nhap',
+            'ngay_dang' => $_POST['ngay_dang'] ?? date('Y-m-d H:i:s'),
+            'id_tac_gia' => $_SESSION['user_id'] ?? null,
+        ];
+
+        $this->model->update($id, $updateData);
+        header('Location: admin.php?action=bai_viet');
     }
 
     public function delete($id)
     {
         $this->model->delete($id);
-        header('Location: index.php?action=list');
+        header('Location: admin.php?action=bai_viet');
     }
      public function chiTiet($id)
     {
