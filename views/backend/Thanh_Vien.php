@@ -43,7 +43,7 @@ function displayStatus($raw)
             }
             $clearUrl = 'admin.php?' . http_build_query($qs);
             ?>
-            <a href="<?= htmlspecialchars($clearUrl) ?>" class="btn" style="margin-left:8px;">Bỏ tìm kiếm</a>
+            <a href="<?= htmlspecialchars($clearUrl) ?>" class="btn btn-clear-search" style="margin-left:8px;">Bỏ tìm kiếm</a>
         <?php endif; ?>
 
         <div id="filterPanel" class="filter-panel" role="region" aria-hidden="true">
