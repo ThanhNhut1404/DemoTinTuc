@@ -20,7 +20,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Website\TinTuc\Controllers\ThanhVienController;
 use Website\TinTuc\Controllers\BaiVietController;
 use Website\TinTuc\Controllers\QuangCaoController;
-use Website\TinTuc\Controllers\BannerController;
 
 $action = $_GET['action'] ?? 'index';
 $controller = new ThanhVienController();
@@ -89,41 +88,6 @@ switch ($action) {
     case 'qc_delete':
         $qcController = new QuangCaoController();
         $qcController->delete($_GET['id'] ?? 0);
-        break;
-
-    // Quản lý banner
-    case 'banner':
-        $bnController = new BannerController();
-        $bnController->index();
-        break;
-
-    case 'bn_create':
-        $bnController = new BannerController();
-        $bnController->create();
-        break;
-
-    case 'bn_store':
-        $bnController = new BannerController();
-        $bnController->store();
-        break;
-
-    case 'bn_edit':
-        $bnController = new BannerController();
-        $bnController->edit($_GET['id'] ?? 0);
-        break;
-
-    case 'bn_update':
-        $bnController = new BannerController();
-        $bnController->update($_GET['id'] ?? ($_POST['id'] ?? 0));
-        break;
-
-    case 'bn_delete':
-        $bnController = new BannerController();
-        $bnController->delete($_GET['id'] ?? 0);
-        break;
-    case 'bn_toggle':
-        $bnController = new BannerController();
-        $bnController->toggle($_GET['id'] ?? 0);
         break;
 
     // Các hành động quản trị cho bài viết

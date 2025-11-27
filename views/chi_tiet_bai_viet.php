@@ -132,8 +132,9 @@ $stmt->close();
 <div class="container my-5">
     <div class="row g-5">
 
-        <!-- CỘT TRÁI -->
-        <div class="col-lg-8">
+        <?php if (!empty($bv['anh_dai_dien'])): ?>
+            <img src="<?= htmlspecialchars(img_url($bv['anh_dai_dien'])) ?>" alt="Ảnh đại diện" class="mb-3 img-fluid">
+        <?php endif; ?>
 
             <?php if (isset($_SESSION['flash_message'])): ?>
                 <div class="alert alert-success alert-dismissible fade show rounded-4 mb-4">
@@ -161,32 +162,16 @@ $stmt->close();
                         <p class="lead fs-4 text-muted mb-5"><?= htmlspecialchars($bv['mo_ta_ngan']); ?></p>
                     <?php endif; ?>
 
-                    <div class="content lh-lg fs-5 text-dark mb-5"><?= $bv['noi_dung']; ?></div>
-
-                    <hr class="my-5">
-
-                    <!-- NÚT TƯƠNG TÁC - CÓ NẢY CỰC MẠNH -->
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-4">
-                        <div>
-                            <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                                <form method="post" action="<?= base_url('controllers/chi_tiet_bai_viet.php') ?>" class="d-inline">
-                                    <input type="hidden" name="id_bai_viet" value="<?= $id ?>">
-                                    <input type="hidden" name="action" value="yeu_thich">
-                                    <button class="btn <?= $yeu_thich ? 'btn-danger' : 'btn-outline-danger'; ?> btn-lg px-5 btn-bounce bounce-item">
-                                        Nút thích: <?= $yeu_thich ? 'Đã thích' : 'Thích' ?>
-                                    </button>
-                                </form>
-
-                                <form method="post" action="<?= base_url('controllers/chi_tiet_bai_viet.php') ?>" class="d-inline ms-3">
-                                    <input type="hidden" name="id_bai_viet" value="<?= $id ?>">
-                                    <input type="hidden" name="action" value="luu_bai">
-                                    <button class="btn <?= $da_luu ? 'btn-primary' : 'btn-outline-primary'; ?> btn-lg px-5 btn-bounce bounce-item">
-                                        Nút lưu: <?= $da_luu ? 'Đã lưu' : 'Lưu bài' ?>
-                                    </button>
-                                </form>
-                            <?php else: ?>
-                                <a href="<?= base_url('views/auth/login.php') ?>" class="btn btn-outline-danger btn-lg px-5 btn-bounce bounce-item"> Thích</a>
-                                <a href="<?= base_url('views/auth/login.php') ?>" class="btn btn-outline-primary btn-lg px-5 ms-3 btn-bounce bounce-item"> Lưu bài</a>
+    <!-- Bài viết khác -->
+    <div class="card p-4 related">
+        <h5>Bài viết khác</h5>
+        <div class="row">
+            <?php while ($r = $related_posts->fetch_assoc()): ?>
+                <div class="col-md-4">
+                    <a href="chi_tiet_bai_viet.php?id=<?php echo $r['id']; ?>" class="text-decoration-none text-dark">
+                        <div class="card mb-3">
+                            <?php if ($r['anh_dai_dien']): ?>
+                                <img src="<?= htmlspecialchars(img_url($r['anh_dai_dien'])) ?>" class="card-img-top">
                             <?php endif; ?>
                         </div>
                         <a href="<?= base_url('public/') ?>" class="btn btn-outline-secondary btn-lg px-5 btn-bounce bounce-item">
