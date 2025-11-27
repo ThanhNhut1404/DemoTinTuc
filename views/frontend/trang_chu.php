@@ -753,6 +753,7 @@ unset($adNorm);
                 width: 100px;
                 height: 80px;
             }
+            
         }
     </style>
 </head>
@@ -878,6 +879,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('scroll', () => { if (suggestionsBox.style.display === 'block') positionSuggestions(); }, { passive: true });
     window.addEventListener('resize', () => { if (suggestionsBox.style.display === 'block') positionSuggestions(); });
 });
+
 </script>
 
 <body>

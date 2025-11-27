@@ -17,7 +17,8 @@ class TrangChuController
         $chuyenMuc = $chuyenMucModel->getAll();
         // tạo banner model và lấy dữ liệu
         $bannerModel = new BannerModel();
-        $banners = $bannerModel->getAllBanners();
+        // Hiển thị trên trang chủ chỉ lấy banner đã active
+        $banners = $bannerModel->getOnBanners();
         // sử lý quản cáo
         $qcModel = new QuangCaoModel();
 
