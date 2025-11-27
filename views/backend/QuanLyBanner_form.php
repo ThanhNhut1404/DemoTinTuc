@@ -6,7 +6,7 @@ $banner = $isEdit ? ($banner ?? null) : null;
 <div class="card">
     <h2 style="margin-top:0"><?= $isEdit ? 'Sửa banner' : 'Thêm banner' ?></h2>
 
-    <form method="post" action="admin.php?action=<?= $isEdit ? 'bn_update' : 'bn_store' ?><?= $isEdit ? '&id=' . intval($banner['id']) : '' ?>" enctype="multipart/form-data" style="display:grid;grid-template-columns:1fr 320px;gap:18px">
+    <form method="post" action="admin.php?action=<?= $isEdit ? 'banner_update' : 'banner_store' ?><?= $isEdit ? '&id=' . intval($banner['id']) : '' ?>" enctype="multipart/form-data" style="display:grid;grid-template-columns:1fr 320px;gap:18px">
         <div>
             <div class="form-group">
                 <label>Liên kết</label>

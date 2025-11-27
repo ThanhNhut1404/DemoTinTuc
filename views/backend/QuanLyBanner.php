@@ -15,7 +15,7 @@ if ($sub === 'create' || $sub === 'edit') {
     <?php elseif (isset($_GET['error'])): ?>
         <div style="padding:8px;background:#fff1f0;border:1px solid #ffd6d6;margin-bottom:10px;border-radius:6px">Có lỗi xảy ra trong quá trình cập nhật.</div>
     <?php endif; ?>
-    <p><a href="admin.php?action=bn_create" class="btn">Thêm Banner mới</a></p>
+    <p><a href="admin.php?action=banner_create" class="btn">Thêm Banner mới</a></p>
 
     <?php if (empty($banners)): ?>
         <div class="empty">Chưa có banner nào.</div>
@@ -49,12 +49,12 @@ if ($sub === 'create' || $sub === 'edit') {
                     <td style="padding:8px;border-bottom:1px solid #f4f6f8">
                         <?= isset($b['trang_thai']) && $b['trang_thai'] === 'on' ? '<strong style="color:green">Bật</strong>' : '<span style="color:#666">Tắt</span>' ?>
                         &nbsp;|&nbsp;
-                        <a href="admin.php?action=bn_toggle&id=<?= $b['id'] ?>" style="font-size:13px"><?= (isset($b['trang_thai']) && $b['trang_thai'] === 'on') ? 'Tắt' : 'Bật' ?></a>
+                        <a href="admin.php?action=banner_toggle&id=<?= $b['id'] ?>" style="font-size:13px"><?= (isset($b['trang_thai']) && $b['trang_thai'] === 'on') ? 'Tắt' : 'Bật' ?></a>
                     </td>
                     <!--<td style="padding:8px;border-bottom:1px solid #f4f6f8"><a href="<?= htmlspecialchars($b['lien_ket'] ?? '#') ?>" target="_blank"><?= htmlspecialchars($b['lien_ket'] ?? '') ?></a></td>-->
                     <td style="padding:8px;border-bottom:1px solid #f4f6f8">
-                        <a href="admin.php?action=bn_edit&id=<?= $b['id'] ?>">Sửa</a> |
-                        <a href="admin.php?action=bn_delete&id=<?= $b['id'] ?>" onclick="return confirm('Xóa banner này?')">Xóa</a>
+                        <a href="admin.php?action=banner_edit&id=<?= $b['id'] ?>">Sửa</a> |
+                        <a href="admin.php?action=banner_delete&id=<?= $b['id'] ?>" onclick="return confirm('Xóa banner này?')">Xóa</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
