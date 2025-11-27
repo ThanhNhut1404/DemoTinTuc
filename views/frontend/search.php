@@ -182,5 +182,6 @@ $query = htmlspecialchars($query ?? '');
 
 </div>
 
+
 </body>
 </html>

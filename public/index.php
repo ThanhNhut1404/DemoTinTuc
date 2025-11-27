@@ -57,26 +57,7 @@ switch ($action) {
         $controller = new RegisterController();
         $controller->handleRegister();
         break;
-    // CRUD ví dụ
-    case 'create':
-        $controller->create();
-        break;
-
-    case 'store':
-        $controller->store();
-        break;
-
-    case 'edit':
-        $controller->edit($_GET['id']);
-        break;
-
-    case 'update':
-        $controller->update($_POST['id']);
-        break;
-
-    case 'delete':
-        $controller->delete($_GET['id']);
-        break;
+    // (Admin post management moved to admin.php)
 
     // 🔑 Quên mật khẩu
     case 'forgot':
@@ -101,11 +82,12 @@ switch ($action) {
     $controller->index();
     break;
 
-// case 'ajax_search':
-//     $controller = new \Website\TinTuc\Controllers\searchController();
-//     $controller->ajaxSearch();
-//     break;
-    
+case 'suggest':
+    $controller = new \Website\TinTuc\Controllers\SuggestController();
+    $controller->index();
+    break;
+
+
 
     // ❌ Mặc định: về trang chủ
     default:
