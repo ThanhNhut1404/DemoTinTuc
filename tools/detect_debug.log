@@ -378,3 +378,4 @@
 [2025-11-27T06:09:10+01:00] ThanhVienModel initialized. table=nguoi_dung cols={"id":"id","ho_ten":"ho_ten","email":"email","quyen":"vai_tro","trang_thai":"trang_thai","avatar":"anh_dai_dien","gioi_tinh":"gioi_tinh","ngay_sinh":"ngay_sinh"}
 [2025-11-27T06:09:13+01:00] ThanhVienModel initialized. table=nguoi_dung cols={"id":"id","ho_ten":"ho_ten","email":"email","quyen":"vai_tro","trang_thai":"trang_thai","avatar":"anh_dai_dien","gioi_tinh":"gioi_tinh","ngay_sinh":"ngay_sinh"}
 [2025-11-27T06:09:14+01:00] ThanhVienModel initialized. table=nguoi_dung cols={"id":"id","ho_ten":"ho_ten","email":"email","quyen":"vai_tro","trang_thai":"trang_thai","avatar":"anh_dai_dien","gioi_tinh":"gioi_tinh","ngay_sinh":"ngay_sinh"}
+[2025-11-27T07:09:05+01:00] ThanhVienModel initialized. table=nguoi_dung cols={"id":"id","ho_ten":"ho_ten","email":"email","quyen":"vai_tro","trang_thai":"trang_thai","avatar":"anh_dai_dien","gioi_tinh":"gioi_tinh","ngay_sinh":"ngay_sinh"}
