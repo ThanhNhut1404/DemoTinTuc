@@ -16,6 +16,32 @@ class BannerModel {
 
     public function getAllBanners() {
         $stmt = $this->db->query("SELECT * FROM banner ORDER BY id DESC");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Normalize returned rows so view can consistently use 'hinh_banner' and 'mo_ta'
+        // Some schemas use 'hinh_anh' or 'hinh' as column name. Map them if needed.
+        foreach ($rows as &$r) {
+            if (!isset($r['hinh_banner'])) {
+                if (isset($r['hinh_anh'])) {
+                    $r['hinh_banner'] = $r['hinh_anh'];
+                } elseif (isset($r['hinh'])) {
+                    $r['hinh_banner'] = $r['hinh'];
+                } else {
+                    $r['hinh_banner'] = '';
+                }
+            }
+
+            // normalize description field
+            if (!isset($r['mo_ta']) && isset($r['mo_ta_banner'])) {
+                $r['mo_ta'] = $r['mo_ta_banner'];
+            } elseif (!isset($r['mo_ta']) && isset($r['description'])) {
+                $r['mo_ta'] = $r['description'];
+            } elseif (!isset($r['mo_ta'])) {
+                $r['mo_ta'] = '';
+            }
+        }
+        unset($r);
+
+        return $rows;
     }
 }
