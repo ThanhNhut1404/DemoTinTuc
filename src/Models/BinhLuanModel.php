@@ -1,9 +1,16 @@
 <?php
+namespace Website\TinTuc\Models;
+
+use Website\TinTuc\Database;
+use PDO;
+
 class BinhLuanModel {
     private $conn;
 
-    public function __construct($conn) {
-        $this->conn = $conn;
+    public function __construct()
+    {
+        $db = new Database();
+        $this->conn = $db->connect();
     }
 
     // Lấy danh sách bình luận theo bài viết
@@ -25,5 +32,21 @@ class BinhLuanModel {
                 VALUES (?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([$id_bai_viet, $id_nguoi_dung, $noi_dung]);
+    }
+
+    // Lấy bình luận theo người dùng
+    public function layBinhLuanTheoNguoiDung($idNguoiDung)
+    {
+        $sql = "SELECT * FROM binh_luan WHERE id_nguoi_dung = ? ORDER BY ngay_binh_luan DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$idNguoiDung]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Đếm tổng bình luận
+    public function countAll()
+    {
+        $stmt = $this->conn->query("SELECT COUNT(*) FROM binh_luan");
+        return (int)$stmt->fetchColumn();
     }
 }
