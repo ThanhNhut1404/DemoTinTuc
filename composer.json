@@ -11,5 +11,7 @@
             "name": "Website"
         }
     ],
-    "require": {}
+    "require": {
+        "phpmailer/phpmailer": "^7.0"
+    }
 }
