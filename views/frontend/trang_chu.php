@@ -918,20 +918,10 @@ document.addEventListener("DOMContentLoaded", () => {
            <ul id="suggestions" class="suggestions" style="position:fixed;display:none;z-index:99999;background:rgba(255,255,255,0.98);border-radius:12px;box-shadow:0 10px 30px rgba(8,20,40,0.18);backdrop-filter:blur(6px);max-height:360px;overflow:auto;padding:6px 0;margin:0;list-style:none;"> </ul>
     </div>
 </form>
+    
 
-<<<<<<< HEAD
-    <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
-    <a href="index.php?action=register" class="auth-link">Đăng ký</a>
+            
 
-            <div class="dropdown">
-                <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
-                <ul class="dropdown-menu">
-                    <?php foreach ($chuyenMuc as $cm): ?>
-                        <li><a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>"><?= htmlspecialchars($cm['ten_chuyen_muc']) ?></a></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-=======
            <div class="dropdown">
     <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
     <ul class="dropdown-menu">
@@ -949,6 +939,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <a href="index.php?action=profile">Hồ sơ cá nhân</a>
             <a href="index.php?action=update">Cập nhật thông tin</a>
             <a href="index.php?action=changepass">Đổi mật khẩu</a>
+            <a href="index.php?action=update">Đã thích</a>
+            <a href="index.php?action=changepass">Đã lưu</a>
+             <a href="index.php?action=changepass">Bình luận của tôi</a>
             <a href="index.php?action=logout">Đăng xuất</a>
         </div>
     </div>
@@ -957,7 +950,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <a href="index.php?action=register" class="auth-link">Đăng ký</a>
 <?php endif; ?>
 
->>>>>>> 0ad03f8427ccc26c3a0316038f6108e89a9b183e
+
         </nav>
         <h1>Website Tin Tức</h1>
         <p>Cập nhật tin tức mới nhất, nhanh chóng & chính xác</p>
