@@ -46,7 +46,7 @@ if (!empty($allAds)) {
         <nav class="auth-nav" style="justify-content:space-between;align-items:center;">
             <div>
                 <a href="index.php" class="auth-link">🏠 Trang chủ</a>
-                <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
+                
             </div>
 
             <!-- search removed as requested -->
@@ -74,7 +74,7 @@ if (!empty($allAds)) {
                 foreach ($dsChuyenMuc as $cm):
                 ?>
                     <li>
-                        <a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>" <?= ($cm['id'] == $chuyenMuc['id']) ? 'style="font-weight:bold;color:#005fa3;"' : '' ?>>
+<a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>" <?= ($cm['id'] == $chuyenMuc['id']) ? 'style="font-weight:bold;color:#005fa3;"' : '' ?>>
                             <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
                         </a>
                     </li>
@@ -125,7 +125,7 @@ if (!empty($allAds)) {
                             </div>
                         </div>
                     </a>
-                <?php endforeach; ?>
+<?php endforeach; ?>
             <?php endif; ?>
 
             <!-- Phân trang -->
@@ -187,12 +187,10 @@ if (!empty($allAds)) {
                         img.alt = ad.ten_quang_cao || 'Quảng cáo';
                     } else {
                         link.href = '#';
-                        img.src = 'uploads/default_ads.jpg';
-                        img.alt = 'Quảng cáo';
+                        img.src = 'uploads/default_ads.jpg';img.alt = 'Quảng cáo';
                     }
                 }
             }
-
             // rotate by pairs every 5s
             let adIdx = 0;
             if (ads.length > 0) populateSlots(adIdx);

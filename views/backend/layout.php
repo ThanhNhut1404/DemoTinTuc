@@ -10,6 +10,7 @@ $fragments = [
     'tag' => __DIR__ . '/QuanLyTag.php',
     'binh_luan' => __DIR__ . '/QuanLyBinhLuan.php',
     'quang_cao' => __DIR__ . '/QuanLyQuangCao.php',
+    'banner' => __DIR__ . '/QuanLyBanner.php',
     'thanh_vien_roles' => __DIR__ . '/Thanh_Vien.php',
     'index' => __DIR__ . '/Thanh_Vien.php',
     'search' => __DIR__ . '/Thanh_Vien.php',
@@ -21,7 +22,7 @@ $fragments = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Admin</title>
-    <link rel="stylesheet" href="/DemoTinTuc/public/assets/admin.css">
+    <link rel="stylesheet" href="/DemoTinTuc/public/assets/admin.css?v=<?= time() ?>">
 </head>
 <body>
     <div class="admin-wrap">
@@ -37,6 +38,7 @@ $fragments = [
                 <a href="admin.php?action=tag" class="<?= ($action === 'tag') ? 'active' : '' ?>"><span class="icon">🏷️</span><span class="label">Quản lý thẻ Tag</span></a>
                 <a href="admin.php?action=binh_luan" class="<?= ($action === 'binh_luan') ? 'active' : '' ?>"><span class="icon">💬</span><span class="label">Quản lý Bình luận</span></a>
                 <a href="admin.php?action=quang_cao" class="<?= ($action === 'quang_cao') ? 'active' : '' ?>"><span class="icon">📣</span><span class="label">Quản lý Quảng cáo</span></a>
+                <a href="admin.php?action=banner" class="<?= ($action === 'banner') ? 'active' : '' ?>"><span class="icon">🖼️</span><span class="label">Quản lý Banner</span></a>
                 <a href="admin.php?action=thanh_vien_roles" class="<?= ($action === 'thanh_vien_roles' || $action === 'index') ? 'active' : '' ?>"><span class="icon">👥</span><span class="label">Quản lý Thành viên</span></a>
             </nav>
         </aside>

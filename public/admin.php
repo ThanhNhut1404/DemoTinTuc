@@ -19,6 +19,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Website\TinTuc\Controllers\ThanhVienController;
 use Website\TinTuc\Controllers\BaiVietController;
+use Website\TinTuc\Controllers\QuangCaoController;
+use Website\TinTuc\Controllers\BannerController;
 
 $action = $_GET['action'] ?? 'index';
 $controller = new ThanhVienController();
@@ -58,6 +60,37 @@ switch ($action) {
         $baiVietController->index();
         break;
 
+    // Quản lý quảng cáo
+    case 'quang_cao':
+        $qcController = new QuangCaoController();
+        $qcController->index();
+        break;
+
+    case 'qc_create':
+        $qcController = new QuangCaoController();
+        $qcController->create();
+        break;
+
+    case 'qc_store':
+        $qcController = new QuangCaoController();
+        $qcController->store();
+        break;
+
+    case 'qc_edit':
+        $qcController = new QuangCaoController();
+        $qcController->edit($_GET['id'] ?? 0);
+        break;
+
+    case 'qc_update':
+        $qcController = new QuangCaoController();
+        $qcController->update($_GET['id'] ?? ($_POST['id'] ?? 0));
+        break;
+
+    case 'qc_delete':
+        $qcController = new QuangCaoController();
+        $qcController->delete($_GET['id'] ?? 0);
+        break;
+
     // Các hành động quản trị cho bài viết
     case 'create':
         $baiVietController = new BaiVietController();
@@ -90,7 +123,43 @@ switch ($action) {
 
     case 'updateProfile':
         $controller->updateProfile();
-        break;    
+        break;
+
+    // Quản lý banner
+    case 'banner':
+        $bannerController = new BannerController();
+        $bannerController->index();
+        break;
+
+    case 'banner_create':
+        $bannerController = new BannerController();
+        $bannerController->create();
+        break;
+
+    case 'banner_store':
+        $bannerController = new BannerController();
+        $bannerController->store();
+        break;
+
+    case 'banner_edit':
+        $bannerController = new BannerController();
+        $bannerController->edit($_GET['id'] ?? 0);
+        break;
+
+    case 'banner_update':
+        $bannerController = new BannerController();
+        $bannerController->update($_GET['id'] ?? ($_POST['id'] ?? 0));
+        break;
+
+    case 'banner_delete':
+        $bannerController = new BannerController();
+        $bannerController->delete($_GET['id'] ?? 0);
+        break;
+
+    case 'banner_toggle':
+        $bannerController = new BannerController();
+        $bannerController->toggle($_GET['id'] ?? 0);
+        break;
 
     default:
         echo "Action không tồn tại in admin.php";

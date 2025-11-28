@@ -3,41 +3,44 @@ use Website\TinTuc\Models\BaiVietModel;
 use Website\TinTuc\Models\ThanhVienModel;
 use Website\TinTuc\Models\BinhLuanModel;
 
-$bv = new BaiVietModel();
-$tv = new ThanhVienModel();
-$bl = new BinhLuanModel();
-
-$countPosts = $bv->countAll();
-$countUsers = $tv->countAll();
-$countComments = $bl->countAll();
-$totalViews = $bv->totalViews();
+// Cho phép controller truyền sẵn các biến; nếu chưa có thì tự lấy an toàn
+if (!isset($countPosts) || !isset($countUsers) || !isset($countComments) || !isset($totalViews)) {
+    try {
+        $bv = new BaiVietModel();
+        $tv = new ThanhVienModel();
+        $bl = new BinhLuanModel();
+        $countPosts = (int)$bv->countAll();
+        $countUsers = (int)$tv->countAll();
+        $countComments = (int)$bl->countAll();
+        $totalViews = (int)$bv->totalViews();
+    } catch (\Throwable $e) {
+        $countPosts = $countUsers = $countComments = $totalViews = 0;
+    }
+}
 ?>
 
-<div class="card">
+<div class="card dashboard">
     <h2>Trang Tổng quan</h2>
-    <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:180px;background:#fff;border:1px solid #eef2f6;padding:12px;border-radius:8px;">
-            <h3>Thống kê bài viết</h3>
-            <p style="font-size:20px;font-weight:700;margin:6px 0;"><?= $countPosts ?></p>
-            <small>Số bài viết hiện có</small>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <p class="stat-title">Thống kê bài viết</p>
+            <p class="stat-value"><?= (int)$countPosts ?></p>
+            <p class="stat-note">Số bài viết hiện có</p>
         </div>
-
-        <div style="flex:1;min-width:180px;background:#fff;border:1px solid #eef2f6;padding:12px;border-radius:8px;">
-            <h3>Thống kê người dùng</h3>
-            <p style="font-size:20px;font-weight:700;margin:6px 0;"><?= $countUsers ?></p>
-            <small>Tổng người dùng</small>
+        <div class="stat-card">
+            <p class="stat-title">Thống kê người dùng</p>
+            <p class="stat-value"><?= (int)$countUsers ?></p>
+            <p class="stat-note">Tổng người dùng</p>
         </div>
-
-        <div style="flex:1;min-width:180px;background:#fff;border:1px solid #eef2f6;padding:12px;border-radius:8px;">
-            <h3>Thống kê bình luận</h3>
-            <p style="font-size:20px;font-weight:700;margin:6px 0;"><?= $countComments ?></p>
-            <small>Tổng bình luận</small>
+        <div class="stat-card">
+            <p class="stat-title">Thống kê bình luận</p>
+            <p class="stat-value"><?= (int)$countComments ?></p>
+            <p class="stat-note">Tổng bình luận</p>
         </div>
-
-        <div style="flex:1;min-width:180px;background:#fff;border:1px solid #eef2f6;padding:12px;border-radius:8px;">
-            <h3>Lượt xem</h3>
-            <p style="font-size:20px;font-weight:700;margin:6px 0;"><?= $totalViews ?></p>
-            <small>Tổng lượt xem tất cả bài viết</small>
+        <div class="stat-card">
+            <p class="stat-title">Lượt xem</p>
+            <p class="stat-value"><?= (int)$totalViews ?></p>
+            <p class="stat-note">Tổng lượt xem tất cả bài viết</p>
         </div>
     </div>
 </div>

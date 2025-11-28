@@ -5,6 +5,9 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 ?>
+
+<?php include 'header.php'; ?>  <!-- đặt ở đây -->
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
