@@ -17,13 +17,30 @@ class TrangChuController
         $chuyenMuc = $chuyenMucModel->getAll();
         // tạo banner model và lấy dữ liệu
         $bannerModel = new BannerModel();
-        $banners = $bannerModel->getAllBanners();
+        // Hiển thị trên trang chủ chỉ lấy banner đã active
+        $banners = $bannerModel->getOnBanners();
         // sử lý quản cáo
-        $qcModel = new QuangcaoModel();
+        $qcModel = new QuangCaoModel();
 
         // Lấy quảng cáo hai bên
         $quangCaoTrai = $qcModel->getQuangCaoTheoViTri('Trang_chu');
         $quangCaoPhai = $qcModel->getQuangCaoTheoViTri('Sidebar');
+
+        // Nếu không có banner trong bảng `banner`, fallback dùng quảng cáo vị trí 'Trang_chu'
+        // (nhiều project upload ảnh banner vào bảng quang_cao via admin). Map trường
+        // 'hinh_anh' -> 'hinh_banner', 'tieu_de' -> 'mo_ta' để view không cần thay đổi.
+        if (empty($banners)) {
+            $adsForBanner = $qcModel->getQuangCaoTheoViTri('Trang_chu');
+            $banners = [];
+            foreach ($adsForBanner as $a) {
+                $banners[] = [
+                    'id' => $a['id'] ?? null,
+                    'hinh_banner' => $a['hinh_anh'] ?? ($a['hinh'] ?? ''),
+                    'mo_ta' => $a['tieu_de'] ?? ($a['mo_ta'] ?? ''),
+                    'lien_ket' => $a['lien_ket'] ?? '#',
+                ];
+            }
+        }
         // Chuẩn bị mảng 4 quảng cáo dùng cho view (nếu ít hơn 4 sẽ lặp lại)
         $allAds = array_values(array_filter(array_merge($quangCaoTrai, $quangCaoPhai)));
         $ads = [];
