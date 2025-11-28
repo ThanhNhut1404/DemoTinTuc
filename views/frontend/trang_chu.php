@@ -917,16 +917,31 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 </form>
 
-            <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
-            <a href="index.php?action=register" class="auth-link">Đăng ký</a>
-            <div class="dropdown">
-                <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
-                <ul class="dropdown-menu">
-                    <?php foreach ($chuyenMuc as $cm): ?>
-                        <li><a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>"><?= htmlspecialchars($cm['ten_chuyen_muc']) ?></a></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
+           <div class="dropdown">
+    <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
+    <ul class="dropdown-menu">
+        <?php foreach ($chuyenMuc as $cm): ?>
+            <li><a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>"><?= htmlspecialchars($cm['ten_chuyen_muc']) ?></a></li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+
+<?php if(isset($_SESSION['user'])): ?>
+    <div class="dropdown">
+        <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
+        </a>
+        <div class="dropdown-menu">
+            <a href="index.php?action=profile">Hồ sơ cá nhân</a>
+            <a href="index.php?action=update">Cập nhật thông tin</a>
+            <a href="index.php?action=changepass">Đổi mật khẩu</a>
+            <a href="index.php?action=logout">Đăng xuất</a>
+        </div>
+    </div>
+<?php else: ?>
+    <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
+    <a href="index.php?action=register" class="auth-link">Đăng ký</a>
+<?php endif; ?>
+
         </nav>
         <h1>Website Tin Tức</h1>
         <p>Cập nhật tin tức mới nhất, nhanh chóng & chính xác</p>
