@@ -14,6 +14,7 @@ require_once __DIR__ . '/../src/Controllers/TrangChuController.php';
 require_once __DIR__ . '/../src/Controllers/BaiVietController.php';
 require_once __DIR__ . '/../src/Controllers/ForgotPasswordController.php';
 require_once __DIR__ . '/../src/Controllers/ChuyenMucController.php'; // 🆕 thêm dòng này nè
+require_once __DIR__ . '/../src/Controllers/ProfileController.php';
 
 use Website\TinTuc\Controllers\LoginController;
 use Website\TinTuc\Controllers\RegisterController;
@@ -82,11 +83,26 @@ switch ($action) {
     $controller->index();
     break;
 
-case 'suggest':
+        case 'suggest':
     $controller = new \Website\TinTuc\Controllers\SuggestController();
     $controller->index();
     break;
+           case 'profile':
+    include 'views/frontend/profile.php';
+    break;
 
+case 'profile_edit':
+    include 'views/frontend/profile_edit.php';
+    break;
+
+case 'profile_update':
+    // xử lý form
+    $_SESSION['user']['name'] = $_POST['name'];
+    header("Location: index.php?action=profile");
+    break;
+
+
+    
 
 
     // ❌ Mặc định: về trang chủ
