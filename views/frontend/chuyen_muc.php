@@ -46,7 +46,7 @@ if (!empty($allAds)) {
         <nav class="auth-nav" style="justify-content:space-between;align-items:center;">
             <div>
                 <a href="index.php" class="auth-link">🏠 Trang chủ</a>
-                <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
+                
             </div>
 
             <!-- search removed as requested -->

@@ -46,7 +46,7 @@
             font-size: 14px;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 12px 15px;
             margin-bottom: 18px;
@@ -57,7 +57,7 @@
             box-sizing: border-box;
         }
 
-        input:focus {
+        input:focus, select:focus {
             border-color: #007bff;
             box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
             outline: none;
@@ -101,14 +101,35 @@
 <div class="register-box">
     <h2>Đăng ký</h2>
     <form action="index.php?action=do_register" method="POST">
+
+        <!-- Họ và tên -->
+        <label for="ho_ten">Họ và tên:</label>
+        <input type="text" id="ho_ten" name="ho_ten" required>
+
+        <!-- Ngày sinh -->
+        <label for="ngay_sinh">Ngày sinh:</label>
+        <input type="date" id="ngay_sinh" name="ngay_sinh" required>
+
+        <!-- Giới tính -->
+        <label for="gioi_tinh">Giới tính:</label>
+        <select id="gioi_tinh" name="gioi_tinh" required>
+            <option value="">-- Chọn giới tính --</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+        </select>
+
+        <!-- Email -->
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br>
+        <input type="email" id="email" name="email" required>
 
-        <label for="mat_khau">Mật khẩu:</label>
-        <input type="password" id="password" name="mat_khau" required><br>
+        <!-- Mật khẩu -->
+        <label for="password">Mật khẩu:</label>
+        <input type="password" id="password" name="mat_khau" required>
 
+        <!-- Xác nhận mật khẩu -->
         <label for="confirm_password">Xác nhận mật khẩu:</label>
-        <input type="password" id="confirm_password" name="confirm_password" required><br>
+        <input type="password" id="confirm_password" name="confirm_password" required>
 
         <button type="submit">Đăng ký</button>
     </form>

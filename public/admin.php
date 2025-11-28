@@ -20,6 +20,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Website\TinTuc\Controllers\ThanhVienController;
 use Website\TinTuc\Controllers\BaiVietController;
 use Website\TinTuc\Controllers\QuangCaoController;
+use Website\TinTuc\Controllers\BannerController;
 
 $action = $_GET['action'] ?? 'index';
 $controller = new ThanhVienController();
@@ -122,7 +123,43 @@ switch ($action) {
 
     case 'updateProfile':
         $controller->updateProfile();
-        break;    
+        break;
+
+    // Quản lý banner
+    case 'banner':
+        $bannerController = new BannerController();
+        $bannerController->index();
+        break;
+
+    case 'banner_create':
+        $bannerController = new BannerController();
+        $bannerController->create();
+        break;
+
+    case 'banner_store':
+        $bannerController = new BannerController();
+        $bannerController->store();
+        break;
+
+    case 'banner_edit':
+        $bannerController = new BannerController();
+        $bannerController->edit($_GET['id'] ?? 0);
+        break;
+
+    case 'banner_update':
+        $bannerController = new BannerController();
+        $bannerController->update($_GET['id'] ?? ($_POST['id'] ?? 0));
+        break;
+
+    case 'banner_delete':
+        $bannerController = new BannerController();
+        $bannerController->delete($_GET['id'] ?? 0);
+        break;
+
+    case 'banner_toggle':
+        $bannerController = new BannerController();
+        $bannerController->toggle($_GET['id'] ?? 0);
+        break;
 
     default:
         echo "Action không tồn tại in admin.php";
