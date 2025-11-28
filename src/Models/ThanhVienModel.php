@@ -137,10 +137,7 @@ class ThanhVienModel {
         return (int)$stmt->fetchColumn();
     }
 
-<<<<<<< HEAD
     // Tìm kiếm người dùng theo tên hoặc email
-=======
->>>>>>> 0ad03f8427ccc26c3a0316038f6108e89a9b183e
     public function search(string $keyword, ?string $role = null, ?string $status = null, ?string $gender = null) {
         $idCol = $this->cols['id'];
         $nameCol = $this->cols['ho_ten'];
