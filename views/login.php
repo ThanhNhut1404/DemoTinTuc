@@ -15,16 +15,14 @@
         }
 
         .login-box {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.95);
             width: 420px;
             padding: 45px 40px;
             border-radius: 26px;
             border: 1px solid rgba(255,255,255,0.4);
             backdrop-filter: blur(10px);
-            box-shadow:
-                0 20px 40px rgba(0,0,0,0.12),
-                0 8px 16px rgba(0,0,0,0.05);
-            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.05);
+            transition: 0.3s;
         }
 
         h2 {
@@ -32,6 +30,7 @@
             font-size: 26px;
             font-weight: 700;
             color: #222;
+            text-align: center;
         }
 
         label {
@@ -44,10 +43,15 @@
             font-size: 14px;
         }
 
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
         input {
             width: 100%;
-            padding: 14px 15px;
-            margin-bottom: 20px;
+            padding: 14px 40px 14px 15px; /* Padding để icon không chồng chữ */
             border: 1px solid #dcdcdc;
             border-radius: 12px;
             font-size: 15px;
@@ -59,6 +63,35 @@
             border-color: #0d6efd;
             box-shadow: 0 0 8px rgba(0, 123, 255, 0.35);
             outline: none;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .toggle-password:hover {
+            color: #007bff;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .forgot-password a {
+            font-size: 13px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
         }
 
         button {
@@ -83,6 +116,7 @@
             margin-top: 15px;
             font-size: 14px;
             color: #444;
+            text-align: center;
         }
 
         a {
@@ -105,9 +139,15 @@
         <input type="email" id="email" name="email" required>
 
         <label for="password">Mật khẩu:</label>
-        <input type="password" id="password" name="mat_khau" required>
+        <div class="input-group">
+            <input type="password" id="password" name="mat_khau" required>
+            <span class="toggle-password" onclick="togglePassword('password', this)">👁️</span>
+        </div>
 
-        
+        <div class="forgot-password">
+            <a href="index.php?action=forgot_password">Quên mật khẩu?</a>
+
+        </div>
 
         <button type="submit">Đăng nhập</button>
     </form>
@@ -116,5 +156,18 @@
         Chưa có tài khoản? <a href="index.php?action=register">Đăng ký ngay</a>
     </p>
 </div>
+
+<script>
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = "🙈";
+        } else {
+            input.type = "password";
+            icon.textContent = "👁️";
+        }
+    }
+</script>
 </body>
 </html>

@@ -15,18 +15,15 @@
         }
 
         .register-box {
-    background: rgba(255,255,255,0.9);
-    width: 420px;
-    padding: 45px 40px;
-    border-radius: 26px;
-    border: 1px solid rgba(255,255,255,0.4);
-    backdrop-filter: blur(10px);
-    box-shadow:
-        0 20px 40px rgba(0,0,0,0.12),
-        0 8px 16px rgba(0,0,0,0.05);
-    transition: 0.3s;
-}
-
+            background: rgba(255,255,255,0.95);
+            width: 420px;
+            padding: 45px 40px;
+            border-radius: 26px;
+            border: 1px solid rgba(255,255,255,0.4);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
 
         h2 {
             margin-bottom: 25px;
@@ -51,10 +48,15 @@
             font-size: 14px;
         }
 
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 18px;
+        }
+
         input, select {
             width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 18px;
+            padding: 12px 40px 12px 15px; /* để icon con mắt không chồng lên */
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 15px;
@@ -66,6 +68,20 @@
             border-color: #007bff;
             box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
             outline: none;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .toggle-password:hover {
+            color: #007bff;
         }
 
         button {
@@ -121,7 +137,7 @@
             <option value="">-- Chọn giới tính --</option>
             <option value="Nam">Nam</option>
             <option value="Nữ">Nữ</option>
-            <option value="Khác">Khác</option>
+            
         </select>
 
         <!-- Email -->
@@ -130,11 +146,17 @@
 
         <!-- Mật khẩu -->
         <label for="password">Mật khẩu:</label>
-        <input type="password" id="password" name="mat_khau" required>
+        <div class="input-group">
+            <input type="password" id="password" name="mat_khau" required>
+            <span class="toggle-password" onclick="togglePassword('password', this)">👁️</span>
+        </div>
 
         <!-- Xác nhận mật khẩu -->
         <label for="confirm_password">Xác nhận mật khẩu:</label>
-        <input type="password" id="confirm_password" name="confirm_password" required>
+        <div class="input-group">
+            <input type="password" id="confirm_password" name="confirm_password" required>
+            <span class="toggle-password" onclick="togglePassword('confirm_password', this)">👁️</span>
+        </div>
 
         <button type="submit">Đăng ký</button>
     </form>
@@ -143,5 +165,18 @@
         Đã có tài khoản? <a href="index.php?action=login">Đăng nhập</a>
     </p>
 </div>
+
+<script>
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = "🙈"; // đổi icon khi hiện mật khẩu
+        } else {
+            input.type = "password";
+            icon.textContent = "👁️"; // đổi icon khi ẩn mật khẩu
+        }
+    }
+</script>
 </body>
 </html>

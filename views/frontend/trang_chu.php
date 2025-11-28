@@ -931,10 +931,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
         </a>
         <div class="dropdown-menu">
-            <a href="index.php?action=profile">Hồ sơ cá nhân</a>
-            <a href="index.php?action=update">Cập nhật thông tin</a>
-            <a href="index.php?action=changepass">Đổi mật khẩu</a>
-            <a href="index.php?action=logout">Đăng xuất</a>
+            
+            
         </div>
     </div>
 <?php else: ?>
