@@ -19,7 +19,6 @@ $query = htmlspecialchars($query ?? '');
             margin: 0;
         }
 
-        /* HEADER WEBSITE */
         .header-title {
             text-align: center;
             padding: 20px 0;
@@ -30,9 +29,8 @@ $query = htmlspecialchars($query ?? '');
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
-        /* CONTAINER */
         .search-container {
-            max-width: 1100px;
+            max-width: 1150px;
             margin: 40px auto;
             background: #fff;
             padding: 30px;
@@ -40,48 +38,104 @@ $query = htmlspecialchars($query ?? '');
             box-shadow: 0 6px 20px rgba(0,0,0,0.08);
         }
 
-        /* TOP BAR */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
+        .ad-banner img {
+            width: 100%;
+            height: 135px;
+            object-fit: cover;
+            border-radius: 10px;
         }
 
-        /* Home button giống hình bạn gửi */
+        /* TOP BAR + SEARCH FORM */
+        .top-bar {
+            display: flex;
+            justify-content: center; /* căn giữa toàn bộ */
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
         .home-btn {
-            text-decoration: none;
             font-size: 18px;
             font-weight: 500;
             color: #333333;
+            text-decoration: none;
+            flex-shrink: 0;
         }
 
-        .home-btn:hover { color: #000; }
+        .search-form {
+            display: flex;
+            gap: 10px;
+            flex: 1; /* chiếm phần còn lại */
+            max-width: 600px; /* giới hạn độ rộng */
+        }
 
-        /* SEARCH BAR */
-        .search-form input {
-            padding: 12px 15px;
-            border-radius: 6px;
+        .search-form input[type="text"] {
+            flex: 1; /* input chiếm hết chiều ngang có thể */
+            padding: 10px 15px;
+            border-radius: 8px;
             border: 1px solid #ccc;
-            width: 260px;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .search-form button {
-            padding: 12px 18px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
             background: #0077cc;
             color: white;
-            border: none;
-            border-radius: 6px;
+            font-size: 16px;
             cursor: pointer;
-            font-size: 14px;
+            transition: 0.25s;
         }
 
         .search-form button:hover {
             background: #005fa3;
         }
 
-        /* ARTICLE CARD */
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .layout-wrapper {
+            display: flex;
+            gap: 25px;
+        }
+        .left-content {
+            flex: 3;
+        }
+        .right-sidebar {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        /* SIDEBAR QUẢNG CÁO */
+        .sidebar-ad {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        .sidebar-ad img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .sidebar-ad img:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
         .article-item {
             display: flex;
             gap: 20px;
@@ -92,7 +146,6 @@ $query = htmlspecialchars($query ?? '');
             border: 1px solid #eee;
             transition: 0.25s;
         }
-
         .article-item:hover {
             background: #fff;
             border-color: #ccc;
@@ -106,24 +159,25 @@ $query = htmlspecialchars($query ?? '');
             object-fit: cover;
         }
 
-        .article-content { flex: 1; }
-
-        .article-item h3 a {
-            color: #0077cc;
+        .article-content h3 a {
             text-decoration: none;
-            font-size: 21px;
-            font-weight: bold;
+            color: #0077cc;
         }
 
-        .article-item h3 a:hover { color: #005fa3; text-decoration: underline; }
+        .article-content .article-desc {
+            margin: 8px 0;
+            color: #555;
+        }
 
-        .article-desc { color: #555; font-size: 15px; margin: 6px 0; }
+        .article-content .article-date {
+            font-size: 14px;
+            color: #888;
+        }
 
-        .article-date { color: #888; font-size: 13px; }
-
-        /* PAGINATION */
-        .pagination { margin-top: 25px; text-align: center; }
-
+        .pagination {
+            margin-top: 25px;
+            text-align: center;
+        }
         .pagination a, .pagination strong {
             margin: 0 5px;
             padding: 9px 15px;
@@ -132,13 +186,11 @@ $query = htmlspecialchars($query ?? '');
             text-decoration: none;
             color: #0077cc;
             border: 1px solid #0077cc;
-            transition: 0.2s;
         }
 
-        .pagination a:hover { background: #0077cc; color: #fff; }
-        .pagination strong { background: #0077cc; color: #fff; border-color: #005fa3; }
-
         @media (max-width: 700px) {
+            .layout-wrapper { flex-direction: column; }
+            .right-sidebar { position: static; }
             .article-item { flex-direction: column; align-items: center; }
             .article-img { width: 100%; height: 200px; }
         }
@@ -146,68 +198,62 @@ $query = htmlspecialchars($query ?? '');
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header-title">WEBSITE TIN TỨC</div>
 
 <div class="search-container">
 
-    <!-- TOP BAR -->
+    <div class="ad-banner">
+        <img src="uploads/đầutrangjpg.jpg" alt="Quảng cáo">
+    </div>
+
     <div class="top-bar">
         <a href="index.php" class="home-btn">Trang chủ</a>
 
-        <form action="index.php" method="GET" class="search-form" style="display:flex; gap:10px;">
+        <!-- Thanh tìm kiếm cân bằng -->
+        <form action="index.php" method="GET" class="search-form">
             <input type="hidden" name="action" value="search">
             <input type="text" name="q" value="<?= $query ?>" placeholder="Tìm kiếm bài viết...">
-            <button type="submit"> Tìm kiếm</button>
+            <button type="submit">Tìm kiếm</button>
         </form>
     </div>
 
     <h1>Kết quả tìm kiếm cho: "<?= $query ?>"</h1>
 
-    <?php if (empty($results)): ?>
-        <p>Không tìm thấy bài viết nào.</p>
-    <?php else: ?>
+    <div class="layout-wrapper">
+        
+        <!-- LEFT CONTENT -->
+        <div class="left-content">
+            <?php if (empty($results)): ?>
+                <p>Không tìm thấy bài viết nào.</p>
+            <?php else: ?>
+                <?php foreach ($results as $index => $r): ?>
+                    <div class="article-item">
+                        <img src="<?= htmlspecialchars($r['hinh_anh'] ?? 'uploads/default.jpg') ?>" 
+                             class="article-img" alt="Ảnh minh họa">
+                        <div class="article-content">
+                            <h3>
+                                <a href="index.php?action=chi_tiet_bai_viet&id=<?= urlencode($r['id']) ?>">
+                                    <?= htmlspecialchars($r['tieu_de']) ?>
+                                </a>
+                            </h3>
+                            <div class="article-desc"><?= htmlspecialchars($r['mo_ta_ngan'] ?? '') ?></div>
+                            <div class="article-date">📅 <?= htmlspecialchars($r['ngay_dang'] ?? '') ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
 
-        <?php foreach ($results as $r): ?>
-            <div class="article-item">
-                <img src="<?= htmlspecialchars($r['hinh_anh'] ?? 'uploads/default.jpg') ?>" class="article-img" alt="Ảnh minh họa">
-                <div class="article-content">
-                    <h3>
-                        <a href="index.php?action=chi_tiet_bai_viet&id=<?= urlencode($r['id']) ?>">
-                            <?= htmlspecialchars($r['tieu_de']) ?>
-                        </a>
-                    </h3>
-                    <div class="article-desc"><?= htmlspecialchars($r['mo_ta_ngan'] ?? '') ?></div>
-                    <div class="article-date">📅 Ngày đăng: <?= htmlspecialchars($r['ngay_dang'] ?? '') ?></div>
-                </div>
+        <!-- RIGHT SIDEBAR QUẢNG CÁO -->
+        <div class="right-sidebar">
+            <div class="sidebar-ad">
+                <img src="uploads/haha.jpg" alt="Quảng cáo 1">
+                <img src="uploads/quangcao.jpg" alt="Quảng cáo 2">
+                <img src="uploads/3.jpg" alt="Quảng cáo 3">
             </div>
-        <?php endforeach; ?>
+        </div>
 
-        <?php
-        $totalPages = max(1, (int)ceil($totalResults / $perPage));
-        if ($totalPages > 1):
-        ?>
-            <div class="pagination">
-                <?php if ($currentPage > 1): ?>
-                    <a href="index.php?action=search&q=<?= urlencode($query) ?>&page=1">« Trang đầu</a>
-                    <a href="index.php?action=search&q=<?= urlencode($query) ?>&page=<?= $currentPage - 1 ?>">« Trước</a>
-                <?php endif; ?>
-
-                <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                    <?php if ($p == $currentPage): ?>
-                        <strong><?= $p ?></strong>
-                    <?php else: ?>
-                        <a href="index.php?action=search&q=<?= urlencode($query) ?>&page=<?= $p ?>"><?= $p ?></a>
-                    <?php endif; ?>
-                <?php endfor; ?>
-
-                <?php if ($currentPage < $totalPages): ?>
-                    <a href="index.php?action=search&q=<?= urlencode($query) ?>&page=<?= $currentPage + 1 ?>">Tiếp »</a>
-                    <a href="index.php?action=search&q=<?= urlencode($query) ?>&page=<?= $totalPages ?>">Trang cuối »</a>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-    <?php endif; ?>
+    </div>
 </div>
 
 </body>

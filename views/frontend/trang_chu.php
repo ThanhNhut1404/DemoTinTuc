@@ -755,6 +755,7 @@ unset($adNorm);
             }
             
         }
+
     </style>
 </head>
 <script>
@@ -882,6 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
+
 <body>
 
     <!-- BANNER SLIDE -->
@@ -917,8 +919,9 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 </form>
 
-            <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
-            <a href="index.php?action=register" class="auth-link">Đăng ký</a>
+    <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
+    <a href="index.php?action=register" class="auth-link">Đăng ký</a>
+
             <div class="dropdown">
                 <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
                 <ul class="dropdown-menu">
