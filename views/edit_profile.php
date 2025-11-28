@@ -78,7 +78,7 @@ button { margin-top: 15px; padding: 10px 15px; cursor: pointer; }
     </div>
 </div>
 
-<h2>Cập nhật hồ sơ cá nhân</h2>
+<h2>Cập nhật thông tin cá nhân</h2>
 
 <?php if($message): ?>
     <div class="message"><?= htmlspecialchars($message) ?></div>

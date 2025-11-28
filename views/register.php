@@ -15,13 +15,18 @@
         }
 
         .register-box {
-            background: #fff;
-            padding: 40px 35px;
-            border-radius: 15px;
-            width: 350px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            text-align: center;
-        }
+    background: rgba(255,255,255,0.9);
+    width: 420px;
+    padding: 45px 40px;
+    border-radius: 26px;
+    border: 1px solid rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    box-shadow:
+        0 20px 40px rgba(0,0,0,0.12),
+        0 8px 16px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
+
 
         h2 {
             margin-bottom: 25px;
