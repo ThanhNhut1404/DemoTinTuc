@@ -936,9 +936,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
         </a>
         <div class="dropdown-menu">
-            <a href="index.php?action=profile">Hồ sơ cá nhân</a>
-            <a href="index.php?action=update">Cập nhật thông tin</a>
-            <a href="index.php?action=changepass">Đổi mật khẩu</a>
+          
+            <a href="http://localhost/DemoTinTuc/public/admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
             <a href="index.php?action=update">Đã thích</a>
             <a href="index.php?action=changepass">Đã lưu</a>
              <a href="index.php?action=changepass">Bình luận của tôi</a>

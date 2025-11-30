@@ -87,23 +87,19 @@ switch ($action) {
     $controller = new \Website\TinTuc\Controllers\SuggestController();
     $controller->index();
     break;
-           case 'profile':
-    include 'views/frontend/profile.php';
-    break;
+//            case 'profile':
+//     include 'views/frontend/profile.php';
+//     break;
 
-case 'profile_edit':
-    include 'views/frontend/profile_edit.php';
-    break;
+// case 'profile_edit':
+//     include 'views/frontend/profile_edit.php';
+//     break;
 
-case 'profile_update':
-    // xử lý form
-    $_SESSION['user']['name'] = $_POST['name'];
-    header("Location: index.php?action=profile");
-    break;
-
-
-    
-
+// case 'profile_update':
+//     // xử lý form
+//     $_SESSION['user']['name'] = $_POST['name'];
+//     header("Location: index.php?action=profile");
+//     break;
 
     // ❌ Mặc định: về trang chủ
     default:
