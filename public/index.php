@@ -4,34 +4,37 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// ✅ Nạp autoload (nếu có Composer)
+// Composer Autoload
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// ✅ Nạp các controller cần thiết
+// Controllers
 require_once __DIR__ . '/../src/Controllers/LoginController.php';
 require_once __DIR__ . '/../src/Controllers/RegisterController.php';
 require_once __DIR__ . '/../src/Controllers/TrangChuController.php';
 require_once __DIR__ . '/../src/Controllers/BaiVietController.php';
 require_once __DIR__ . '/../src/Controllers/ForgotPasswordController.php';
-require_once __DIR__ . '/../src/Controllers/ChuyenMucController.php'; // 🆕 thêm dòng này nè
+require_once __DIR__ . '/../src/Controllers/ChuyenMucController.php';
 require_once __DIR__ . '/../src/Controllers/ProfileController.php';
+require_once __DIR__ . '/../src/Controllers/searchController.php';
+require_once __DIR__ . '/../src/Controllers/SuggestController.php';
 
 use Website\TinTuc\Controllers\LoginController;
 use Website\TinTuc\Controllers\RegisterController;
 use Website\TinTuc\Controllers\TrangChuController;
 use Website\TinTuc\Controllers\ForgotPasswordController;
 use Website\TinTuc\Controllers\ChuyenMucController;
-// ✅ Lấy tham số "action" trên URL (vd: ?action=login)
+
+// Action
 $action = $_GET['action'] ?? 'home';
 
 switch ($action) {
-    // 🏠 Trang chủ
+
     case 'home':
         $controller = new TrangChuController();
         $controller->index();
         break;
 
-    // 🔑 Đăng nhập
+    // LOGIN
     case 'login':
         $controller = new LoginController();
         $controller->showLoginForm();
@@ -42,13 +45,13 @@ switch ($action) {
         $controller->login();
         break;
 
-    // 🚪 Đăng xuất
+    // LOGOUT
     case 'logout':
         $controller = new LoginController();
         $controller->logout();
         break;
 
-    // 📝 Đăng ký
+    // REGISTER
     case 'register':
         $controller = new RegisterController();
         $controller->showForm();
@@ -58,10 +61,9 @@ switch ($action) {
         $controller = new RegisterController();
         $controller->handleRegister();
         break;
-    // (Admin post management moved to admin.php)
 
-    // 🔑 Quên mật khẩu
-    case 'forgot':
+    // FORGOT PASSWORD
+    case 'forgot_password':
         $controller = new ForgotPasswordController();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $controller->submit();
@@ -69,20 +71,42 @@ switch ($action) {
             $controller->index();
         }
         break;
+
+    // RESET PASSWORD
+    case 'reset':
+        $controller = new ForgotPasswordController();
+        $controller->reset();
+        break;
+
+    case 'submit_reset':
+        $controller = new ForgotPasswordController();
+        $controller->submitReset();
+        break;
+
+    // SEND RESET (giữ code cũ)
+    case 'send_reset':
+        $controller = new ForgotPasswordController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->submit();
+        } else {
+            $controller->index();
+        }
+        break;
+
+    // CATEGORY
     case 'chuyenmuc':
         $id = $_GET['id'] ?? 0;
         $controller = new ChuyenMucController();
         $controller->hienThiTheoChuyenMuc($id);
         break;
+
+    // DETAIL POST
     case 'chi_tiet_bai_viet':
         $controller = new \Website\TinTuc\Controllers\BaiVietController();
         $controller->chiTiet($_GET['id']);
         break;
-        case 'search':
-    $controller = new \Website\TinTuc\Controllers\searchController();
-    $controller->index();
-    break;
 
+<<<<<<< HEAD
         case 'suggest':
     $controller = new \Website\TinTuc\Controllers\SuggestController();
     $controller->index();
@@ -102,6 +126,35 @@ switch ($action) {
 //     break;
 
     // ❌ Mặc định: về trang chủ
+=======
+    // SEARCH
+    case 'search':
+        $controller = new \Website\TinTuc\Controllers\searchController();
+        $controller->index();
+        break;
+
+    // SUGGEST
+    case 'suggest':
+        $controller = new \Website\TinTuc\Controllers\SuggestController();
+        $controller->index();
+        break;
+
+    // PROFILE
+    case 'profile':
+        include 'views/frontend/profile.php';
+        break;
+
+    case 'profile_edit':
+        include 'views/frontend/profile_edit.php';
+        break;
+
+    case 'profile_update':
+        $_SESSION['user']['name'] = $_POST['name'];
+        header("Location: index.php?action=profile");
+        break;
+
+    // DEFAULT
+>>>>>>> 6dd5ffaf6dcf48b18301bc2b31f051b52be68324
     default:
         $controller = new TrangChuController();
         $controller->index();

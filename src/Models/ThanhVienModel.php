@@ -271,40 +271,40 @@ class ThanhVienModel {
         return $stmt->execute([$hashedPassword, $email]);
     }
 
-    public function createResetToken(string $email): string
-    {
-        $user = $this->findByEmail($email);
-        if (!$user) throw new \Exception("Email không tồn tại");
+    public function createResetToken($email)
+{
+    $token = bin2hex(random_bytes(32));
+    $expires = date("Y-m-d H:i:s", strtotime("+30 minutes"));
 
-        $token = bin2hex(random_bytes(16));
-        $expires = date('Y-m-d H:i:s', time() + 3600);
+    $sql = "UPDATE nguoi_dung SET reset_token=?, reset_expires=? WHERE email=?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$token, $expires, $email]);
 
-        $sql = "UPDATE {$this->table} SET reset_token = ?, reset_expires = ? WHERE email = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$token, $expires, $email]);
-
+    if ($stmt->rowCount() > 0) {
         return $token;
     }
 
-    public function validateResetToken(string $token)
-    {
-        $sql = "SELECT * FROM {$this->table} WHERE reset_token = ? AND reset_expires > NOW()";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$token]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    return false;
+}
 
-    public function resetPasswordByToken(string $token, string $hashedPassword)
-    {
-        $user = $this->validateResetToken($token);
-        if (!$user) throw new \Exception("Token không hợp lệ hoặc đã hết hạn");
+public function validateResetToken($token)
+{
+    $sql = "SELECT * FROM nguoi_dung WHERE reset_token=? AND reset_expires > NOW()";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$token]);
 
-        $sql = "UPDATE {$this->table} 
-                SET mat_khau = ?, reset_token = NULL, reset_expires = NULL 
-                WHERE id = ?";
-        $stmt = $this->conn->prepare($sql);
-        return $stmt->execute([$hashedPassword, $user['id']]);
-    }
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+public function resetPasswordByToken($token, $password)
+{
+    $sql = "UPDATE nguoi_dung 
+            SET mat_khau=?, reset_token=NULL, reset_expires=NULL 
+            WHERE reset_token=?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$password, $token]);
+}
+
 
     // =========================
     // Thêm hàm updateProfile

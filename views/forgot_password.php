@@ -98,10 +98,11 @@
 <body>
     <div class="form-container">
         <h2>Quên mật khẩu</h2>
-        <form action="index.php?action=forgot" method="POST">
+        <form action="index.php?action=forgot_password" method="POST">
+
             <label for="email">Email:</label>
             <input id="email" type="email" name="email" placeholder="Nhập email của bạn" required>
-            <button type="submit">Gửi mật khẩu mới</button>
+            <button type="submit">Gửi yêu cầu</button>
         </form>
         <p><a href="index.php?action=login">← Quay lại đăng nhập</a></p>
     </div>
