@@ -16,10 +16,36 @@ class BaiVietModel
         $this->conn = $db->connect();
     }
 
+    /**
+     * Check whether a column exists in `bai_viet` table. Returns boolean.
+     */
+    private function columnExists(string $col): bool
+    {
+        $sql = "SHOW COLUMNS FROM bai_viet LIKE :col";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['col' => $col]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (bool)$row;
+    }
+
+    /**
+     * Detect a tag column name if present in the table. Returns column name or null.
+     */
+    private function detectTagColumn(): ?string
+    {
+        $candidates = ['id', 'the_tag', 'tag', 'id_tag'];
+        foreach ($candidates as $c) {
+            if ($this->columnExists($c)) {
+                return $c;
+            }
+        }
+        return null;
+    }
+
     // --- Lấy toàn bộ bài viết ---
     public function all()
     {
-        $sql = "SELECT * FROM bai_viet ORDER BY id DESC";
+        $sql = "SELECT bv.*, cm.ten_chuyen_muc FROM bai_viet bv LEFT JOIN chuyen_muc cm ON bv.id_chuyen_muc = cm.id ORDER BY bv.id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -29,7 +55,16 @@ class BaiVietModel
     public function getPending()
     {
         // Chuẩn hóa: kiểm tra giá trị chuỗi 'cho_duyet' (không phân biệt hoa thường)
-        $sql = "SELECT * FROM bai_viet WHERE LOWER(TRIM(trang_thai)) = 'cho_duyet' OR trang_thai = '0' ORDER BY id DESC";
+        $sql = "SELECT bv.*, cm.ten_chuyen_muc FROM bai_viet bv LEFT JOIN chuyen_muc cm ON bv.id_chuyen_muc = cm.id WHERE LOWER(TRIM(bv.trang_thai)) = 'cho_duyet' OR bv.trang_thai = '0' ORDER BY bv.id DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // --- Lấy bài viết theo lịch đăng (ngày đăng trong tương lai) ---
+    public function getScheduled()
+    {
+        $sql = "SELECT bv.*, cm.ten_chuyen_muc FROM bai_viet bv LEFT JOIN chuyen_muc cm ON bv.id_chuyen_muc = cm.id WHERE bv.ngay_dang > NOW() AND LOWER(TRIM(bv.trang_thai)) != 'tu_choi' ORDER BY bv.ngay_dang ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -56,22 +91,55 @@ class BaiVietModel
     // --- Thêm bài viết ---
     public function create($data)
     {
-        $sql = "INSERT INTO bai_viet (tieu_de, mo_ta_ngan, noi_dung, anh_dai_dien, id_chuyen_muc, id_tac_gia, la_noi_bat, trang_thai, ngay_dang)
-                VALUES (:tieu_de, :mo_ta_ngan, :noi_dung, :anh_dai_dien, :id_chuyen_muc, :id_tac_gia, :la_noi_bat, :trang_thai, :ngay_dang)";
+        // Normalize status: capitalize first word to match DB enum (Nhap, Cho_duyet, Da_dang)
+        $status = $data['trang_thai'] ?? 'Nhap';
+        $status = ucfirst(strtolower(str_replace('_', ' ', $status)));
+        $status = str_replace(' ', '_', $status);
+
+        $sql = "INSERT INTO bai_viet (tieu_de, mo_ta_ngan, noi_dung, anh_dai_dien, id_chuyen_muc, id_tac_gia, id_the_tag, la_noi_bat, trang_thai, ngay_dang)
+                VALUES (:tieu_de, :mo_ta_ngan, :noi_dung, :anh_dai_dien, :id_chuyen_muc, :id_tac_gia, :id_the_tag, :la_noi_bat, :trang_thai, :ngay_dang)";
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute($data);
+        $stmt->execute([
+            'tieu_de' => $data['tieu_de'] ?? '',
+            'mo_ta_ngan' => $data['mo_ta_ngan'] ?? '',
+            'noi_dung' => $data['noi_dung'] ?? '',
+            'anh_dai_dien' => $data['anh_dai_dien'] ?? '',
+            'id_chuyen_muc' => $data['id_chuyen_muc'] ?? 0,
+            'id_tac_gia' => $data['id_tac_gia'] ?? null,
+            'id_the_tag' => $data['tag'] ?? ($data['id_the_tag'] ?? null),
+            'la_noi_bat' => $data['la_noi_bat'] ?? 0,
+            'trang_thai' => $status,
+            'ngay_dang' => $data['ngay_dang'] ?? date('Y-m-d H:i:s'),
+        ]);
     }
 
     // --- Cập nhật bài viết ---
     public function update($id, $data)
     {
+        // Normalize status: capitalize first word to match DB enum (Nhap, Cho_duyet, Da_dang)
+        $status = $data['trang_thai'] ?? 'Nhap';
+        $status = ucfirst(strtolower(str_replace('_', ' ', $status)));
+        $status = str_replace(' ', '_', $status);
+
         $data['id'] = $id;
         $sql = "UPDATE bai_viet 
                 SET tieu_de=:tieu_de, mo_ta_ngan=:mo_ta_ngan, noi_dung=:noi_dung, anh_dai_dien=:anh_dai_dien,
-                    id_chuyen_muc=:id_chuyen_muc, id_tac_gia=:id_tac_gia, la_noi_bat=:la_noi_bat, trang_thai=:trang_thai, ngay_dang=:ngay_dang
+                    id_chuyen_muc=:id_chuyen_muc, id_tac_gia=:id_tac_gia, id_the_tag=:id_the_tag, la_noi_bat=:la_noi_bat, trang_thai=:trang_thai, ngay_dang=:ngay_dang
                 WHERE id=:id";
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute($data);
+        $stmt->execute([
+            'tieu_de' => $data['tieu_de'] ?? '',
+            'mo_ta_ngan' => $data['mo_ta_ngan'] ?? '',
+            'noi_dung' => $data['noi_dung'] ?? '',
+            'anh_dai_dien' => $data['anh_dai_dien'] ?? '',
+            'id_chuyen_muc' => $data['id_chuyen_muc'] ?? 0,
+            'id_tac_gia' => $data['id_tac_gia'] ?? null,
+            'id_the_tag' => $data['tag'] ?? ($data['id_the_tag'] ?? null),
+            'la_noi_bat' => $data['la_noi_bat'] ?? 0,
+            'trang_thai' => $status,
+            'ngay_dang' => $data['ngay_dang'] ?? date('Y-m-d H:i:s'),
+            'id' => $id,
+        ]);
     }
 
     // --- Xóa bài viết ---
@@ -117,7 +185,7 @@ class BaiVietModel
     public function getTinTheoChuyenMuc($id_chuyen_muc)
     {
         try {
-            $sql = "SELECT * FROM bai_viet WHERE id_chuyen_muc = :id ORDER BY ngay_dang DESC";
+            $sql = "SELECT bv.*, cm.ten_chuyen_muc FROM bai_viet bv LEFT JOIN chuyen_muc cm ON bv.id_chuyen_muc = cm.id WHERE bv.id_chuyen_muc = :id ORDER BY bv.ngay_dang DESC";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute(['id' => $id_chuyen_muc]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

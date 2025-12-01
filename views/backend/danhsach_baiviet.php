@@ -20,7 +20,7 @@
             <tr>
                 <td class="col-id"><?= $b['id'] ?></td>
                 <td><?= htmlspecialchars($b['tieu_de']) ?></td>
-                <td class="col-category"><?= htmlspecialchars($b['id_chuyen_muc']) ?></td>
+                <td class="col-category"><?= htmlspecialchars($b['ten_chuyen_muc'] ?? 'Không xác định') ?></td>
                 <td class="col-status"><?= htmlspecialchars($b['trang_thai']) ?></td>
                 <td class="col-date"><?= $b['ngay_dang'] ?></td>
                 <td class="col-highlight" style="text-align:center"><?= $b['la_noi_bat'] ? '<span class="badge">✔️</span>' : '' ?></td>

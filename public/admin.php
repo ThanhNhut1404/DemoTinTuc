@@ -117,6 +117,11 @@ switch ($action) {
         $baiVietController->delete($_GET['id'] ?? 0);
         break;
 
+    case 'upload_image':
+        $baiVietController = new BaiVietController();
+        $baiVietController->uploadImage();
+        break;
+
     case 'userPage':
         $controller->userPage();
         break;
