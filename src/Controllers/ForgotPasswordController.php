@@ -14,69 +14,74 @@ class ForgotPasswordController
         $this->model = new ThanhVienModel();
     }
 
-    // Hiển thị form quên mật khẩu
     public function index()
     {
         include __DIR__ . '/../../views/forgot_password.php';
     }
 
-    // Xử lý gửi link reset
     public function submit()
     {
         $email = $_POST['email'] ?? '';
-        if (!$email) die("Email không được để trống");
+
+        if (!$email) {
+            die("Email không được để trống");
+        }
+
+        $token = $this->model->createResetToken($email);
+        if (!$token) {
+            die("Email không tồn tại trong hệ thống!");
+        }
+
+        $resetLink = "http://localhost/DemoTinTuc/public/index.php?action=reset&token=$token";
 
         try {
-            $token = $this->model->createResetToken($email);
-
-            // Link reset chứa token
-            $resetLink = "https://yourdomain.com/index.php?controller=forgot_password&action=reset&token=$token";
-
             $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'youremail@gmail.com';
-            $mail->Password = 'your_app_password'; // App password
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
 
-            $mail->setFrom('no-reply@yourdomain.com', 'Website Tin Tuc');
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'YOUR_EMAIL@gmail.com';
+            $mail->Password   = 'APP_PASSWORD';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            // Quan trọng
+            $mail->setFrom('YOUR_EMAIL@gmail.com', 'Website Tin Tuc');
+
+            // Sửa đúng biến nhận email
             $mail->addAddress($email);
 
             $mail->isHTML(true);
-            $mail->Subject = 'Link đặt lại mật khẩu';
-            $mail->Body = "Nhấn vào link sau để đặt lại mật khẩu (hết hạn sau 1 giờ):<br>
-                           <a href='$resetLink'>$resetLink</a>";
+            $mail->Subject = "Reset mật khẩu";
+            $mail->Body    = "Click vào link để đặt lại mật khẩu: $resetLink";
 
             $mail->send();
-            echo "Link reset đã được gửi vào email của bạn";
-        } catch (\Exception $e) {
-            echo "Gửi mail thất bại: " . $e->getMessage();
+            echo 'Sent!';
+        } catch (Exception $e) {
+            echo "Error: {$mail->ErrorInfo}";
         }
     }
 
-    // Hiển thị form reset password
     public function reset()
     {
         $token = $_GET['token'] ?? '';
         $user = $this->model->validateResetToken($token);
-        if (!$user) die("Token không hợp lệ hoặc đã hết hạn");
+
+        if (!$user) {
+            die("Token không hợp lệ hoặc đã hết hạn.");
+        }
 
         include __DIR__ . '/../../views/reset_password.php';
     }
 
-    // Xử lý submit mật khẩu mới
     public function submitReset()
     {
-        $token = $_POST['token'] ?? '';
-        $newPassword = $_POST['password'] ?? '';
+        $token = $_POST['token'];
+        $password = $_POST['password'];
 
-        if (!$token || !$newPassword) die("Dữ liệu không hợp lệ");
-
-        $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
         $this->model->resetPasswordByToken($token, $hashed);
 
-        echo "✅ Mật khẩu đã được thay đổi thành công! Bạn có thể <a href='index.php?controller=login&action=showLoginForm'>đăng nhập</a> ngay.";
+        echo "Đổi mật khẩu thành công! <a href='index.php?action=login'>Đăng nhập</a>";
     }
 }
