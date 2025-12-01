@@ -22,11 +22,6 @@ class ThanhVienModel {
         $db = new Database();
         $this->conn = $db->connect();
         $this->detectTableAndColumns(['users', 'nguoi_dung']);
-        try {
-            $summary = sprintf("[%s] ThanhVienModel initialized. table=%s cols=%s\n", date('c'), $this->table, json_encode($this->cols, JSON_UNESCAPED_UNICODE));
-            @file_put_contents(__DIR__ . '/../../tools/detect_debug.log', $summary, FILE_APPEND);
-        } catch (\Exception $e) {
-        }
     }
 
     private function detectTableAndColumns(array $candidates)

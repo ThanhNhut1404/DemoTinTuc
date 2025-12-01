@@ -1,6 +1,5 @@
 <?php
 namespace Website\TinTuc\Controllers;
-
 use Website\TinTuc\Models\BannerModel;
 
 class BannerController
