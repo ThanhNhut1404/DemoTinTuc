@@ -1,13 +1,29 @@
 <?php
 // Bài viết management menu + sub-fragment loader
+use Website\TinTuc\Models\ChuyenMucModel;
+use Website\TinTuc\Models\TagModel;
+
 $sub = $_GET['sub'] ?? null;
 $subFragments = [
     'danhsach' => __DIR__ . '/danhsach_baiviet.php',
     'them' => __DIR__ . '/them_baiviet.php',
     'sua' => __DIR__ . '/sua_baiviet.php',
     'duyet' => __DIR__ . '/duyet_baiviet.php',
+    'lich' => __DIR__ . '/lich_dang_bai.php',
     // các fragment khác có thể thêm vào đây
 ];
+
+// Fetch categories for dropdowns in 'them' and 'sua' subfragments
+if (!isset($chuyenMucList)) {
+    $chuyenMucModel = new ChuyenMucModel();
+    $chuyenMucList = $chuyenMucModel->getAll();
+}
+
+// Fetch tags for dropdowns in 'them' and 'sua' subfragments
+if (!isset($tagList)) {
+    $tagModel = new TagModel();
+    $tagList = $tagModel->getAll();
+}
 ?>
 <div class="card">
     <h2>Quản lý bài viết</h2>
