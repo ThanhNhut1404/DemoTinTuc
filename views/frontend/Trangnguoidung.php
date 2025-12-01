@@ -1,14 +1,17 @@
 <?php
+// Khởi động session
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-/* ⭐ LẤY THÔNG TIN NGƯỜI ĐANG ĐĂNG NHẬP */
+// Nếu chưa đăng nhập → đá về trang login
 if (!isset($_SESSION['user'])) {
-    die("Bạn chưa đăng nhập!");
+    header("Location: index.php?action=login");
+    exit;
 }
 
-$user = $_SESSION['user']; // ⭐ Quan trọng
+// Lấy thông tin người dùng đang đăng nhập
+$user = $_SESSION['user'];
 
-/* Ảnh đại diện */
+// Avatar
 $avatar = !empty($user['anh_dai_dien'])
     ? 'uploads/' . htmlspecialchars($user['anh_dai_dien'])
     : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
@@ -39,7 +42,6 @@ body {
   background: #fff;
   padding: 40px;
   border-radius: 12px;
-  text-align: center;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
@@ -48,6 +50,7 @@ body {
   color: #0066cc;
   margin-bottom: 25px;
   font-size: 26px;
+  text-align: center;
   font-weight: bold;
 }
 
@@ -57,7 +60,6 @@ label {
   margin-top: 10px;
   margin-bottom: 6px;
   font-weight: 600;
-  text-align: left;
 }
 
 input, textarea, select {
@@ -99,12 +101,38 @@ input:focus, textarea:focus {
   font-size: 13px;
 }
 
-/* Buttons */
+/* Buttons area */
 .buttons {
   display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 15px;
+  justify-content: space-between;
+  margin-top: 25px;
+  align-items: center;
+}
+
+/* Nút home */
+.btn-home {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background: #e8f0ff;
+  color: #1a56db;
+  border-radius: 8px;
+  border: 1px solid #bcd2ff;
+  text-decoration: none;
+  font-size: 15px;
+  transition: 0.25s;
+}
+
+.btn-home:hover {
+  background: #d5e4ff;
+  border-color: #8cb3ff;
+}
+
+/* Button save / cancel group */
+.right-buttons {
+  display: flex;
+  gap: 12px;
 }
 
 .btn-save {
@@ -170,9 +198,20 @@ input:focus, textarea:focus {
             <option value="Nữ" <?= ($user['gioi_tinh'] == "Nữ" ? "selected" : "") ?>>Nữ</option>
         </select>
 
+        <!-- Buttons row -->
         <div class="buttons">
-          <button class="btn-save" type="submit">Lưu thay đổi</button>
-          <button type="button" class="btn-cancel" onclick="location.reload()">Hủy bỏ</button>
+          
+          <!-- Button Home -->
+          <a class="btn-home" href="index.php">
+            <span style="font-size:18px;">🏠</span> Trang chủ
+          </a>
+
+          <!-- Right button group -->
+          <div class="right-buttons">
+            <button class="btn-save" type="submit">Lưu thay đổi</button>
+            <button type="button" class="btn-cancel" onclick="location.reload()">Hủy bỏ</button>
+          </div>
+
         </div>
 
       </form>

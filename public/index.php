@@ -106,7 +106,6 @@ switch ($action) {
         $controller->chiTiet($_GET['id']);
         break;
 
-<<<<<<< HEAD
         case 'suggest':
     $controller = new \Website\TinTuc\Controllers\SuggestController();
     $controller->index();
@@ -126,7 +125,6 @@ switch ($action) {
 //     break;
 
     // ❌ Mặc định: về trang chủ
-=======
     // SEARCH
     case 'search':
         $controller = new \Website\TinTuc\Controllers\searchController();
@@ -154,7 +152,7 @@ switch ($action) {
         break;
 
     // DEFAULT
->>>>>>> 6dd5ffaf6dcf48b18301bc2b31f051b52be68324
+
     default:
         $controller = new TrangChuController();
         $controller->index();
