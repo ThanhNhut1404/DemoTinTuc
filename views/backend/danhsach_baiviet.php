@@ -25,7 +25,12 @@
                 <td class="col-date"><?= $b['ngay_dang'] ?></td>
                 <td class="col-highlight" style="text-align:center"><?= $b['la_noi_bat'] ? '<span class="badge">✔️</span>' : '' ?></td>
                 <td class="col-actions">
-                    <a href="admin.php?action=edit&id=<?= $b['id'] ?>" class="btn" style="padding:6px 8px">Sửa</a>
+                    <?php $status = strtolower(trim((string)($b['trang_thai'] ?? ''))); ?>
+                    <?php if (stripos($status, 'tu_choi') === false): ?>
+                        <a href="admin.php?action=edit&id=<?= $b['id'] ?>" class="btn" style="padding:6px 8px">Sửa</a>
+                    <?php else: ?>
+                        <span style="color:#999;font-size:12px">Không thể sửa</span>
+                    <?php endif; ?>
                     <a href="admin.php?action=delete&id=<?= $b['id'] ?>" class="btn btn-lock" style="padding:6px 8px" onclick="return confirm('Xóa bài viết này?')">Xóa</a>
                 </td>
             </tr>

@@ -41,6 +41,7 @@
                                 <td>
                                     <?php
                                         $status = strtolower(trim((string)($b['trang_thai'] ?? '')));
+                                        // Chỉ hiển thị nút duyệt/từ chối nếu bài ở trạng thái "Chờ duyệt"
                                         $isPending = in_array($status, ['cho_duyet', '0', 'pending'], true);
                                     ?>
                                     <?php if ($isPending): ?>
@@ -58,14 +59,14 @@
 
                                         <a href="admin.php?action=bai_viet&sub=sua&id=<?= htmlspecialchars($b['id']) ?>" class="btn btn-primary btn-sm" style="margin-left:6px">Sửa</a>
                                     <?php else: ?>
-                                        <?php if ($status === 'da_dang' || $status === 'da-dang' || $status === 'dang'): ?>
+                                        <!-- Bài không ở trạng thái chờ duyệt, hiển thị thông tin và không cho chỉnh sửa -->
+                                        <?php if (stripos($status, 'da_dang') !== false || stripos($status, 'dang') !== false): ?>
                                             <span class="badge badge-success">Đã đăng</span>
-                                        <?php elseif ($status === 'tu_choi' || $status === 'tu-choi' || $status === '2'): ?>
-                                            <span class="badge badge-secondary">Từ chối</span>
+                                        <?php elseif (stripos($status, 'tu_choi') !== false): ?>
+                                            <span class="badge badge-danger">Từ chối</span>
                                         <?php else: ?>
                                             <span class="badge"><?= htmlspecialchars($b['trang_thai'] ?? '') ?></span>
                                         <?php endif; ?>
-                                        <a href="admin.php?action=bai_viet&sub=sua&id=<?= htmlspecialchars($b['id']) ?>" class="btn btn-primary btn-sm" style="margin-left:8px">Sửa</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

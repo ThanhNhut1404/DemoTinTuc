@@ -32,6 +32,18 @@ class BaiVietController
             exit;
         }
 
+        // Before rendering, publish any scheduled posts whose time has arrived
+        // (automatically move from 'Cho_duyet' to 'Da_dang')
+        try {
+            $publishedCount = $this->model->publishDueScheduled();
+            if ($publishedCount > 0) {
+                // set a temporary flash message so admin sees auto-publish occurred
+                $_SESSION['flash'] = "Đã tự động đăng " . intval($publishedCount) . " bài đã đến hạn.";
+            }
+        } catch (\Exception $e) {
+            // swallow - publishDueScheduled already logs errors
+        }
+
         // If viewing the approval subpage, only load pending posts
         if (isset($_GET['sub']) && $_GET['sub'] === 'duyet') {
             $baiviets = $this->model->getPending();

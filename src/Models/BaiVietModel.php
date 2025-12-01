@@ -70,6 +70,24 @@ class BaiVietModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Publish scheduled posts whose scheduled time has arrived.
+     * Only publish posts that are currently waiting for approval ('Cho_duyet').
+     * Returns number of posts updated.
+     */
+    public function publishDueScheduled(): int
+    {
+        try {
+            $sql = "UPDATE bai_viet SET trang_thai = 'Da_dang' WHERE ngay_dang <= NOW() AND (LOWER(TRIM(trang_thai)) = 'cho_duyet' OR trang_thai = 'Cho_duyet')";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            error_log('publishDueScheduled error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
     // --- Cập nhật trạng thái của bài viết ---
     public function updateStatus($id, $status)
     {
