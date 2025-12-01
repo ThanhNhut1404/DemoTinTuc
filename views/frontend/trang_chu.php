@@ -755,6 +755,7 @@ unset($adNorm);
             }
             
         }
+
     </style>
 </head>
 <script>
@@ -882,6 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
+
 <body>
 
     <!-- BANNER SLIDE -->
@@ -916,6 +918,9 @@ document.addEventListener("DOMContentLoaded", () => {
            <ul id="suggestions" class="suggestions" style="position:fixed;display:none;z-index:99999;background:rgba(255,255,255,0.98);border-radius:12px;box-shadow:0 10px 30px rgba(8,20,40,0.18);backdrop-filter:blur(6px);max-height:360px;overflow:auto;padding:6px 0;margin:0;list-style:none;"> </ul>
     </div>
 </form>
+    
+
+            
 
            <div class="dropdown">
     <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
@@ -931,16 +936,24 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
         </a>
         <div class="dropdown-menu">
-            <a href="index.php?action=profile">Hồ sơ cá nhân</a>
-            <a href="index.php?action=update">Cập nhật thông tin</a>
-            <a href="index.php?action=changepass">Đổi mật khẩu</a>
+<<<<<<< HEAD
+          
+            <a href="http://localhost/DemoTinTuc/public/admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
+            <a href="index.php?action=update">Đã thích</a>
+            <a href="index.php?action=changepass">Đã lưu</a>
+             <a href="index.php?action=changepass">Bình luận của tôi</a>
             <a href="index.php?action=logout">Đăng xuất</a>
+=======
+            
+            
+>>>>>>> 6dd5ffaf6dcf48b18301bc2b31f051b52be68324
         </div>
     </div>
 <?php else: ?>
     <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
     <a href="index.php?action=register" class="auth-link">Đăng ký</a>
 <?php endif; ?>
+
 
         </nav>
         <h1>Website Tin Tức</h1>
