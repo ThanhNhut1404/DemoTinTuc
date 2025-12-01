@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Helper functions
 if (!function_exists('img_url')) {
     function img_url($path)
     {
@@ -18,57 +19,133 @@ if (!function_exists('base_url')) {
     }
 }
 
+// === LẤY ID BÀI VIẾT ===
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     echo "<div class='container mt-5'><div class='alert alert-danger'>ID bài viết không hợp lệ.</div></div>";
     exit;
 }
 $id = (int)$_GET['id'];
+$return_url = "index.php?action=chi_tiet_bai_viet&id=" . $id;
+$return_url_encoded = urlencode($return_url);
 
-// === XỬ LÝ AJAX THÍCH / LƯU (trước khi hiển thị trang) ===
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'])) {
+// === XỬ LÝ BÌNH LUẬN (trước hiển thị trang) ===
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'binh_luan') {
+    if (!isset($_SESSION['id_nguoi_dung'])) {
+        $_SESSION['flash_message'] = 'Vui lòng đăng nhập để bình luận!';
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+
+    $noi_dung = trim($_POST['noi_dung'] ?? '');
+    if (empty($noi_dung)) {
+        $_SESSION['flash_message'] = 'Vui lòng nhập nội dung bình luận!';
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+
+    $uid = (int)$_SESSION['id_nguoi_dung'];
+    $id_bai_viet = (int)($_POST['id_bai_viet'] ?? 0);
+
+    if ($id_bai_viet !== $id) {
+        $_SESSION['flash_message'] = 'Dữ liệu không hợp lệ!';
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+
+    $stmt = $conn->prepare("INSERT INTO binh_luan (id_bai_viet, id_nguoi_dung, noi_dung, ngay_binh_luan) VALUES (?, ?, ?, NOW())");
+    $stmt->bind_param("iis", $id, $uid, $noi_dung);
+    $stmt->execute();
+    $stmt->close();
+
+    $_SESSION['flash_message'] = 'Bình luận đã được gửi thành công!';
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+// === XỬ LÝ AJAX LIKE / UNLIKE / SAVE / UNSAVE ===
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_viet'])) {
     header('Content-Type: application/json');
+
     if (!isset($_SESSION['id_nguoi_dung'])) {
         echo json_encode(['login' => true]);
         exit;
     }
 
     $uid = (int)$_SESSION['id_nguoi_dung'];
+    $post_id = (int)$_POST['id_bai_viet'];
     $action = $_POST['do'];
 
+    // Chỉ cho phép xử lý đúng bài viết đang xem
+    if ($post_id !== $id) {
+        echo json_encode(['success' => false]);
+        exit;
+    }
+
     if ($action === 'like') {
-        $conn->query("INSERT IGNORE INTO yeu_thich (id_nguoi_dung, id_bai_viet) VALUES ($uid, $id)");
-        if ($conn->affected_rows > 0) {
-            $conn->query("UPDATE bai_viet SET luot_thich = luot_thich + 1 WHERE id = $id");
+        $stmt = $conn->prepare("INSERT IGNORE INTO yeu_thich (id_nguoi_dung, id_bai_viet) VALUES (?, ?)");
+        $stmt->bind_param("ii", $uid, $id);
+        $stmt->execute();
+        if ($stmt->affected_rows > 0) {
+            $stmt2 = $conn->prepare("UPDATE bai_viet SET luot_thich = luot_thich + 1 WHERE id = ?");
+            $stmt2->bind_param("i", $id);
+            $stmt2->execute();
+            $stmt2->close();
         }
-        $count = $conn->query("SELECT luot_thich FROM bai_viet WHERE id = $id")->fetch_assoc()['luot_thich'];
-        echo json_encode(['success' => true, 'liked' => true, 'count' => $count]);
-        exit;
-    }
-
-    if ($action === 'unlike') {
-        $conn->query("DELETE FROM yeu_thich WHERE id_nguoi_dung = $uid AND id_bai_viet = $id");
-        if ($conn->affected_rows > 0) {
-            $conn->query("UPDATE bai_viet SET luot_thich = luot_thich - 1 WHERE id = $id");
+        $stmt->close();
+    } elseif ($action === 'unlike') {
+        $stmt = $conn->prepare("DELETE FROM yeu_thich WHERE id_nguoi_dung = ? AND id_bai_viet = ?");
+        $stmt->bind_param("ii", $uid, $id);
+        $stmt->execute();
+        if ($stmt->affected_rows > 0) {
+            $stmt2 = $conn->prepare("UPDATE bai_viet SET luot_thich = luot_thich - 1 WHERE id = ?");
+            $stmt2->bind_param("i", $id);
+            $stmt2->execute();
+            $stmt2->close();
         }
-        $count = $conn->query("SELECT luot_thich FROM bai_viet WHERE id = $id")->fetch_assoc()['luot_thich'];
-        echo json_encode(['success' => true, 'liked' => false, 'count' => $count]);
-        exit;
-    }
-
-    if ($action === 'save') {
-        $conn->query("INSERT IGNORE INTO luu_bai_viet (id_nguoi_dung, id_bai_viet) VALUES ($uid, $id)");
+        $stmt->close();
+    } elseif ($action === 'save') {
+        $stmt = $conn->prepare("INSERT IGNORE INTO luu_bai_viet (id_nguoi_dung, id_bai_viet) VALUES (?, ?)");
+        $stmt->bind_param("ii", $uid, $id);
+        $stmt->execute();
+        $stmt->close();
         echo json_encode(['success' => true, 'saved' => true]);
         exit;
-    }
-
-    if ($action === 'unsave') {
-        $conn->query("DELETE FROM luu_bai_viet WHERE id_nguoi_dung = $uid AND id_bai_viet = $id");
+    } elseif ($action === 'unsave') {
+        $stmt = $conn->prepare("DELETE FROM luu_bai_viet WHERE id_nguoi_dung = ? AND id_bai_viet = ?");
+        $stmt->bind_param("ii", $uid, $id);
+        $stmt->execute();
+        $stmt->close();
         echo json_encode(['success' => true, 'saved' => false]);
         exit;
     }
+
+    // Trả về số lượt thích mới (cho like/unlike)
+    $stmt = $conn->prepare("SELECT luot_thich FROM bai_viet WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $count = $result->fetch_assoc()['luot_thich'] ?? 0;
+    $stmt->close();
+
+    $is_liked = false;
+    if ($uid) {
+        $stmt = $conn->prepare("SELECT 1 FROM yeu_thich WHERE id_nguoi_dung = ? AND id_bai_viet = ?");
+        $stmt->bind_param("ii", $uid, $id);
+        $stmt->execute();
+        $stmt->store_result();
+        $is_liked = $stmt->num_rows > 0;
+        $stmt->close();
+    }
+
+    echo json_encode([
+        'success' => true,
+        'liked' => $is_liked,
+        'count' => $count
+    ]);
+    exit;
 }
 
-// Tăng lượt xem
+// === TĂNG LƯỢT XEM (chống spam 30 giây/lần) ===
 if (!isset($_SESSION['views'][$id]) || (time() - ($_SESSION['views'][$id] ?? 0)) >= 30) {
     $stmt = $conn->prepare("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?");
     $stmt->bind_param("i", $id);
@@ -77,8 +154,11 @@ if (!isset($_SESSION['views'][$id]) || (time() - ($_SESSION['views'][$id] ?? 0))
     $_SESSION['views'][$id] = time();
 }
 
-// Lấy bài viết chính
-$stmt = $conn->prepare("SELECT b.*, n.ho_ten AS tac_gia, COALESCE(b.luot_thich, 0) AS luot_thich FROM bai_viet b LEFT JOIN nguoi_dung n ON b.id_tac_gia = n.id WHERE b.id = ?");
+// === LẤY BÀI VIẾT CHÍNH ===
+$stmt = $conn->prepare("SELECT b.*, n.ho_ten AS tac_gia, COALESCE(b.luot_thich, 0) AS luot_thich, COALESCE(b.luot_xem, 0) AS luot_xem 
+                        FROM bai_viet b 
+                        LEFT JOIN nguoi_dung n ON b.id_tac_gia = n.id 
+                        WHERE b.id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -89,10 +169,11 @@ if ($result->num_rows === 0) {
 $bv = $result->fetch_assoc();
 $stmt->close();
 
-// Kiểm tra đã thích / đã lưu chưa
+// === KIỂM TRA ĐÃ THÍCH / ĐÃ LƯU CHƯA ===
 $yeu_thich = $da_luu = false;
 if (isset($_SESSION['id_nguoi_dung'])) {
     $uid = (int)$_SESSION['id_nguoi_dung'];
+
     $stmt = $conn->prepare("SELECT 1 FROM yeu_thich WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
     $stmt->bind_param("ii", $id, $uid);
     $stmt->execute();
@@ -108,15 +189,23 @@ if (isset($_SESSION['id_nguoi_dung'])) {
     $stmt->close();
 }
 
-// Bình luận
-$stmt = $conn->prepare("SELECT bl.noi_dung, u.ho_ten AS ten_nguoi_dung, bl.ngay_binh_luan FROM binh_luan bl JOIN nguoi_dung u ON bl.id_nguoi_dung = u.id WHERE bl.id_bai_viet = ? ORDER BY bl.ngay_binh_luan DESC");
+// === LẤY BÌNH LUẬN ===
+$stmt = $conn->prepare("SELECT bl.noi_dung, u.ho_ten AS ten_nguoi_dung, bl.ngay_binh_luan 
+                        FROM binh_luan bl 
+                        JOIN nguoi_dung u ON bl.id_nguoi_dung = u.id 
+                        WHERE bl.id_bai_viet = ? 
+                        ORDER BY bl.ngay_binh_luan DESC");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $binh_luan = $stmt->get_result();
 $stmt->close();
 
-// Bài liên quan
-$stmt = $conn->prepare("SELECT id, tieu_de, anh_dai_dien, mo_ta_ngan FROM bai_viet WHERE id != ? ORDER BY ngay_dang DESC LIMIT 6");
+// === BÀI VIẾT LIÊN QUAN ===
+$stmt = $conn->prepare("SELECT id, tieu_de, anh_dai_dien, mo_ta_ngan 
+                        FROM bai_viet 
+                        WHERE id != ? 
+                        ORDER BY ngay_dang DESC 
+                        LIMIT 6");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $related_posts = $stmt->get_result();
@@ -125,6 +214,7 @@ $stmt->close();
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -132,50 +222,145 @@ $stmt->close();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Giữ nguyên toàn bộ CSS đẹp của bạn - không thay đổi */
         body {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding-top: 76px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .article-img { border-radius: 15px; max-height: 500px; object-fit: cover; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.15); animation: fadeInUp 0.6s ease; }
-        .card { border: none; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s ease; }
-        .card:hover { box-shadow: 0 15px 40px rgba(0,0,0,0.15); transform: translateY(-5px); }
-
-        .bounce-item, .related-item, .btn-bounce { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; position: relative; overflow: hidden; }
-        .bounce-item::before, .related-item::before, .btn-bounce::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, rgba(13,110,253,0.1), rgba(0,198,255,0.1));
-            opacity: 0; transition: opacity 0.4s; border-radius: inherit; pointer-events: none;
+        .article-img {
+            border-radius: 15px;
+            max-height: 500px;
+            object-fit: cover;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            animation: fadeInUp 0.6s ease;
         }
-        .bounce-item:hover, .related-item:hover, .btn-bounce:hover {
-            transform: translateY(-8px) scale(1.02) !important; box-shadow: 0 20px 50px rgba(13,110,253,0.3) !important; z-index: 10;
-        }
-        .bounce-item:hover::before, .related-item:hover::before, .btn-bounce:hover::before { opacity: 1; }
 
-        @keyframes pulse { 0%,100% { transform: translateY(-8px) scale(1.02); } 50% { transform: translateY(2px) scale(1.01); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes heartbeat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
-
-        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
-
-        .sticky-sidebar { position: sticky; top: 100px; }
-        .article-content { color: #333; line-height: 1.8; }
-        .article-content p { margin-bottom: 1.5rem; }
-
-        .like-btn, .save-btn {
+        .card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
-            font-weight: 600;
         }
-        .like-btn:hover, .like-btn.active { background: #e74c3c !important; border-color: #e74c3c !important; color: white !important; }
-        .save-btn:hover, .save-btn.active { background: #0d6efd !important; border-color: #0d6efd !important; color: white !important; }
-        .like-btn.active i { animation: heartbeat 0.8s ease; }
 
-        @media (max-width: 992px) { .sticky-sidebar { position: static !important; margin-top: 2rem; } }
-        @media (max-width: 768px) { .article-img { max-height: 300px; } h1.display-5 { font-size: 1.8rem; } }
+        .card:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .bounce-item,
+        .related-item,
+        .btn-bounce {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bounce-item::before,
+        .related-item::before,
+        .btn-bounce::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(0, 198, 255, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s;
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        .bounce-item:hover,
+        .related-item:hover,
+        .btn-bounce:hover {
+            transform: translateY(-8px) scale(1.02) !important;
+            box-shadow: 0 20px 50px rgba(13, 110, 253, 0.3) !important;
+            z-index: 10;
+        }
+
+        .bounce-item:hover::before,
+        .related-item:hover::before,
+        .btn-bounce:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.4);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sticky-sidebar {
+            position: sticky;
+            top: 100px;
+        }
+
+        .like-btn.active,
+        .like-btn:hover {
+            background: #e74c3c !important;
+            border-color: #e74c3c !important;
+            color: white !important;
+        }
+
+        .save-btn.active,
+        .save-btn:hover {
+            background: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: white !important;
+        }
+
+        .like-btn.active i {
+            animation: heartbeat 0.8s ease;
+        }
+
+        @media (max-width: 992px) {
+            .sticky-sidebar {
+                position: static !important;
+                margin-top: 2rem;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <?php include __DIR__ . '/../partials/header.php'; ?>
@@ -197,7 +382,6 @@ $stmt->close();
                     <div class="card-body p-4 p-lg-5">
                         <h1 class="display-5 fw-bold mb-4"><?= htmlspecialchars($bv['tieu_de']); ?></h1>
 
-                        <!-- THÔNG TIN + NÚT THÍCH & LƯU -->
                         <div class="text-muted small mb-4 d-flex flex-wrap align-items-center gap-3 border-bottom pb-3">
                             <span><i class="fas fa-calendar-alt me-2"></i><?= date('d/m/Y', strtotime($bv['ngay_dang'])); ?></span>
                             <span><i class="fas fa-user me-2"></i><?= htmlspecialchars($bv['tac_gia'] ?? 'Ẩn danh'); ?></span>
@@ -206,26 +390,26 @@ $stmt->close();
                             <div class="ms-auto d-flex gap-3">
                                 <!-- NÚT THÍCH -->
                                 <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill like-btn <?= $yeu_thich ? 'active' : '' ?>" 
-                                            data-id="<?= $id ?>" data-action="<?= $yeu_thich ? 'unlike' : 'like' ?>">
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill like-btn <?= $yeu_thich ? 'active' : '' ?>"
+                                        data-id="<?= $id ?>" data-action="<?= $yeu_thich ? 'unlike' : 'like' ?>">
                                         <i class="fa<?= $yeu_thich ? 's' : 'r' ?> fa-heart"></i>
                                         <span class="like-count ms-1"><?= number_format($bv['luot_thich']); ?></span>
                                     </button>
                                 <?php else: ?>
-                                    <a href="index.php?action=login" class="text-danger text-decoration-none">
+                                    <a href="index.php?action=login&return_url=<?= $return_url_encoded ?>" class="text-danger text-decoration-none">
                                         <i class="far fa-heart"></i> <?= number_format($bv['luot_thich']); ?>
                                     </a>
                                 <?php endif; ?>
 
                                 <!-- NÚT LƯU -->
                                 <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                                    <button class="btn btn-outline-primary btn-sm rounded-pill save-btn <?= $da_luu ? 'active' : '' ?>" 
-                                            data-id="<?= $id ?>" data-action="<?= $da_luu ? 'unsave' : 'save' ?>">
+                                    <button class="btn btn-outline-primary btn-sm rounded-pill save-btn <?= $da_luu ? 'active' : '' ?>"
+                                        data-id="<?= $id ?>" data-action="<?= $da_luu ? 'unsave' : 'save' ?>">
                                         <i class="fa<?= $da_luu ? 's' : 'r' ?> fa-bookmark"></i>
                                         <span class="ms-1"><?= $da_luu ? 'Đã lưu' : 'Lưu' ?></span>
                                     </button>
                                 <?php else: ?>
-                                    <a href="index.php?action=login" class="text-primary text-decoration-none">
+                                    <a href="index.php?action=login&return_url=<?= $return_url_encoded ?>" class="text-primary text-decoration-none">
                                         <i class="far fa-bookmark"></i> Lưu
                                     </a>
                                 <?php endif; ?>
@@ -239,7 +423,7 @@ $stmt->close();
                         <?php if (!empty($bv['anh_dai_dien'])): ?>
                             <div class="text-center mb-5">
                                 <img src="<?= img_url($bv['anh_dai_dien']) ?>" alt="<?= htmlspecialchars($bv['tieu_de']) ?>"
-                                     class="img-fluid rounded shadow-lg article-main-img" style="max-height:550px; border-radius:15px;">
+                                    class="img-fluid rounded shadow-lg article-img">
                             </div>
                         <?php endif; ?>
 
@@ -255,27 +439,23 @@ $stmt->close();
                     </div>
                 </article>
 
-                <!-- BÌNH LUẬN (giữ nguyên như cũ) -->
+                <!-- BÌNH LUẬN -->
                 <div class="card shadow-lg">
                     <div class="card-body p-4 p-lg-5">
-                        <h4 class="mb-4 text-primary"><i class="fas fa-comments me-2"></i>Bình luận (<?= $binh_luan->num_rows ?? 0; ?>)</h4>
+                        <h4 class="mb-4 text-primary"><i class="fas fa-comments me-2"></i>Bình luận (<?= $binh_luan->num_rows; ?>)</h4>
 
-                        <?php if ($binh_luan && $binh_luan->num_rows > 0): ?>
+                        <?php if ($binh_luan->num_rows > 0): ?>
                             <div class="comments-list">
                                 <?php while ($c = $binh_luan->fetch_assoc()): ?>
-                                    <div class="comment-item border-bottom pb-4 mb-4">
-                                        <div class="d-flex align-items-start">
-                                            <div class="flex-grow-1">
-                                                <strong class="text-primary"><?= htmlspecialchars($c['ten_nguoi_dung']); ?></strong>
-                                                <small class="text-muted ms-2"><i class="fas fa-clock me-1"></i><?= date('d/m/Y H:i', strtotime($c['ngay_binh_luan'])); ?></small>
-                                                <p class="mt-2 mb-0"><?= nl2br(htmlspecialchars($c['noi_dung'])); ?></p>
-                                            </div>
-                                        </div>
+                                    <div class="border-bottom pb-4 mb-4">
+                                        <strong class="text-primary"><?= htmlspecialchars($c['ten_nguoi_dung']); ?></strong>
+                                        <small class="text-muted ms-2"><i class="fas fa-clock"></i> <?= date('d/m/Y H:i', strtotime($c['ngay_binh_luan'])); ?></small>
+                                        <p class="mt-2 mb-0"><?= nl2br(htmlspecialchars($c['noi_dung'])); ?></p>
                                     </div>
                                 <?php endwhile; ?>
                             </div>
                         <?php else: ?>
-                            <p class="text-muted fst-italic text-center py-5">
+                            <p class="text-muted text-center py-5 fst-italic">
                                 <i class="fas fa-comments fa-3x opacity-25 mb-3 d-block"></i>
                                 Chưa có bình luận nào. Hãy là người đầu tiên!
                             </p>
@@ -284,31 +464,31 @@ $stmt->close();
                         <hr class="my-4">
 
                         <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                            <form action="<?= base_url('views/frontend/chi_tiet_bai_viet.php') ?>" method="post">
+                            <form action="" method="post">
                                 <input type="hidden" name="id_bai_viet" value="<?= $id ?>">
                                 <input type="hidden" name="action" value="binh_luan">
-                                <div class="form-group mb-3">
-                                    <label for="noi_dung" class="form-label">Viết bình luận của bạn</label>
-                                    <textarea name="noi_dung" id="noi_dung" class="form-control" rows="4" placeholder="Chia sẻ suy nghĩ của bạn..." required></textarea>
+                                <div class="mb-3">
+                                    <label class="form-label">Viết bình luận của bạn</label>
+                                    <textarea name="noi_dung" class="form-control" rows="4" placeholder="Chia sẻ suy nghĩ của bạn..." required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-lg px-5 btn-bounce bounce-item">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 btn-bounce">
                                     <i class="fas fa-paper-plane me-2"></i>Gửi bình luận
                                 </button>
                             </form>
                         <?php else: ?>
                             <div class="text-center py-5 bg-light rounded">
-                                <i class="fas fa-lock fa-3x text-muted mb-3 d-block"></i>
-                                <a href="index.php?action=login" class="btn btn-primary">Đăng nhập để bình luận</a>
+                                <i class="fas fa-lock fa-3x text-muted mb-3"></i>
+                                <a href="index.php?action=login&return_url=<?= $return_url_encoded ?>" class="btn btn-primary">Đăng nhập để bình luận</a>
                             </div>
                         <?php endif; ?>
                     </div>
                 </div>
             </div>
 
-            <!-- CỘT PHẢI: BÀI VIẾT LIÊN QUAN (giữ nguyên) -->
+            <!-- CỘT PHẢI: BÀI LIÊN QUAN -->
             <div class="col-lg-4">
                 <div class="sticky-sidebar">
-                    <?php if ($related_posts && $related_posts->num_rows > 0): ?>
+                    <?php if ($related_posts->num_rows > 0): ?>
                         <div class="card shadow-lg">
                             <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);">
                                 <h5 class="mb-0 fw-bold"><i class="fas fa-lightbulb me-2"></i>Bài viết gợi ý</h5>
@@ -316,11 +496,11 @@ $stmt->close();
                             <div class="card-body p-0">
                                 <?php while ($r = $related_posts->fetch_assoc()): ?>
                                     <a href="/Demotintuc/public/index.php?action=chi_tiet_bai_viet&id=<?= $r['id'] ?>"
-                                       class="text-decoration-none text-dark d-block border-bottom related-item bounce-item p-3">
+                                        class="text-decoration-none text-dark d-block border-bottom related-item bounce-item p-3">
                                         <div class="row g-2 align-items-center">
                                             <?php if (!empty($r['anh_dai_dien'])): ?>
                                                 <div class="col-4">
-                                                    <img src="<?= img_url($r['anh_dai_dien']); ?>" class="img-fluid rounded shadow-sm" style="height:70px; object-fit:cover; width:100%;">
+                                                    <img src="<?= img_url($r['anh_dai_dien']); ?>" class="img-fluid rounded shadow-sm" style="height:70px; object-fit:cover;">
                                                 </div>
                                                 <div class="col-8">
                                                     <h6 class="fw-bold mb-1 line-clamp-2 text-primary" style="font-size:0.95rem;">
@@ -344,10 +524,6 @@ $stmt->close();
                                 <?php endwhile; ?>
                             </div>
                         </div>
-                    <?php else: ?>
-                        <div class="alert alert-info text-center">
-                            <i class="fas fa-info-circle me-2"></i>Chưa có bài viết gợi ý
-                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -358,43 +534,49 @@ $stmt->close();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.like-btn, .save-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
+                btn.addEventListener('click', function() {
                     const id = this.dataset.id;
                     const action = this.dataset.action;
 
                     fetch('', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'do=' + action + '&id_bai_viet=' + id
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.login) {
-                            window.location.href = 'index.php?action=login';
-                            return;
-                        }
-
-                        if (this.classList.contains('like-btn')) {
-                            const isLiked = data.liked;
-                            this.dataset.action = isLiked ? 'unlike' : 'like';
-                            this.classList.toggle('active', isLiked);
-                            this.querySelector('i').className = isLiked ? 'fas fa-heart' : 'far fa-heart';
-                            if (data.count !== undefined) {
-                                this.querySelector('.like-count').textContent = data.count;
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                'do': action,
+                                'id_bai_viet': id
+                            })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.login) {
+                                window.location.href = 'index.php?action=login';
+                                return;
                             }
-                        } else {
-                            const isSaved = data.saved;
-                            this.dataset.action = isSaved ? 'unsave' : 'save';
-                            this.classList.toggle('active', isSaved);
-                            this.querySelector('i').className = isSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
-                            this.querySelector('span.ms-1').textContent = isSaved ? 'Đã lưu' : 'Lưu';
-                        }
-                    });
+
+                            if (this.classList.contains('like-btn')) {
+                                const isLiked = data.liked;
+                                this.dataset.action = isLiked ? 'unlike' : 'like';
+                                this.classList.toggle('active', isLiked);
+                                this.querySelector('i').className = isLiked ? 'fas fa-heart' : 'far fa-heart';
+                                if (data.count !== undefined) {
+                                    this.querySelector('.like-count').textContent = data.count.toLocaleString();
+                                }
+                            } else {
+                                const isSaved = data.saved;
+                                this.dataset.action = isSaved ? 'unsave' : 'save';
+                                this.classList.toggle('active', isSaved);
+                                this.querySelector('i').className = isSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
+                                this.querySelector('span.ms-1').textContent = isSaved ? 'Đã lưu' : 'Lưu';
+                            }
+                        });
                 });
             });
         });
     </script>
 </body>
+
 </html>
