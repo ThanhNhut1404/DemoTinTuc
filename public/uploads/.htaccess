@@ -1,0 +1,20 @@
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(php|php5|phtml|phps|pl|py|jsp|asp|sh|cgi)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(php|php5|phtml|phps|pl|py|jsp|asp|sh|cgi)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+Options -ExecCGI
+<IfModule mod_mime.c>
+    RemoveHandler .php .phtml .php3 .php4 .php5
+</IfModule>
+
+# Prevent access to dotfiles
+<FilesMatch "^\..+">
+    Require all denied
+</FilesMatch>
