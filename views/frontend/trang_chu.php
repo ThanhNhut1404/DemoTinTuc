@@ -8,6 +8,7 @@ $tinNoiBat = isset($tinNoiBat) && is_array($tinNoiBat) ? $tinNoiBat : [];
 $tinMoiNhat = isset($tinMoiNhat) && is_array($tinMoiNhat) ? $tinMoiNhat : [];
 $tinXemNhieu = isset($tinXemNhieu) && is_array($tinXemNhieu) ? $tinXemNhieu : [];
 $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChuyenMuc) ? $baiVietTheoChuyenMuc : [];
+$activeWallpaper = isset($activeWallpaper) && is_array($activeWallpaper) ? $activeWallpaper : [];
 
 // Prepare unified ads list (take up to 4 ads from available left/right ad arrays)
 // Prepare unified ads list (take up to 6 ads: 3 left + 3 right slots)
@@ -52,6 +53,12 @@ foreach ($ads as &$adNorm) {
     }
 }
 unset($adNorm);
+
+// Prepare wallpaper URL from database
+$wallpaperUrl = '';
+if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
+    $wallpaperUrl = 'uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -81,6 +88,23 @@ unset($adNorm);
             background: #f5f7fa;
             color: #333;
             line-height: 1.6;
+            background-image: <?= !empty($wallpaperUrl) ? "url('" . htmlspecialchars($wallpaperUrl) . "')" : "''" ?>;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            transition: background-image 0.5s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.55);
+            pointer-events: none;
+            z-index: -1;
         }
 
         /* ===== HEADER & NAV ===== */
@@ -1167,7 +1191,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const container = document.getElementById('scroll-' + id);
             container.scrollBy({ left: 300, behavior: 'smooth' });
         }
-        // Tự động ẩn nút khi hết nội dung (tùy chọn nâng cao)
+
+        // Load background on page load
+        document.addEventListener('DOMContentLoaded', loadBackground);
     </script>
     
 </body>

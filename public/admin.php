@@ -21,6 +21,7 @@ use Website\TinTuc\Controllers\ThanhVienController;
 use Website\TinTuc\Controllers\BaiVietController;
 use Website\TinTuc\Controllers\QuangCaoController;
 use Website\TinTuc\Controllers\BannerController;
+use Website\TinTuc\Controllers\BgWallpaperController;
 
 $action = $_GET['action'] ?? 'index';
 $controller = new ThanhVienController();
@@ -164,6 +165,42 @@ switch ($action) {
     case 'banner_toggle':
         $bannerController = new BannerController();
         $bannerController->toggle($_GET['id'] ?? 0);
+        break;
+
+    // Quản lý nền website
+    case 'bg_wallpaper':
+        $bgController = new BgWallpaperController();
+        $bgController->index();
+        break;
+
+    case 'bg_wallpaper_create':
+        $bgController = new BgWallpaperController();
+        $bgController->create();
+        break;
+
+    case 'bg_wallpaper_store':
+        $bgController = new BgWallpaperController();
+        $bgController->store();
+        break;
+
+    case 'bg_wallpaper_edit':
+        $bgController = new BgWallpaperController();
+        $bgController->edit($_GET['id'] ?? 0);
+        break;
+
+    case 'bg_wallpaper_update':
+        $bgController = new BgWallpaperController();
+        $bgController->update($_GET['id'] ?? ($_POST['id'] ?? 0));
+        break;
+
+    case 'bg_wallpaper_delete':
+        $bgController = new BgWallpaperController();
+        $bgController->delete($_GET['id'] ?? 0);
+        break;
+
+    case 'bg_wallpaper_toggle':
+        $bgController = new BgWallpaperController();
+        $bgController->toggle($_GET['id'] ?? 0);
         break;
 
     default:

@@ -6,6 +6,7 @@ use Website\TinTuc\Models\ChuyenMucModel;
 use Website\TinTuc\Models\BaiVietModel;
 use Website\TinTuc\Models\QuangCaoModel;
 use Website\TinTuc\Models\BannerModel; // thêm dòng này nếu bạn có BannerModel
+use Website\TinTuc\Models\BgWallpaperModel;
 
 class TrangChuController
 {
@@ -80,6 +81,10 @@ class TrangChuController
         }
 
         // Biến $banners, $tinMoiNhat... sẽ có sẵn trong view
+        // Lấy wallpaper nền website đang kích hoạt
+        $bgWallpaperModel = new BgWallpaperModel();
+        $activeWallpaper = $bgWallpaperModel->getActive();
+        
         include __DIR__ . '/../../views/frontend/trang_chu.php';
     }
 }
