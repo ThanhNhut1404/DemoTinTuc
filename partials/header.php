@@ -85,13 +85,13 @@
             </form>
             <!-- Nút Tài khoản -->
             <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                <span>Xin chào, <?= htmlspecialchars($_SESSION['ho_ten'] ?? 'User') ?>!</span>
-                <form action="index.php" method="POST" class="d-inline">
-                    <input type="hidden" name="action" value="logout">
-                    <button type="submit" class="btn btn-custom btn-sm px-4">Đăng xuất</button>
-                </form>
+                <span class="text-white me-3">Xin chào, <strong><?= htmlspecialchars($_SESSION['ho_ten'] ?? 'User') ?></strong>!</span>
+                <a href="index.php?action=logout" class="btn btn-outline-light btn-sm px-4"
+                    onclick="return confirm('Bạn có chắc muốn đăng xuất không?')">
+                    Đăng xuất
+                </a>
             <?php else: ?>
-                <a href="index.php?action=login" class="btn btn-custom">Đăng Nhập</a>
+                <a href="index.php?action=login" class="btn btn-outline-light btn-sm px-4">Đăng Nhập</a>
             <?php endif; ?>
         </div>
     </header>
