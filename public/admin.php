@@ -19,6 +19,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Website\TinTuc\Controllers\ThanhVienController;
 use Website\TinTuc\Controllers\BaiVietController;
+use Website\TinTuc\Controllers\ChuyenMucController;
 use Website\TinTuc\Controllers\QuangCaoController;
 use Website\TinTuc\Controllers\BannerController;
 use Website\TinTuc\Controllers\BgWallpaperController;
@@ -60,6 +61,12 @@ switch ($action) {
         $baiVietController = new BaiVietController();
         $baiVietController->index();
         break;
+
+    case 'danh_muc':   
+        // Quản lý chuyên mục
+        $chuyenMucController = new ChuyenMucController();
+        $chuyenMucController->index();
+        break; 
 
     // Quản lý quảng cáo
     case 'quang_cao':

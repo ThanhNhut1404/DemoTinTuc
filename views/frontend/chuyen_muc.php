@@ -3,11 +3,11 @@ $page = $page ?? 1;
 $totalPages = $totalPages ?? 1;
 use Website\TinTuc\Models\QuangcaoModel;
 $qcModel = new QuangcaoModel();
+// Load only Sidebar ads for category page (Trang_chu ads are only for homepage)
 $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
-$dsQuangCaoTrangChu = $qcModel->getQuangCaoTheoViTri('Trang_chu');
 
 // Prepare unified ads list for rotating slots (ensure 4 items)
-$allAds = array_values(array_filter(array_merge($dsQuangCao, $dsQuangCaoTrangChu)));
+$allAds = array_values(array_filter($dsQuangCao));
 $ads = [];
 if (!empty($allAds)) {
     $take = array_slice($allAds, 0, 4);
@@ -16,6 +16,27 @@ if (!empty($allAds)) {
         $take = array_slice($take, 0, 4);
     }
     $ads = $take;
+}
+
+use Website\TinTuc\Models\BgWallpaperModel;
+$bgModel = new BgWallpaperModel();
+$activeWallpaper = $bgModel->getActive();
+$wallpaperUrl = '';
+if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
+    $wallpaperUrl = 'uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
+}
+// Helper to normalize image URLs (matches homepage behavior)
+function img_url($src)
+{
+    $src = trim((string)$src);
+    if ($src === '') return 'uploads/no_image.png';
+    if (preg_match('#^(https?:)?//#i', $src)) return $src;
+    if (strpos($src, '/') === 0) return $src;
+    if (stripos($src, 'uploads/') !== false) {
+        $pos = stripos($src, 'uploads/');
+        return substr($src, $pos);
+    }
+    return 'uploads/' . ltrim($src, '/');
 }
 ?>
 <!DOCTYPE html>
@@ -26,17 +47,40 @@ if (!empty($allAds)) {
     <title><?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?> - Website Tin Tức</title>
     <link rel="stylesheet" href="../views/frontend/frontend.css">
     <style>
+    body {
+        background-image: <?= !empty($wallpaperUrl) ? "url('" . $wallpaperUrl . "')" : "''" ?>;
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.20);
+        pointer-events: none;
+        z-index: -1;
+    }
+
     /* Local tweaks for category page layout */
-    main { display:flex; gap:18px; align-items:flex-start; }
-    main > aside { width:22%; }
-    main > section { width:56%; }
+    main { display:flex; gap:6px; align-items:stretch; }
+    /* use 24% / 52% / 24% layout so sidebars sit flush with main; stretch to same height */
+    main > aside { width:24%; display:flex; flex-direction:column; box-sizing:border-box; }
+    main > section { width:52%; }
     .tin-link { display:block; text-decoration:none; color:inherit; }
     .tin { padding:12px; transition: transform .18s ease, box-shadow .18s ease; }
     .tin:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
     .title { font-size:1.05em; color:#005fa3; margin:0 0 6px 0; }
     /* Ad image sizing (consistent with homepage) */
-    .ad-img { width:100%; height:600px; object-fit:cover; border-radius:6px; display:block; }
-    .ad-slot { overflow:hidden; }
+    /* Show sidebar images flush to container edge and make ad slots fill sidebar height */
+    .ad-img { width:100%; height:100%; object-fit:cover; border-radius:0; display:block; }
+    .ad-slot { overflow:hidden; background:transparent; padding:0; border-radius:0; box-shadow: none; margin:0; flex:1 1 0; }
+    /* Make the wrapper inside aside fill available height and stack ad-slots vertically */
+    main > aside > div { display:flex; flex-direction:column; gap:10px; height:100%; margin-top:0; padding:0; }
     </style>
 </head>
 
@@ -117,7 +161,7 @@ if (!empty($allAds)) {
                 <?php foreach ($baiViet as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
                         <div class="tin">
-                            <img src="<?= htmlspecialchars($tin['anh_dai_dien'] ?? 'uploads/no_image.png') ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
+                            <img src="<?= htmlspecialchars(img_url($tin['anh_dai_dien'] ?? '')) ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
                             <div>
                                 <h3 class="title"><?= htmlspecialchars($tin['tieu_de']) ?></h3>
                                 <small>📅 <?= htmlspecialchars($tin['ngay_dang']) ?> | 👁 <?= htmlspecialchars($tin['luot_xem']) ?></small>
