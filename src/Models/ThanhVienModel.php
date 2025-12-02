@@ -263,6 +263,20 @@ class ThanhVienModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Return user row mapped to logical column names (id, ho_ten, email, mat_khau, quyen, ...)
+     */
+    public function findByEmailNormalized(string $email)
+    {
+        $row = $this->findByEmail($email);
+        if (!$row) return false;
+        $normalized = [];
+        foreach ($this->cols as $logical => $actual) {
+            $normalized[$logical] = $row[$actual] ?? null;
+        }
+        return $normalized;
+    }
+
     public function updatePassword(string $email, string $hashedPassword)
     {
         $emailCol = $this->cols['email'];

@@ -9,17 +9,6 @@ if (session_status() === PHP_SESSION_NONE) {
 if (!function_exists('img_url')) {
     function img_url($path)
     {
-        // Nếu chỉ là tên file (không có /)
-        if (strpos($path, '/') === false) {
-            // Kiểm tra file có trong public/uploads/bai_viet/ không
-            $bai_viet_path = __DIR__ . '/../public/uploads/bai_viet/' . $path;
-            if (file_exists($bai_viet_path)) {
-                return '/Demotintuc/public/uploads/bai_viet/' . $path;
-            }
-            // Nếu không, tìm trong public/uploads/
-            return '/Demotintuc/public/uploads/' . $path;
-        }
-        // Nếu đã là đường dẫn đầy đủ, chỉ thêm /Demotintuc/ vào trước
         return '/Demotintuc/' . ltrim($path, '/');
     }
 }
@@ -73,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// === XỬ LÝ AJAX LIKE / UNLIKE (theo dõi từng user) ===
+// === XỬ LÝ AJAX LIKE / UNLIKE (chỉ cập nhật luot_thich) ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_viet'])) {
     header('Content-Type: application/json');
 
@@ -83,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_
     }
 
     $post_id = (int)$_POST['id_bai_viet'];
-    $user_id = (int)$_SESSION['id_nguoi_dung'];
     $action = $_POST['do'];
 
     // Chỉ cho phép xử lý đúng bài viết đang xem
@@ -93,37 +81,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_
     }
 
     if ($action === 'like') {
-        // Kiểm tra xem user đã like chưa
-        $stmt = $conn->prepare("SELECT id FROM yeu_thich WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
-        $stmt->bind_param("ii", $id, $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows === 0) {
-            // Chưa like, thêm vào yeu_thich
-            $stmt = $conn->prepare("INSERT INTO yeu_thich (id_bai_viet, id_nguoi_dung) VALUES (?, ?)");
-            $stmt->bind_param("ii", $id, $user_id);
-            $stmt->execute();
-            $stmt->close();
-            
-            // Tăng luot_thich
-            $stmt = $conn->prepare("UPDATE bai_viet SET luot_thich = luot_thich + 1 WHERE id = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $stmt->close();
-        } else {
-            // Đã like rồi, không cho like lại
-            echo json_encode(['success' => false, 'message' => 'Bạn đã like bài viết này rồi']);
-            exit;
-        }
-    } elseif ($action === 'unlike') {
-        // Xóa like
-        $stmt = $conn->prepare("DELETE FROM yeu_thich WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
-        $stmt->bind_param("ii", $id, $user_id);
+        $stmt = $conn->prepare("UPDATE bai_viet SET luot_thich = luot_thich + 1 WHERE id = ?");
+        $stmt->bind_param("i", $id);
         $stmt->execute();
         $stmt->close();
-        
-        // Giảm luot_thich
+    } elseif ($action === 'unlike') {
         $stmt = $conn->prepare("UPDATE bai_viet SET luot_thich = GREATEST(luot_thich - 1, 0) WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -143,54 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_
         'count' => $count
     ]);
     exit;
-}
-
-// === XỬ LÝ AJAX LƯU BÀI VIẾT ===
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save'], $_POST['id_bai_viet'])) {
-    header('Content-Type: application/json');
-
-    if (!isset($_SESSION['id_nguoi_dung'])) {
-        echo json_encode(['login' => true]);
-        exit;
-    }
-
-    $post_id = (int)$_POST['id_bai_viet'];
-    $user_id = (int)$_SESSION['id_nguoi_dung'];
-    $action = $_POST['action_save'];
-
-    if ($post_id !== $id) {
-        echo json_encode(['success' => false]);
-        exit;
-    }
-
-    if ($action === 'save') {
-        // Kiểm tra xem user đã lưu chưa
-        $stmt = $conn->prepare("SELECT id FROM luu_bai_viet WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
-        $stmt->bind_param("ii", $id, $user_id);
-        $stmt->execute();
-        
-        if ($stmt->get_result()->num_rows === 0) {
-            // Chưa lưu, thêm vào luu_bai_viet
-            $stmt = $conn->prepare("INSERT INTO luu_bai_viet (id_bai_viet, id_nguoi_dung) VALUES (?, ?)");
-            $stmt->bind_param("ii", $id, $user_id);
-            $stmt->execute();
-            $stmt->close();
-            
-            echo json_encode(['success' => true, 'saved' => true]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Bạn đã lưu bài viết này rồi']);
-        }
-        exit;
-    } elseif ($action === 'unsave') {
-        // Xóa lưu
-        $stmt = $conn->prepare("DELETE FROM luu_bai_viet WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
-        $stmt->bind_param("ii", $id, $user_id);
-        $stmt->execute();
-        $stmt->close();
-        
-        echo json_encode(['success' => true, 'saved' => false]);
-        exit;
-    }
 }
 
 // === TĂNG LƯỢT XEM (chống spam 30 giây/lần) ===
@@ -216,25 +130,6 @@ if ($result->num_rows === 0) {
 }
 $bv = $result->fetch_assoc();
 $stmt->close();
-
-// === KIỂM TRA USER ĐÃ LIKE BÀI VIẾT NÀY CHƯA ===
-$user_liked = false;
-$user_saved = false;
-if (isset($_SESSION['id_nguoi_dung'])) {
-    $user_id = (int)$_SESSION['id_nguoi_dung'];
-    $stmt = $conn->prepare("SELECT id FROM yeu_thich WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
-    $stmt->bind_param("ii", $id, $user_id);
-    $stmt->execute();
-    $user_liked = $stmt->get_result()->num_rows > 0;
-    $stmt->close();
-    
-    // Kiểm tra user đã lưu chưa
-    $stmt = $conn->prepare("SELECT id FROM luu_bai_viet WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
-    $stmt->bind_param("ii", $id, $user_id);
-    $stmt->execute();
-    $user_saved = $stmt->get_result()->num_rows > 0;
-    $stmt->close();
-}
 
 // === LẤY BÌNH LUẬN ===
 $stmt = $conn->prepare("SELECT bl.noi_dung, u.ho_ten AS ten_nguoi_dung, bl.ngay_binh_luan 
@@ -388,24 +283,12 @@ $stmt->close();
             animation: heartbeat 0.8s ease;
         }
 
-        .save-btn.active {
-            background: #0d6efd !important;
-            border-color: #0d6efd !important;
-            color: white !important;
-        }
-
-        .save-btn.active i {
-            animation: bounce 0.6s ease;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
+        @media (max-width: 992px) {
             .sticky-sidebar {
                 position: static !important;
                 margin-top: 2rem;
             }
+        }
     </style>
 </head>
 
@@ -438,28 +321,14 @@ $stmt->close();
                             <div class="ms-auto d-flex gap-3">
                                 <!-- NÚT THÍCH -->
                                 <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill like-btn <?= $user_liked ? 'active' : '' ?>"
-                                        data-id="<?= $id ?>" data-action="<?= $user_liked ? 'unlike' : 'like' ?>" title="Thích bài viết">
-                                        <i class="<?= $user_liked ? 'fas' : 'far' ?> fa-heart"></i>
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill like-btn"
+                                        data-id="<?= $id ?>" data-action="like">
+                                        <i class="far fa-heart"></i>
                                         <span class="like-count ms-1"><?= number_format($bv['luot_thich']); ?></span>
                                     </button>
                                 <?php else: ?>
-                                    <a href="index.php?action=login&return_url=<?= $return_url_encoded ?>" class="text-danger text-decoration-none" title="Thích bài viết">
+                                    <a href="index.php?action=login&return_url=<?= $return_url_encoded ?>" class="text-danger text-decoration-none">
                                         <i class="far fa-heart"></i> <?= number_format($bv['luot_thich']); ?>
-                                    </a>
-                                <?php endif; ?>
-
-                                <!-- NÚT LƯU BÀI VIẾT -->
-                                <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                                    <button class="btn btn-outline-primary btn-sm rounded-pill save-btn <?= $user_saved ? 'active' : '' ?>"
-                                        data-id="<?= $id ?>" data-action="<?= $user_saved ? 'unsave' : 'save' ?>" title="Lưu bài viết">
-                                        <i class="<?= $user_saved ? 'fas' : 'far' ?> fa-bookmark"></i>
-                                        <span class="ms-1">Lưu</span>
-                                    </button>
-                                <?php else: ?>
-                                    <a href="index.php?action=login&return_url=<?= $return_url_encoded ?>" class="btn btn-outline-primary btn-sm rounded-pill" title="Lưu bài viết">
-                                        <i class="far fa-bookmark"></i>
-                                        <span class="ms-1">Lưu</span>
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -584,12 +453,12 @@ $stmt->close();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // === XỬ LÝ NÚT LIKE ===
             document.querySelectorAll('.like-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const id = this.dataset.id;
                     const currentAction = this.dataset.action;
+                    const nextAction = currentAction === 'like' ? 'unlike' : 'like';
 
                     fetch('', {
                         method: 'POST',
@@ -608,76 +477,16 @@ $stmt->close();
                             return;
                         }
 
-                        if (!data.success) {
-                            alert(data.message || 'Bạn đã like bài viết này rồi!');
-                            return;
-                        }
-
-                        // Cập nhật giao diện
-                        const nextAction = currentAction === 'like' ? 'unlike' : 'like';
-                        this.dataset.action = nextAction;
-                        this.classList.toggle('active');
-                        
-                        // Cập nhật icon
-                        const icon = this.querySelector('i');
-                        if (currentAction === 'like') {
-                            icon.className = 'fas fa-heart';
-                        } else {
-                            icon.className = 'far fa-heart';
-                        }
-                        
-                        // Cập nhật số lượng like
-                        if (data.count !== undefined) {
-                            this.querySelector('.like-count').textContent = data.count.toLocaleString();
+                        if (data.success) {
+                            this.dataset.action = nextAction;
+                            this.classList.toggle('active');
+                            this.querySelector('i').className = nextAction === 'like' ? 'far fa-heart' : 'fas fa-heart';
+                            if (data.count !== undefined) {
+                                this.querySelector('.like-count').textContent = data.count.toLocaleString();
+                            }
                         }
                     })
                     .catch(err => console.error('Like error:', err));
-                });
-            });
-
-            // === XỬ LÝ NÚT LƯU ===
-            document.querySelectorAll('.save-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const id = this.dataset.id;
-                    const currentAction = this.dataset.action;
-
-                    fetch('', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'action_save': currentAction,
-                            'id_bai_viet': id
-                        })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.login) {
-                            window.location.href = 'index.php?action=login';
-                            return;
-                        }
-
-                        if (!data.success) {
-                            alert(data.message || 'Lỗi khi lưu bài viết!');
-                            return;
-                        }
-
-                        // Cập nhật giao diện
-                        const nextAction = data.saved ? 'unsave' : 'save';
-                        this.dataset.action = nextAction;
-                        this.classList.toggle('active');
-                        
-                        // Cập nhật icon
-                        const icon = this.querySelector('i');
-                        if (data.saved) {
-                            icon.className = 'fas fa-bookmark';
-                        } else {
-                            icon.className = 'far fa-bookmark';
-                        }
-                    })
-                    .catch(err => console.error('Save error:', err));
                 });
             });
         });

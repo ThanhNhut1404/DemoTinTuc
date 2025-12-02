@@ -18,13 +18,68 @@ if (! $isDevEnv && ! $isLocalRequest) {
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Website\TinTuc\Controllers\ThanhVienController;
+use Website\TinTuc\Models\ThanhVienModel;
 use Website\TinTuc\Controllers\BaiVietController;
 use Website\TinTuc\Controllers\ChuyenMucController;
 use Website\TinTuc\Controllers\QuangCaoController;
 use Website\TinTuc\Controllers\BannerController;
 use Website\TinTuc\Controllers\BgWallpaperController;
 
+// Actions: allow login/logout without authentication
 $action = $_GET['action'] ?? 'index';
+
+if ($action === 'login') {
+    include __DIR__ . '/../views/backend/admin_login.php';
+    exit;
+}
+
+if ($action === 'login_submit') {
+    // process POST login
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $tv = new ThanhVienModel();
+    $user = $tv->findByEmailNormalized(trim($email));
+    $allowed = ['admin', 'editor'];
+    $ok = false;
+    if ($user) {
+        $role = isset($user['quyen']) ? strtolower(trim((string)$user['quyen'])) : '';
+        $hash = $user['mat_khau'] ?? null;
+        if ($hash && password_verify($password, $hash) && in_array($role, $allowed, true)) {
+            $ok = true;
+        }
+    }
+    if ($ok) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_role'] = $user['quyen'];
+        // store normalized user data in session for quick access in views
+        $_SESSION['user'] = $user;
+        // flash success to show on login page briefly before redirect
+        $_SESSION['flash_success'] = 'Đăng nhập thành công';
+        include __DIR__ . '/../views/backend/admin_login.php';
+        exit;
+    }
+    // provide two separate message lines for clarity
+    $_SESSION['flash_login_error'] = [
+        'Đăng nhập thất bại',
+        'Bạn không có quyền truy cập Admin.'
+    ];
+    include __DIR__ . '/../views/backend/admin_login.php';
+    exit;
+}
+
+if ($action === 'logout') {
+    session_unset();
+    session_destroy();
+    header('Location: admin.php?action=login');
+    exit;
+}
+
+// require authentication for all other admin actions
+if (empty($_SESSION['user_id'])) {
+    header('Location: admin.php?action=login');
+    exit;
+}
+
 $controller = new ThanhVienController();
 
 switch ($action) {
