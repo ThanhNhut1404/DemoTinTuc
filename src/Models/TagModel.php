@@ -26,5 +26,23 @@ class TagModel extends Database
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-}
 
+    public function create($ten_tag) {
+        $sql = "INSERT INTO the_tag (ten_tag) VALUES (?)";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$ten_tag]);
+    }
+
+    public function update($id, $ten_tag) {
+        $sql = "UPDATE the_tag SET ten_tag = ? WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$ten_tag, $id]);
+    }
+
+    public function delete($id) {
+        $sql = "DELETE FROM the_tag WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$id]);
+    }
+
+}

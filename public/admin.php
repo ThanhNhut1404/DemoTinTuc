@@ -141,7 +141,11 @@ switch ($action) {
         $chuyenMucController = new ChuyenMucController();
         $chuyenMucController->index();
         break; 
-
+    
+    case 'tag':
+        // Quản lý thẻ tag
+        include __DIR__ . '/../views/backend/QuanLyTag.php';
+        break;
     // Quản lý quảng cáo
     case 'quang_cao':
         $qcController = new QuangCaoController();
