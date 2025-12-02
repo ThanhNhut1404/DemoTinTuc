@@ -186,8 +186,7 @@ input:focus, textarea:focus {
         <label>Họ và tên</label>
         <input type="text" name="ho_ten" required value="<?= htmlspecialchars($user['ho_ten']) ?>">
 
-        <label>Email</label>
-        <input type="email" name="email" required value="<?= htmlspecialchars($user['email']) ?>">
+        
 
         <label>Ngày sinh</label>
         <input type="date" name="ngay_sinh" value="<?= htmlspecialchars($user['ngay_sinh'] ?? '') ?>">

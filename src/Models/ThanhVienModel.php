@@ -225,34 +225,58 @@ class ThanhVienModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function capNhatThongTin($id, $hoTen, $email, $anh = null, $ngaySinh = null, $gioiTinh = null) {
-        $emailCol = $this->cols['email'];
-        $idCol = $this->cols['id'];
-        $checkSql = sprintf("SELECT `%s` FROM `%s` WHERE `%s` = ? AND `%s` != ?", $emailCol, $this->table, $emailCol, $idCol);
-        $check = $this->conn->prepare($checkSql);
-        $check->execute([$email, $id]);
-        if ($check->fetch()) { throw new \Exception("❌ Email này đã được sử dụng bởi tài khoản khác!"); }
+    public function capNhatThongTin($id, $hoTen, $email = null, $anh = null, $ngaySinh = null, $gioiTinh = null)
+{
+    $idCol = $this->cols['id'];
+    $nameCol = $this->cols['ho_ten'];
+    $avatarCol = $this->cols['avatar'] ?? null;
+    $dobCol = $this->cols['ngay_sinh'] ?? null;
+    $genderCol = $this->cols['gioi_tinh'] ?? null;
 
-        $nameCol = $this->cols['ho_ten'];
-        $avatarCol = $this->cols['avatar'] ?? null;
-        $dobCol = $this->cols['ngay_sinh'] ?? null;
-        $genderCol = $this->cols['gioi_tinh'] ?? null;
+    // KHÔNG kiểm tra email
+    // KHÔNG cập nhật email
 
-        $setParts = [];
-        $params = [];
-        $setParts[] = sprintf("`%s` = ?", $nameCol); $params[] = $hoTen;
-        $setParts[] = sprintf("`%s` = ?", $emailCol); $params[] = $email;
-        if ($anh && $avatarCol) { $setParts[] = sprintf("`%s` = ?", $avatarCol); $params[] = $anh; }
-        if ($dobCol) { $setParts[] = sprintf("`%s` = ?", $dobCol); $params[] = $ngaySinh; }
-        if ($genderCol) { $setParts[] = sprintf("`%s` = ?", $genderCol); $params[] = $gioiTinh; }
+    $setParts = [];
+    $params = [];
 
-        if (empty($setParts)) return false;
+    // Cập nhật tên
+    $setParts[] = sprintf("`%s` = ?", $nameCol);
+    $params[] = $hoTen;
 
-        $sql = sprintf("UPDATE `%s` SET %s WHERE `%s` = ?", $this->table, implode(', ', $setParts), $idCol);
-        $params[] = $id;
-        $stmt = $this->conn->prepare($sql);
-        return $stmt->execute($params);
+    // Cập nhật avatar nếu có
+    if ($anh && $avatarCol) {
+        $setParts[] = sprintf("`%s` = ?", $avatarCol);
+        $params[] = $anh;
     }
+
+    // Cập nhật ngày sinh
+    if ($dobCol) {
+        $setParts[] = sprintf("`%s` = ?", $dobCol);
+        $params[] = $ngaySinh;
+    }
+
+    // Cập nhật giới tính
+    if ($genderCol) {
+        $setParts[] = sprintf("`%s` = ?", $genderCol);
+        $params[] = $gioiTinh;
+    }
+
+    if (empty($setParts)) return false;
+
+    // Query update cuối cùng
+    $sql = sprintf(
+        "UPDATE `%s` SET %s WHERE `%s` = ?",
+        $this->table,
+        implode(', ', $setParts),
+        $idCol
+    );
+
+    $params[] = $id;
+
+    $stmt = $this->conn->prepare($sql);
+    return $stmt->execute($params);
+}
+
 
     public function findByEmail(string $email)
     {

@@ -163,7 +163,7 @@ class ThanhVienController
 
     // Lấy dữ liệu
     $user = $thanhVienModel->layThongTinNguoiDung($userId);
-    // $yeuThich = $baiVietModel->layBaiVietYeuThich($userId);
+    $yeuThich = $baiVietModel->layBaiVietYeuThich($userId);
     $daLuu = $baiVietModel->layBaiVietDaLuu($userId);
     $binhLuan = $binhLuanModel->layBinhLuanTheoNguoiDung($userId);
 
@@ -186,9 +186,8 @@ public function updateProfile()
 
         $id = $_SESSION['user']['id'];
 
-        // Lấy dữ liệu từ form
+        // Lấy dữ liệu từ form — ❌ BỎ EMAIL
         $hoTen = trim($_POST['ho_ten'] ?? '');
-        $email = trim($_POST['email'] ?? '');
         $ngaySinh = $_POST['ngay_sinh'] ?? null;
         $gioiTinh = $_POST['gioi_tinh'] ?? null;
         $anhDaiDien = null;
@@ -206,12 +205,11 @@ public function updateProfile()
         $model = new ThanhVienModel();
 
         try {
-            // Cập nhật DB
-            $model->capNhatThongTin($id, $hoTen, $email, $anhDaiDien, $ngaySinh, $gioiTinh);
+            // Cập nhật DB — ❌ KHÔNG cập nhật email
+            $model->capNhatThongTin($id, $hoTen, $anhDaiDien, $ngaySinh, $gioiTinh);
 
-            // cập nhật session
+            // cập nhật session — ❌ KHÔNG đổi email
             $_SESSION['user']['ho_ten'] = $hoTen;
-            $_SESSION['user']['email'] = $email;
             $_SESSION['user']['ngay_sinh'] = $ngaySinh;
             $_SESSION['user']['gioi_tinh'] = $gioiTinh;
             if ($anhDaiDien !== null) {
@@ -223,10 +221,11 @@ public function updateProfile()
             $_SESSION['flash_message'] = "⚠️ " . $e->getMessage();
         }
 
-        header("Location: index.php?action=userPage");
+       include __DIR__ . '/../../views/frontend/Trangnguoidung.php';
         exit;
     }
 }
+
 
 
 
