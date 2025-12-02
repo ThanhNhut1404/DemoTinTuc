@@ -649,6 +649,18 @@ footer {
 
 /* ================== ANIMATIONS ================== */
 @keyframes dropdownShow {
+<<<<<<< HEAD
+    from {
+        opacity: 0;
+        transform: translateY(6px); /* Đã bỏ translateX */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0); /* Đã bỏ translateX */
+    }
+    
+=======
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
+>>>>>>> 0ad03f8427ccc26c3a0316038f6108e89a9b183e
 }

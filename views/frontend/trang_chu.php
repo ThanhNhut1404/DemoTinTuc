@@ -8,6 +8,7 @@ $tinNoiBat = isset($tinNoiBat) && is_array($tinNoiBat) ? $tinNoiBat : [];
 $tinMoiNhat = isset($tinMoiNhat) && is_array($tinMoiNhat) ? $tinMoiNhat : [];
 $tinXemNhieu = isset($tinXemNhieu) && is_array($tinXemNhieu) ? $tinXemNhieu : [];
 $baiVietTheoChuyenMuc = isset($baiVietTheoChuyenMuc) && is_array($baiVietTheoChuyenMuc) ? $baiVietTheoChuyenMuc : [];
+$activeWallpaper = isset($activeWallpaper) && is_array($activeWallpaper) ? $activeWallpaper : [];
 
 // Prepare unified ads list (take up to 4 ads from available left/right ad arrays)
 // Prepare unified ads list (take up to 6 ads: 3 left + 3 right slots)
@@ -52,6 +53,12 @@ foreach ($ads as &$adNorm) {
     }
 }
 unset($adNorm);
+
+// Prepare wallpaper URL from database
+$wallpaperUrl = '';
+if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
+    $wallpaperUrl = 'uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -81,6 +88,23 @@ unset($adNorm);
             background: #f5f7fa;
             color: #333;
             line-height: 1.6;
+            background-image: <?= !empty($wallpaperUrl) ? "url('" . htmlspecialchars($wallpaperUrl) . "')" : "''" ?>;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            transition: background-image 0.5s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.55);
+            pointer-events: none;
+            z-index: -1;
         }
 
         /* ===== HEADER & NAV ===== */
@@ -755,6 +779,7 @@ unset($adNorm);
             }
             
         }
+
     </style>
 </head>
 <script>
@@ -882,6 +907,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
+
 <body>
 
     <!-- BANNER SLIDE -->
@@ -916,6 +942,9 @@ document.addEventListener("DOMContentLoaded", () => {
            <ul id="suggestions" class="suggestions" style="position:fixed;display:none;z-index:99999;background:rgba(255,255,255,0.98);border-radius:12px;box-shadow:0 10px 30px rgba(8,20,40,0.18);backdrop-filter:blur(6px);max-height:360px;overflow:auto;padding:6px 0;margin:0;list-style:none;"> </ul>
     </div>
 </form>
+    
+
+            
 
            <div class="dropdown">
     <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
@@ -931,16 +960,24 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
         </a>
         <div class="dropdown-menu">
-            <a href="index.php?action=profile">Hồ sơ cá nhân</a>
-            <a href="index.php?action=update">Cập nhật thông tin</a>
-            <a href="index.php?action=changepass">Đổi mật khẩu</a>
+
+          
+            <a href="http://localhost/DemoTinTuc/public/admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
+            <a href="index.php?action=update">Đã thích</a>
+            <a href="index.php?action=changepass">Đã lưu</a>
+             <a href="index.php?action=changepass">Bình luận của tôi</a>
             <a href="index.php?action=logout">Đăng xuất</a>
+
+            
+            
+
         </div>
     </div>
 <?php else: ?>
     <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
     <a href="index.php?action=register" class="auth-link">Đăng ký</a>
 <?php endif; ?>
+
 
         </nav>
         <h1>Website Tin Tức</h1>
@@ -1154,7 +1191,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const container = document.getElementById('scroll-' + id);
             container.scrollBy({ left: 300, behavior: 'smooth' });
         }
-        // Tự động ẩn nút khi hết nội dung (tùy chọn nâng cao)
+
+        // Load background on page load
+        document.addEventListener('DOMContentLoaded', loadBackground);
     </script>
     
 </body>

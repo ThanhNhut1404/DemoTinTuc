@@ -15,114 +15,117 @@
         }
 
         .login-box {
-            background: #fff;
-            padding: 40px 35px;
-            border-radius: 15px;
-            width: 350px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            text-align: center;
+            background: rgba(255,255,255,0.95);
+            width: 420px;
+            padding: 45px 40px;
+            border-radius: 26px;
+            border: 1px solid rgba(255,255,255,0.4);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.05);
+            transition: 0.3s;
         }
 
         h2 {
-            margin-bottom: 25px;
-            color: #333;
-            font-size: 24px;
-            letter-spacing: 0.5px;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .form-group {
-            width: 100%;
-            text-align: left;
-            margin-bottom: 18px;
-            position: relative; /* để đặt con mắt */
+            margin-bottom: 28px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #222;
+            text-align: center;
         }
 
         label {
             display: block;
+            text-align: left;
+            width: 100%;
             font-weight: 500;
-            color: #ccccccff;
+            color: #444;
             margin-bottom: 6px;
             font-size: 14px;
-            padding-left: 3px;
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 10px;
         }
 
         input {
             width: 100%;
-            padding: 12px 40px 12px 15px; /* thêm padding phải cho nút con mắt */
-            border: 1px solid #ddddddff;
-            border-radius: 8px;
+            padding: 14px 40px 14px 15px; /* Padding để icon không chồng chữ */
+            border: 1px solid #dcdcdc;
+            border-radius: 12px;
             font-size: 15px;
-            transition: all 0.3s ease;
+            transition: 0.3s;
             box-sizing: border-box;
         }
 
         input:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+            border-color: #0d6efd;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.35);
             outline: none;
         }
 
         .toggle-password {
             position: absolute;
-            top: 65%;
-            right: 10px;
+            top: 50%;
+            right: 12px;
             transform: translateY(-50%);
-            background: transparent;
-            border: none;
             cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 18px;
+            color: #666;
         }
 
-        .toggle-password svg {
-            width: 22px;
-            height: 22px;
-            fill: #bbbbbbff;
-            transition: fill 0.3s ease;
+        .toggle-password:hover {
+            color: #007bff;
         }
 
-        .toggle-password:hover svg {
-            fill: #bbbbbbff;
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 20px;
         }
 
-        button.submit-btn {
+        .forgot-password a {
+            font-size: 13px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        button {
             width: 100%;
-            background: #007bff;
-            color: white;
-            padding: 12px;
+            padding: 14px;
+            font-size: 17px;
+            background: linear-gradient(90deg, #007bff, #0052cc);
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 12px;
+            color: #fff;
             cursor: pointer;
+            font-weight: 600;
             transition: 0.3s;
         }
 
-        button.submit-btn:hover {
-            background: #0056b3;
-            transform: translateY(-1px);
+        button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(90deg, #0056b3, #003d99);
         }
 
-        .extra-links {
-            text-align: center;
+        p {
             margin-top: 15px;
             font-size: 14px;
+            color: #444;
+            text-align: center;
         }
 
-        .extra-links a {
+        a {
             color: #007bff;
+            font-weight: 600;
             text-decoration: none;
-            font-weight: 500;
         }
 
-        .extra-links a:hover {
+        a:hover {
             text-decoration: underline;
         }
     </style>
@@ -132,57 +135,39 @@
     <h2>Đăng nhập</h2>
     <form action="index.php?action=do_login" method="POST">
 
-        <div class="form-group">
-            <label>Email:</label>
-            <input type="email" name="email" placeholder="Nhập email" required>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Mật khẩu:</label>
+        <div class="input-group">
+            <input type="password" id="password" name="mat_khau" required>
+            <span class="toggle-password" onclick="togglePassword('password', this)">👁️</span>
         </div>
 
-        <div class="form-group">
-            <label>Mật khẩu:</label>
-            <input id="mat_khau" type="password" name="mat_khau" placeholder="Nhập mật khẩu" required>
-            <button type="button" class="toggle-password" aria-label="Hiện mật khẩu" title="Hiện/Ẩn mật khẩu">
-                <svg id="eyeIcon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 5c-7 0-11 6-11 7s4 7 11 7 11-6 11-7-4-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-                    <circle cx="12" cy="12" r="2.5"/>
-                </svg>
-            </button>
+        <div class="forgot-password">
+            <a href="index.php?action=forgot_password">Quên mật khẩu?</a>
+
         </div>
 
-        <button type="submit" class="submit-btn">Đăng nhập</button>
+        <button type="submit">Đăng nhập</button>
     </form>
 
-    <div class="extra-links">
-        <p><a href="index.php?action=forgot">Quên mật khẩu?</a></p>
-        <p>Chưa có tài khoản? <a href="index.php?action=register">Đăng ký</a></p>
-    </div>
+    <p>
+        Chưa có tài khoản? <a href="index.php?action=register">Đăng ký ngay</a>
+    </p>
 </div>
 
 <script>
-    const toggleBtn = document.querySelector('.toggle-password');
-    const pwdInput = document.getElementById('mat_khau');
-    const eyeIcon = document.getElementById('eyeIcon');
-    let visible = false;
-
-    toggleBtn.addEventListener('click', function () {
-        visible = !visible;
-
-        if (visible) {
-            // Hiển thị mật khẩu + con mắt có gạch chéo
-            pwdInput.type = 'text';
-            eyeIcon.innerHTML = `
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="#bbbbbbff" stroke-width="2"/>
-                <circle cx="12" cy="12" r="3" fill="#bbbbbbff"/>
-                <line x1="3" y1="3" x2="21" y2="21" stroke="#bbbbbbff" stroke-width="2"/>
-            `;
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = "🙈";
         } else {
-            // Ẩn mật khẩu + icon bình thường
-            pwdInput.type = 'password';
-            eyeIcon.innerHTML = `
-                <path d="M12 5c-7 0-11 6-11 7s4 7 11 7 11-6 11-7-4-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-                <circle cx="12" cy="12" r="2.5"/>
-            `;
+            input.type = "password";
+            icon.textContent = "👁️";
         }
-    });
+    }
 </script>
 </body>
 </html>

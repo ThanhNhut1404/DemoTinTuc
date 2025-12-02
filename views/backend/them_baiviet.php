@@ -20,12 +20,26 @@
 
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:8px">
                 <div style="flex:1;min-width:160px">
-                    <label style="display:block;font-weight:600;margin-bottom:6px">Chuyên mục (ID)</label>
-                    <input type="text" name="id_chuyen_muc" style="width:100%;padding:8px;border:1px solid #e6eef8;border-radius:8px" />
+                    <label style="display:block;font-weight:600;margin-bottom:6px">Chuyên mục</label>
+                    <select name="id_chuyen_muc" style="width:100%;padding:8px;border:1px solid #e6eef8;border-radius:8px">
+                        <option value="">-- Chọn chuyên mục --</option>
+                        <?php if (!empty($chuyenMucList)): ?>
+                            <?php foreach ($chuyenMucList as $cm): ?>
+                                <option value="<?= htmlspecialchars($cm['id'] ?? '') ?>"><?= htmlspecialchars($cm['ten_chuyen_muc'] ?? $cm['name'] ?? '') ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
                 </div>
                 <div style="flex:1;min-width:160px">
                     <label style="display:block;font-weight:600;margin-bottom:6px">Thẻ tag</label>
-                    <input type="text" name="tag" style="width:100%;padding:8px;border:1px solid #e6eef8;border-radius:8px" />
+                    <select name="tag" style="width:100%;padding:8px;border:1px solid #e6eef8;border-radius:8px">
+                        <option value="">-- Chọn thẻ tag --</option>
+                        <?php if (!empty($tagList)): ?>
+                            <?php foreach ($tagList as $t): ?>
+                                <option value="<?= htmlspecialchars($t['id'] ?? '') ?>"><?= htmlspecialchars($t['ten_tag'] ?? $t['name'] ?? '') ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
                 </div>
             </div>
 
@@ -33,9 +47,10 @@
                 <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="la_noi_bat"> Tin nổi bật</label>
                 <label style="display:flex;align-items:center;gap:8px">Trạng thái
                     <select name="trang_thai" style="margin-left:6px;padding:6px;border:1px solid #e6eef8;border-radius:8px">
-                        <option value="nhap">Nháp</option>
-                        <option value="cho_duyet">Chờ duyệt</option>
-                        <option value="da_dang">Đã đăng</option>
+                        <option value="Nhap">Nháp</option>
+                        <option value="Cho_duyet">Chờ duyệt</option>
+                        <option value="Da_dang">Đã đăng</option>
+                        <option value="Tu_choi">Từ chối</option>
                     </select>
                 </label>
                 <label style="display:flex;align-items:center;gap:8px">Ngày đăng
@@ -62,3 +77,16 @@
         </aside>
     </form>
 </div>
+
+<!-- Rich editor (CKEditor 5) with simple upload -->
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script>
+ClassicEditor
+    .create(document.querySelector('textarea[name="noi_dung"]'), {
+        simpleUpload: {
+            // The URL that the images are uploaded to.
+            uploadUrl: 'admin.php?action=upload_image'
+        }
+    })
+    .catch(error => { console.error(error); });
+</script>
