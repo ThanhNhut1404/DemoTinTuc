@@ -185,13 +185,7 @@ switch ($action) {
         $baiVietController->uploadImage();
         break;
 
-    case 'userPage':
-        $controller->userPage();
-        break;
-
-    case 'updateProfile':
-        $controller->updateProfile();
-        break;
+    
 
     case 'deleteUser':
         $controller->deleteUser();

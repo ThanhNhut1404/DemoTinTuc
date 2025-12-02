@@ -150,10 +150,11 @@ class ThanhVienController
     if (session_status() === PHP_SESSION_NONE) session_start();
 
     // Kiểm tra đăng nhập đúng cách
-    if (empty($_SESSION['user']) || empty($_SESSION['user']['id'])) {
-        header("Location: index.php?action=login");
-        exit;
-    }
+    if (!isset($_SESSION['user']['id'])) {
+    header("Location: index.php?action=login");
+    exit;
+}
+
 
     $userId = $_SESSION['user']['id']; // chỉ dùng 1 kiểu session
 
@@ -178,11 +179,10 @@ public function updateProfile()
         if (session_status() === PHP_SESSION_NONE) session_start();
 
         // Kiểm tra đúng session user
-        if (empty($_SESSION['user']) || empty($_SESSION['user']['id'])) {
-            $_SESSION['flash_message'] = "⚠️ Vui lòng đăng nhập!";
-            header("Location: index.php?action=login");
-            exit;
-        }
+        if (!isset($_SESSION['user']['id'])) {
+    header("Location: index.php?action=login");
+    exit;
+}
 
         $id = $_SESSION['user']['id'];
 

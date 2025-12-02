@@ -30,15 +30,7 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 
 /* HEADER */
 .main-header { width:100%; background:#005fa3; padding:12px 0; }
-.main-header-wrapper { 
-    max-width:2000px; 
-    margin:0 auto; 
-    display:flex; 
-    justify-content:flex-start; 
-    align-items:center; 
-    gap:15px; 
-    padding-left:40px; /* Nhích sang trái chút xíu */
-}
+.main-header-wrapper { max-width:2000px; margin:0 auto; display:flex; justify-content:flex-start; /* vẫn căn trái */ align-items:center; gap:15px; padding-left:800px; /* nhích sang phải 20px, nghĩa là nhìn tổng thể nhích sang trái so với container */ }
 
 /* Search box */
 .header-search-form { display:flex; width:380px; background:white; border-radius:25px; overflow:hidden; border:1px solid #ddd; }
@@ -110,7 +102,7 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
             <?php if(isset($_SESSION['user'])): ?>
                 <span class="dropdown-toggle">Tài khoản ▾</span>
                 <div class="dropdown-menu">
-                    <a href="http://localhost/DemoTinTuc/public/admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
+                    <a href="http://localhost/DemoTinTuc/public/index.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
                     <a href="index.php?action=update">Đã thích</a>
                     <a href="index.php?action=changepass">Đã lưu</a>
                     <a href="index.php?action=changepass">Bình luận của tôi</a>

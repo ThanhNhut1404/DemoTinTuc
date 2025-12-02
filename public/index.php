@@ -23,6 +23,7 @@ use Website\TinTuc\Controllers\RegisterController;
 use Website\TinTuc\Controllers\TrangChuController;
 use Website\TinTuc\Controllers\ForgotPasswordController;
 use Website\TinTuc\Controllers\ChuyenMucController;
+use Website\TinTuc\Controllers\ThanhVienController;
 
 // Action
 $action = $_GET['action'] ?? 'home';
@@ -150,6 +151,16 @@ switch ($action) {
         $_SESSION['user']['name'] = $_POST['name'];
         header("Location: index.php?action=profile");
         break;
+   case 'userPage':
+    $controller = new \Website\TinTuc\Controllers\ThanhVienController();
+    $controller->userPage();
+    break;
+
+case 'updateProfile':
+    $controller = new \Website\TinTuc\Controllers\ThanhVienController();
+    $controller->updateProfile();
+    break;
+
 
     // DEFAULT
 
