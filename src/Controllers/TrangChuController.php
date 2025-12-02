@@ -23,9 +23,10 @@ class TrangChuController
         // sử lý quản cáo
         $qcModel = new QuangCaoModel();
 
-        // Lấy quảng cáo hai bên
-        $quangCaoTrai = $qcModel->getQuangCaoTheoViTri('Trang_chu');
-        $quangCaoPhai = $qcModel->getQuangCaoTheoViTri('Sidebar');
+        // Lấy chỉ quảng cáo trang chủ (không lấy sidebar)
+        $quangCaoTrangChu = $qcModel->getQuangCaoTheoViTri('Trang_chu');
+        $quangCaoTrai = $quangCaoTrangChu;
+        $quangCaoPhai = $quangCaoTrangChu;
 
         // Nếu không có banner trong bảng `banner`, fallback dùng quảng cáo vị trí 'Trang_chu'
         // (nhiều project upload ảnh banner vào bảng quang_cao via admin). Map trường

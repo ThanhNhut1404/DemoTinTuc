@@ -2,6 +2,16 @@
 // Fragment: danh sách quảng cáo
 // Biến được cung cấp từ controller: $quangCaos (mảng)
 
+// Hàm dịch vị trí quảng cáo sang tiếng Việt
+function translateViTri($viTri) {
+    $translations = [
+        'Trang_chu' => ' Trang chủ',
+        'Sidebar' => ' Chuyên mục',
+        'Giua_noi_dung' => ' Giữa nội dung'
+    ];
+    return $translations[$viTri] ?? htmlspecialchars($viTri);
+}
+
 // Nếu yêu cầu create hoặc edit thì include form fragment
 $sub = $_GET['sub'] ?? '';
 if ($sub === 'create' || $sub === 'edit') {
@@ -34,6 +44,12 @@ if ($sub === 'create' || $sub === 'edit') {
     .action-btn:hover { background:#e5e7eb; color:#111; }
     .action-btn.delete { color:#ef4444; border-left:1px solid #e5e7eb; }
     .action-btn.delete:hover { background:#fee2e2; color:#b91c1c; }
+    .status-badge { display:inline-block; padding:6px 12px; border-radius:6px; font-size:0.85rem; font-weight:600; text-decoration:none; cursor:pointer; transition:all .2s; border:none; }
+    .status-active { background:#d1fae5; color:#065f46; }
+    .status-active:hover { background:#a7f3d0; }
+    .status-inactive { background:#fee2e2; color:#b91c1c; }
+    .status-inactive:hover { background:#fecaca; }
+    .action-btn.delete:hover { background:#fee2e2; color:#b91c1c; }
 </style>
 
 <div class="backend-banner-card">
@@ -50,6 +66,7 @@ if ($sub === 'create' || $sub === 'edit') {
                     <th style="width:140px">Hình</th>
                     <th>Tiêu đề / Link</th>
                     <th>Vị trí</th>
+                    <th style="width:100px">Trạng thái</th>
                     <th style="text-align:right">Hành động</th>
                 </tr>
             </thead>
@@ -69,7 +86,12 @@ if ($sub === 'create' || $sub === 'edit') {
                         <div style="font-weight:600;margin-bottom:4px"><?= htmlspecialchars($qc['tieu_de'] ?? 'Không có tiêu đề') ?></div>
                         <span class="link-shorten" title="<?= htmlspecialchars($qc['lien_ket'] ?? '') ?>"><?= htmlspecialchars($qc['lien_ket'] ?? '#') ?></span>
                     </td>
-                    <td style="font-size:0.9rem;color:#666"><?= htmlspecialchars($qc['vi_tri'] ?? '-') ?></td>
+                    <td style="font-size:0.9rem;color:#666"><?= translateViTri($qc['vi_tri'] ?? '-') ?></td>
+                    <td>
+                        <a href="admin.php?action=qc_toggle_status&id=<?= $qc['id'] ?>" class="status-badge status-<?= ($qc['trang_thai'] === 'on') ? 'active' : 'inactive' ?>">
+                            <?= ($qc['trang_thai'] === 'on') ? '🟢 Bật' : '🔴 Tắt' ?>
+                        </a>
+                    </td>
                     <td style="text-align:right">
                         <div class="action-group">
                             <a href="admin.php?action=qc_edit&id=<?= $qc['id'] ?>" class="action-btn">Sửa</a>

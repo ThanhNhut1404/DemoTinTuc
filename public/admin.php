@@ -141,7 +141,11 @@ switch ($action) {
         $chuyenMucController = new ChuyenMucController();
         $chuyenMucController->index();
         break; 
-
+    
+    case 'tag':
+        // Quản lý thẻ tag
+        include __DIR__ . '/../views/backend/QuanLyTag.php';
+        break;
     // Quản lý quảng cáo
     case 'quang_cao':
         $qcController = new QuangCaoController();
@@ -171,6 +175,11 @@ switch ($action) {
     case 'qc_delete':
         $qcController = new QuangCaoController();
         $qcController->delete($_GET['id'] ?? 0);
+        break;
+
+    case 'qc_toggle_status':
+        $qcController = new QuangCaoController();
+        $qcController->toggleStatus($_GET['id'] ?? 0);
         break;
 
     // Các hành động quản trị cho bài viết
