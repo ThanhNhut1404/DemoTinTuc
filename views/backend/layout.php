@@ -28,20 +28,74 @@ $fragments = [
 <body>
     <div class="admin-wrap">
         <aside id="sidebar" class="sidebar">
-            <div class="brand">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#0ea5e9"/></svg>
-                <div class="brand-text">Admin</div>
-            </div>
-            <nav class="nav">
-                <a href="admin.php?action=dashboard" class="<?= ($action === 'dashboard') ? 'active' : '' ?>"><span class="icon">🏠</span><span class="label">Tổng quan</span></a>
-                <a href="admin.php?action=bai_viet" class="<?= ($action === 'bai_viet') ? 'active' : '' ?>"><span class="icon">📝</span><span class="label">Quản lý Bài viết</span></a>
-                <a href="admin.php?action=danh_muc" class="<?= ($action === 'danh_muc') ? 'active' : '' ?>"><span class="icon">📂</span><span class="label">Quản lý Danh mục</span></a>
-                <a href="admin.php?action=tag" class="<?= ($action === 'tag') ? 'active' : '' ?>"><span class="icon">🏷️</span><span class="label">Quản lý thẻ Tag</span></a>
-                <a href="admin.php?action=binh_luan" class="<?= ($action === 'binh_luan') ? 'active' : '' ?>"><span class="icon">💬</span><span class="label">Quản lý Bình luận</span></a>
-                <a href="admin.php?action=quang_cao" class="<?= ($action === 'quang_cao') ? 'active' : '' ?>"><span class="icon">📣</span><span class="label">Quản lý Quảng cáo</span></a>
-                <a href="admin.php?action=banner" class="<?= ($action === 'banner') ? 'active' : '' ?>"><span class="icon">🖼️</span><span class="label">Quản lý Banner</span></a>
-                <a href="admin.php?action=bg_wallpaper" class="<?= ($action === 'bg_wallpaper') ? 'active' : '' ?>"><span class="icon">🎨</span><span class="label">Quản lý Nền</span></a>
-                <a href="admin.php?action=thanh_vien_roles" class="<?= ($action === 'thanh_vien_roles' || $action === 'index') ? 'active' : '' ?>"><span class="icon">👥</span><span class="label">Quản lý Thành viên</span></a>
+            <a href="admin.php?action=index" class="brand" style="text-decoration:none;display:flex;align-items:center;gap:10px" aria-label="Trang tổng quan" title="Trang tổng quan">
+                <div class="brand-icon" style="display:flex;align-items:center;gap:10px">
+                    <!-- shield with user (admin) -->
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2l7 3v5c0 5-3.58 9.74-7 12-3.42-2.26-7-7-7-12V5l7-3z" fill="#00c6ff"/>
+                        <g fill="#fff">
+                            <circle cx="12" cy="9.5" r="2.2" />
+                            <path d="M7.5 18c1.2-1.6 3.6-2.5 6.5-2.5s5.3.9 6.5 2.5" fill="#fff"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="brand-text">ADMIN</div>
+            </a>
+                <nav class="nav">
+                <a href="admin.php?action=dashboard" class="<?= ($action === 'dashboard') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M9 22V12h6v10"/></svg>
+                    </span>
+                    <span class="label">Tổng quan</span>
+                </a>
+                <a href="admin.php?action=bai_viet" class="<?= ($action === 'bai_viet') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8"/></svg>
+                    </span>
+                    <span class="label">Quản lý Bài viết</span>
+                </a>
+                <a href="admin.php?action=danh_muc" class="<?= ($action === 'danh_muc') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v13a2 2 0 0 0 2 2h14V7"/><path d="M3 7a2 2 0 0 1 2-2h3l2 2h9"/></svg>
+                    </span>
+                    <span class="label">Quản lý Danh mục</span>
+                </a>
+                <a href="admin.php?action=tag" class="<?= ($action === 'tag') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3 3 11l8.59 8.59a2 2 0 0 0 2.83 0L20.59 16.24a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+                    </span>
+                    <span class="label">Quản lý thẻ Tag</span>
+                </a>
+                <a href="admin.php?action=binh_luan" class="<?= ($action === 'binh_luan') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </span>
+                    <span class="label">Quản lý Bình luận</span>
+                </a>
+                <a href="admin.php?action=quang_cao" class="<?= ($action === 'quang_cao') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h3l7 4V7L8 11H5a2 2 0 0 0-2 2z"/></svg>
+                    </span>
+                    <span class="label">Quản lý Quảng cáo</span>
+                </a>
+                <a href="admin.php?action=banner" class="<?= ($action === 'banner') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 21l-5-5-2 2-3-3-5 5"/></svg>
+                    </span>
+                    <span class="label">Quản lý Banner</span>
+                </a>
+                <a href="admin.php?action=bg_wallpaper" class="<?= ($action === 'bg_wallpaper') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H3v14h18V3z"/><path d="M3 17l5-5 4 4 5-7 5 7"/></svg>
+                    </span>
+                    <span class="label">Quản lý Nền</span>
+                </a>
+                <a href="admin.php?action=thanh_vien_roles" class="<?= ($action === 'thanh_vien_roles' || $action === 'index') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </span>
+                    <span class="label">Quản lý Thành viên</span>
+                </a>
             </nav>
         </aside>
 
