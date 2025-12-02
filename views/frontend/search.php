@@ -102,15 +102,14 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
         <div class="dropdown">
             <a class="dropdown-toggle">Tài khoản ▾</a>
             <div class="dropdown-menu">
-                <?php if(isset($_SESSION['user'])): ?>
-                    <a href="admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
-                    <a href="index.php?action=update">Đã thích</a>
-                    <a href="index.php?action=changepass">Đã lưu</a>
-                    <a href="index.php?action=changepass">Bình luận của tôi</a>
-                    <a href="index.php?action=logout">Đăng xuất</a>
-                <?php else: ?>
-                    
-                <?php endif; ?>
+                <a href="http://localhost/DemoTinTuc/public/admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
+            <a href="index.php?action=update">Đã thích</a>
+            <a href="index.php?action=changepass">Đã lưu</a>
+             <a href="index.php?action=changepass">Bình luận của tôi</a>
+            <a href="index.php?action=logout">Đăng xuất</a>
+
+            
+                
             </div>
         </div>
 
