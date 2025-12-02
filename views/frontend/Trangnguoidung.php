@@ -10,6 +10,7 @@ if (!isset($_SESSION['user'])) {
 
 // Lấy thông tin người dùng đang đăng nhập
 $user = $_SESSION['user'];
+$_SESSION['user_id'] = $user['id'];
 
 // Avatar
 $avatar = !empty($user['anh_dai_dien'])

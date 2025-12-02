@@ -102,7 +102,7 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.55);
+            background: rgba(255, 255, 255, 0.20);
             pointer-events: none;
             z-index: -1;
         }
@@ -113,8 +113,8 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             justify-content: flex-end;
             align-items: center;
             background: var(--primary);
-            padding: 12px 20px;
-            gap: 15px;
+            padding: 8px 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
@@ -216,7 +216,7 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
 
         header {
             text-align: center;
-            padding: 20px 15px;
+            padding: 12px 10px;
             background: white;
             border-bottom: 4px solid var(--primary);
         }
@@ -234,10 +234,10 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             color: #555;
             background: linear-gradient(to right, #e3f2fd, #fff);
             display: inline-block;
-            padding: 6px 18px;
-            border-radius: 30px;
+            padding: 4px 12px;
+            border-radius: 20px;
             border: 1px solid #cfe2ff;
-            font-size: 1.05em;
+            font-size: 1.02em;
         }
 
         /* ===== BANNER SLIDE ===== */
@@ -245,53 +245,53 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             position: relative;
             max-width: 100%;
             overflow: hidden;
-            margin: 20px auto;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
+            margin: 8px auto; /* reduce vertical gap to align with menu */
+            border-radius: 8px;
+            box-shadow: none; /* remove extra shadow so banner sits flush */
         }
 
-        .banner-slide {
-            display: none;
-        }
-
-        .banner-slide.active {
-            display: block;
-        }
-
-        .banner-slide img {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-        }
-
+        /* Dots overlaid on the banner (do not take extra vertical space) */
         .banner-dots {
-            text-align: center;
-            margin-top: 10px;
+            position: absolute;
+            left: 50%;
+            bottom: 12px;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            z-index: 40;
+            margin: 0; /* remove extra space */
         }
 
         .dot {
-            display: inline-block;
             width: 12px;
             height: 12px;
-            margin: 0 6px;
-            background: #ccc;
+            background: rgba(255,255,255,0.65);
+            border: 2px solid rgba(0,0,0,0.08);
             border-radius: 50%;
             cursor: pointer;
-            transition: 0.3s;
+            transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
-        .dot.active, .dot:hover {
-            background: var(--primary);
+        .dot.active {
+            background: rgba(13,110,253,0.95);
+            transform: scale(1.2);
+            box-shadow: 0 6px 18px rgba(13,110,253,0.18);
+            border-color: rgba(13,110,253,0.15);
         }
+        
 
         /* ===== MAIN LAYOUT ===== */
         main {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 8px; /* tighten gaps between main columns */
             max-width: 1400px;
-            margin: 30px auto;
-            padding: 0 15px;
+            margin: 12px auto; /* reduce vertical spacing */
+            padding: 0 10px;
         }
 
         .content {
@@ -306,18 +306,18 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
 
         .category-list {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
+            padding: 10px; /* reduce padding */
+            border-radius: 8px;
             box-shadow: var(--shadow);
             height: fit-content;
         }
 
         .category-list h2 {
             color: var(--primary);
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            margin-bottom: 8px;
+            font-size: 1.15em;
             border-left: 4px solid #007bff;
-            padding-left: 10px;
+            padding-left: 8px;
         }
 
         .category-menu {
@@ -326,11 +326,11 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
 
         .category-menu a {
             display: block;
-            padding: 10px 0;
+            padding: 6px 0;
             color: #333;
             text-decoration: none;
             border-bottom: 1px dashed #eee;
-            transition: 0.2s;
+            transition: 0.15s;
         }
 
         .category-menu a:hover {
@@ -560,12 +560,12 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         /* ===== AD COLUMNS (Left & Right slots) ===== */
         .ad-columns, .ad-columns-right {
             background: white;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 8px;
+            border-radius: 8px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             height: fit-content;
         }
 
@@ -586,9 +586,13 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         .ad-slot .ad-img {
             display:block;
             width:100%;
-            height:600px; /* tăng chiều cao quảng cáo lên gấp 5 lần (120px -> 600px) */
+            height:678px; /* increased by 20px */
             object-fit:cover;
             transition: transform .25s ease;
+        }
+
+        .ad-slot {
+            margin-bottom: 8px; /* small gap between stacked ads */
         }
 
         .ad-slot .ad-link:hover .ad-img { transform: scale(1.03); }
@@ -596,25 +600,25 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         /* ===== CHUYÊN MỤC - SCROLL NGANG ĐẸP ===== */
         .chuyen-muc-wrapper {
             max-width: 1400px;
-            margin: 40px auto;
-            padding: 0 15px;
+            margin: 12px auto; /* reduce spacing between sections */
+            padding: 0 10px;
         }
 
         .chuyen-muc-block {
-            margin-bottom: 35px;
+            margin-bottom: 12px;
             background: white;
-            padding: 20px;
-            border-radius: 12px;
+            padding: 12px;
+            border-radius: 8px;
             box-shadow: var(--shadow);
         }
 
         .chuyen-muc-block h3 {
             color: var(--primary);
-            font-size: 1.4em;
+            font-size: 1.2em;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             border-left: 5px solid #007bff;
-            padding-left: 10px;
+            padding-left: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -653,9 +657,9 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
 
         .scroll-container {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             overflow-x: auto;
-            padding: 10px 0;
+            padding: 6px 0;
             scroll-behavior: smooth;
         }
 
@@ -673,12 +677,12 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         }
 
         .bai-viet-item {
-            flex: 0 0 260px;
+            flex: 0 0 240px;
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: 0.3s;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            transition: 0.25s;
             text-align: center;
         }
 
@@ -694,10 +698,10 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         }
 
         .bai-viet-item h4 {
-            font-size: 1.05em;
+            font-size: 1.02em;
             color: var(--primary);
-            margin: 12px 10px 8px;
-            line-height: 1.3;
+            margin: 8px 8px 6px;
+            line-height: 1.25;
             height: 40px;
             overflow: hidden;
             display: -webkit-box;
@@ -708,7 +712,7 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         .bai-viet-item p {
             font-size: 0.9em;
             color: #555;
-            margin: 0 10px 12px;
+            margin: 0 8px 8px;
             height: 40px;
             overflow: hidden;
             display: -webkit-box;
@@ -718,13 +722,13 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
 
         .bai-viet-item a {
             display: block;
-            margin: 0 10px 12px;
-            padding: 8px;
+            margin: 0 8px 8px;
+            padding: 6px;
             background: #007bff;
             color: white;
             text-decoration: none;
             border-radius: 6px;
-            font-size: 0.9em;
+            font-size: 0.88em;
             font-weight: 600;
         }
 
@@ -742,11 +746,11 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         /* ===== FOOTER ===== */
         footer {
             text-align: center;
-            padding: 25px;
+            padding: 16px;
             background: #222;
             color: #aaa;
             font-size: 0.95em;
-            margin-top: 50px;
+            margin-top: 20px;
         }
 
         /* ===== RESPONSIVE ===== */
@@ -919,11 +923,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 </a>
             </div>
         <?php endforeach; ?>
-    </div>
-    <div class="banner-dots">
-        <?php foreach ($banners as $index => $b): ?>
-            <span class="dot <?= $index === 0 ? 'active' : '' ?>" onclick="showBanner(<?= $index ?>)"></span>
-        <?php endforeach; ?>
+        <?php if (!empty($banners)): ?>
+            <div class="banner-dots">
+                <?php foreach ($banners as $index => $b): ?>
+                    <span class="dot <?= $index === 0 ? 'active' : '' ?>" onclick="showBanner(<?= $index ?>)"></span>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <header>
@@ -960,17 +966,17 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
         </a>
         <div class="dropdown-menu">
-<<<<<<< HEAD
+
           
             <a href="http://localhost/DemoTinTuc/public/admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
             <a href="index.php?action=update">Đã thích</a>
             <a href="index.php?action=changepass">Đã lưu</a>
              <a href="index.php?action=changepass">Bình luận của tôi</a>
             <a href="index.php?action=logout">Đăng xuất</a>
-=======
+
             
             
->>>>>>> 6dd5ffaf6dcf48b18301bc2b31f051b52be68324
+
         </div>
     </div>
 <?php else: ?>
