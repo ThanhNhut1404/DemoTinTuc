@@ -28,6 +28,20 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 .admin-flash{display:block;margin:10px auto 14px;max-width:720px;padding:8px 12px;border-radius:8px;text-align:center;font-weight:600}
 .admin-flash-success{background:#ecfeff;color:#065f46;border:1px solid rgba(6,95,70,0.08)}
 
+/* Inline error notice for permission-denied (no background) */
+.admin-flash-error{
+    background: transparent; /* remove background */
+    border: none; /* remove border */
+    color: #ef4444; /* strong red for the notice */
+    margin:10px auto 14px;
+    max-width:920px; /* allow longer lines so sentence doesn't wrap awkwardly */
+    text-align:center;
+    padding:0 12px 6px; /* small horizontal padding to avoid clipping */
+    font-weight:600;
+}
+.admin-flash-error .admin-flash-title{font-size:16px;font-weight:800;margin-bottom:6px;color:inherit}
+.admin-flash-error .admin-flash-message{font-size:14px;font-weight:600;color:inherit;white-space:normal;word-wrap:break-word;overflow:visible}
+
 .user-area{display:flex;align-items:center;gap:8px}
 /* User hamburger + dropdown menu */
 .btn.btn-hamburger{background:transparent;border:1px solid rgba(2,6,23,0.06);padding:6px 10px;border-radius:8px;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center;position:static}

@@ -146,11 +146,28 @@ $fragments = [
                     <div class="admin-flash admin-flash-success"><?= htmlspecialchars($_SESSION['flash_success']) ?></div>
                     <?php unset($_SESSION['flash_success']); ?>
                 <?php endif; ?>
-                <?php if (isset($fragments[$action]) && file_exists($fragments[$action])): ?>
-                    <?php include $fragments[$action]; ?>
-                <?php else: ?>
-                    <div class="card">Trang không tìm thấy</div>
+                <?php if (!empty($_SESSION['flash_error'])): ?>
+                    <div class="admin-flash admin-flash-error"><?= htmlspecialchars($_SESSION['flash_error']) ?></div>
+                    <?php unset($_SESSION['flash_error']); ?>
                 <?php endif; ?>
+                <?php
+                // If the logged-in user is an Editor and the action is restricted, show an inline 'no permission' message
+                $currentRole = strtolower(trim((string)($_SESSION['user_role'] ?? '')));
+                $restrictedForEditor = ['dashboard', 'index', 'thanh_vien_roles'];
+                if ($currentRole === 'editor' && in_array($action, $restrictedForEditor, true)) {
+                    // show an inline, two-line permission notice (no background)
+                    echo '<div class="admin-flash admin-flash-error">'
+                        . '<div class="admin-flash-title">Truy cập bị từ chối</div>'
+                        . '<div class="admin-flash-message">Bạn không có quyền truy cập vào chức năng này. Vui lòng liên hệ quản trị viên nếu bạn cho rằng đây là nhầm lẫn!</div>'
+                        . '</div>';
+                } else {
+                    if (isset($fragments[$action]) && file_exists($fragments[$action])) {
+                        include $fragments[$action];
+                    } else {
+                        echo '<div class="card">Trang không tìm thấy</div>';
+                    }
+                }
+                ?>
             </main>
         </div>
     </div>
