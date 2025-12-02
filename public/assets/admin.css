@@ -41,14 +41,14 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 }
 .nav a:last-child::after{ display: none }
 .sidebar.collapsed .nav a::after{ display: none } /* hide separators when icons-only */
-/* Default label style: white and normal weight; active link becomes bold */
+/* Default label style: white and normal weight; keep active label same weight (no bold-on-click) */
 .nav a .label{ color:#fff; font-weight:400 }
-.nav a.active .label{ font-weight:600 }
+.nav a.active .label{ font-weight:400 }
 
 /* Ensure the "Quản lý Thành viên" label stays white like other sidebar links */
 .nav a.member-link .label{ color: #fff; font-weight:400 }
 .nav a.member-link .icon{ color: #fff }
-.nav a.member-link.active .label{ color: #fff; font-weight:600 } /* active state slightly bold */
+.nav a.member-link.active .label{ color: #fff; font-weight:400 } /* active state: keep normal weight */
 /* Background sidebar label: match the other sidebar labels (white, normal weight) */
 .nav a .label.bg-label{ color: inherit; font-weight:400; font-size:inherit; letter-spacing:0 }
 .nav a.active .label.bg-label{ color: #fff } /* active state remains white */

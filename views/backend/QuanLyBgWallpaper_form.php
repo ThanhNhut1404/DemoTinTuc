@@ -168,7 +168,7 @@ if ($isEdit) {
 </style>
 
 <div class="form-container">
-    <h2><?= $isEdit ? 'Sửa Nền Website' : 'Thêm Nền Website Mới' ?></h2>
+    <h2><?= $isEdit ? 'Sửa Nền Website' : 'Thêm Background mới' ?></h2>
 
     <form method="POST" action="admin.php?action=<?= $isEdit ? 'bg_wallpaper_update' : 'bg_wallpaper_store' ?>" enctype="multipart/form-data">
         <?php if ($isEdit): ?>

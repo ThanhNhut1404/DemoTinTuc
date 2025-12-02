@@ -16,23 +16,28 @@ if ($sub === 'create' || $sub === 'edit') {
 
     .wallpaper-card h2 {
         margin-top: 0;
-        font-size: 1.6rem;
-        margin-bottom: 20px;
+        font-size: 24px; /* match .member-title */
+        margin-bottom: 12px;
         color: #1f2937;
-        border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 10px;
     }
 
     .wallpaper-card .btn-add {
-        background: linear-gradient(90deg, #0d6efd, #0b5ed7);
+        background: #007bff; /* match .member-title color */
         color: #fff;
         border-radius: 8px;
-        padding: 10px 16px;
         text-decoration: none;
-        display: inline-block;
-        font-weight: 600;
-        margin-bottom: 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px; /* match form-inline buttons */
+        height: 38px; /* same height as .form-inline .btn-search */
+        box-sizing: border-box;
+        font-weight: 400; /* not bold per request */
+        font-size: 24px; /* keep larger text to match heading */
+        margin-bottom: 12px;
+        border: none;
     }
+    .wallpaper-card .btn-add:hover { background: #0056d6 }
 
     .wallpaper-grid {
         display: grid;
@@ -101,8 +106,8 @@ if ($sub === 'create' || $sub === 'edit') {
     }
 
     .wallpaper-status.inactive {
-        background: #f9fafb;
-        color: #6b7280;
+        background: #fff5f5; /* pale red background to match 'off' state */
+        color: #b91c1c; /* strong red text like 'Đang dùng' typography but red */
     }
 
     .wallpaper-actions {
@@ -135,6 +140,24 @@ if ($sub === 'create' || $sub === 'edit') {
         background: #fee2e2;
     }
 
+    /* Activate link: green like the 'Đang dùng' label */
+    .wallpaper-actions a.activate { color: #047857 }
+    .wallpaper-actions a.activate:hover { background: #ecfdf5 }
+
+    /* Make action links bold: Kích hoạt, Sửa, Xóa */
+    .wallpaper-actions a.activate,
+    .wallpaper-actions a.edit,
+    .wallpaper-actions a.delete { font-weight: 700 }
+
+    /* Style 'Sửa' to match the member-title blue (not filled) */
+    .wallpaper-actions a.edit {
+        background: transparent;
+        color: #007bff; /* match .member-title */
+        border-radius: 6px;
+        padding: 6px 10px;
+    }
+    .wallpaper-actions a.edit:hover { background: #eef6ff }
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -150,18 +173,18 @@ if ($sub === 'create' || $sub === 'edit') {
 </style>
 
 <div class="wallpaper-card">
-    <h2 class="member-title">Quản lý Background</h2>
+    <h2 class="member-title">Danh sách Background</h2>
     
     <?php if (isset($_GET['updated'])): ?>
         <div style="padding:10px;background:#e6ffee;border:1px solid #90ee90;margin-bottom:15px;border-radius:8px; color:#0a7a2a;">Cập nhật thành công.</div>
     <?php endif; ?>
     
-    <p><a href="admin.php?action=bg_wallpaper_create" class="btn-add">+ Thêm Nền Mới</a></p>
+    <p><a href="admin.php?action=bg_wallpaper_create" class="btn-add">Thêm Background</a></p>
 
     <?php if (empty($wallpapers)): ?>
         <div class="empty-state">
             <div class="icon">🖼️</div>
-            <p>Chưa có nền website nào.</p>
+            <p>Chưa có Background mới nào.</p>
         </div>
     <?php else: ?>
         <div class="wallpaper-grid">
@@ -177,14 +200,14 @@ if ($sub === 'create' || $sub === 'edit') {
                         <div class="wallpaper-name"><?= htmlspecialchars($w['ten_wallpaper']) ?></div>
                         <div class="wallpaper-desc"><?= htmlspecialchars($w['mo_ta'] ?? '') ?></div>
                         <span class="wallpaper-status <?= $w['trang_thai'] === 'on' ? 'active' : 'inactive' ?>">
-                            <?= $w['trang_thai'] === 'on' ? '✓ Đang dùng' : '○ Ẩn' ?>
+                            <?= $w['trang_thai'] === 'on' ? '✓ Đang dùng' : 'x Đang tắt' ?>
                         </span>
                         <div class="wallpaper-actions">
                             <?php if ($w['trang_thai'] !== 'on'): ?>
-                                <a href="admin.php?action=bg_wallpaper_toggle&id=<?= $w['id'] ?>" title="Kích hoạt">Kích hoạt</a>
-                            <?php endif; ?>
-                            <a href="admin.php?action=bg_wallpaper_edit&id=<?= $w['id'] ?>" title="Sửa">Sửa</a>
-                            <a href="admin.php?action=bg_wallpaper_delete&id=<?= $w['id'] ?>" class="delete" onclick="return confirm('Xóa nền này?')" title="Xóa">Xóa</a>
+                                    <a href="admin.php?action=bg_wallpaper_toggle&id=<?= $w['id'] ?>" class="activate" title="Kích hoạt">Kích hoạt</a>
+                                <?php endif; ?>
+                            <a href="admin.php?action=bg_wallpaper_edit&id=<?= $w['id'] ?>" class="edit" title="Sửa">Sửa</a>
+                            <a href="admin.php?action=bg_wallpaper_delete&id=<?= $w['id'] ?>" class="delete" onclick="return confirm('Bạn muốn xóa Background này?')" title="Xóa">Xóa</a>
                         </div>
                     </div>
                 </div>
