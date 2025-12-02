@@ -4,41 +4,6 @@ use Website\TinTuc\Models\ChuyenMucModel;
 $chuyenMucModel = new ChuyenMucModel();
 $danhMucList = $chuyenMucModel->getAll();
 
-// Xử lý xóa danh mục
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
-    $id = $_POST['id'] ?? null;
-    if ($id) {
-        try {
-            $stmt = $chuyenMucModel->db->prepare("DELETE FROM chuyen_muc WHERE id = ?");
-            $stmt->execute([$id]);
-            $_SESSION['flash'] = "✅ Xóa danh mục thành công!";
-        } catch (\Exception $e) {
-            $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
-        }
-        header('Location: admin.php?action=danh_muc&sub=danhsach');
-        exit;
-    }
-}
-
-// Xử lý sắp xếp thứ tự
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_order') {
-    $items = $_POST['items'] ?? [];
-    try {
-        foreach ($items as $index => $id) {
-            $stmt = $chuyenMucModel->db->prepare("UPDATE chuyen_muc SET thu_tu = ? WHERE id = ?");
-            $stmt->execute([$index + 1, $id]);
-        }
-        $_SESSION['flash'] = "✅ Cập nhật thứ tự thành công!";
-    } catch (\Exception $e) {
-        $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
-    }
-    header('Location: admin.php?action=danh_muc&sub=danhsach');
-    exit;
-}
-
-// Reload danh sách
-$danhMucList = $chuyenMucModel->getAll();
-
 if (isset($_SESSION['flash'])) {
     $flash = $_SESSION['flash'];
     unset($_SESSION['flash']);

@@ -55,6 +55,7 @@ if ($action === 'login_submit') {
         $_SESSION['user'] = $user;
         // flash success to show on login page briefly before redirect
         $_SESSION['flash_success'] = 'Đăng nhập thành công';
+        // Render the login view so the flash is visible briefly; client JS will redirect
         include __DIR__ . '/../views/backend/admin_login.php';
         exit;
     }
@@ -208,13 +209,7 @@ switch ($action) {
         $baiVietController->uploadImage();
         break;
 
-    case 'userPage':
-        $controller->userPage();
-        break;
-
-    case 'updateProfile':
-        $controller->updateProfile();
-        break;
+    
 
     case 'deleteUser':
         $controller->deleteUser();

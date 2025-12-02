@@ -968,7 +968,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="dropdown-menu">
 
           
-            <a href="http://localhost/DemoTinTuc/public/admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
+            <a href="http://localhost/DemoTinTuc/public/index.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
             <a href="index.php?action=update">Đã thích</a>
             <a href="index.php?action=changepass">Đã lưu</a>
              <a href="index.php?action=changepass">Bình luận của tôi</a>

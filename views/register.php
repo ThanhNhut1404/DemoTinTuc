@@ -199,7 +199,12 @@ button:hover {
 
         <div class="input-group">
             <input type="password" id="password" name="mat_khau" required>
-            <span class="toggle-password" onclick="togglePassword('password', this)">👁️</span>
+            <span class="toggle-password" onclick="togglePassword('password', this)" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-eye">
+                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="#666" stroke-width="1.4" fill="#ecf6ff"/>
+                    <circle cx="12" cy="12" r="3" fill="#007bff"/>
+                </svg>
+            </span>
         </div>
 
         <div id="password-strength-text"></div>
@@ -210,7 +215,12 @@ button:hover {
         <label for="confirm_password">Xác nhận mật khẩu:</label>
         <div class="input-group">
             <input type="password" id="confirm_password" name="confirm_password" required>
-            <span class="toggle-password" onclick="togglePassword('confirm_password', this)">👁️</span>
+            <span class="toggle-password" onclick="togglePassword('confirm_password', this)" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-eye">
+                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="#666" stroke-width="1.4" fill="#ecf6ff"/>
+                    <circle cx="12" cy="12" r="3" fill="#007bff"/>
+                </svg>
+            </span>
         </div>
 
         <!-- THÔNG BÁO HIỆN Ở ĐÂY (SẼ NẰM THẲNG HÀNG VỚI INPUTS) -->
@@ -240,52 +250,86 @@ button:hover {
 <script>
 function togglePassword(id, icon) {
     const input = document.getElementById(id);
-    input.type = input.type === "password" ? "text" : "password";
-    icon.textContent = input.type === "text" ? "🙈" : "👁️";
+    const openSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="#666" stroke-width="1.4" fill="#ecf6ff"/><circle cx="12" cy="12" r="3" fill="#007bff"/></svg>';
+    const closeSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6 0-10-7-10-7 .9-1.53 2.12-2.95 3.58-4.16m2.42-1.77A9.99 9.99 0 0 1 12 5c6 0 10 7 10 7 0 1.12-.23 2.19-.65 3.17M3 3l18 18" stroke="#666" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = closeSvg;
+    } else {
+        input.type = 'password';
+        icon.innerHTML = openSvg;
+    }
 }
 
-function checkPasswordStrength(password) {
-    let score = 0;
-    if (password.length >= 6) score++;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[\W]/.test(password)) score++;
-    return score;
+// Password strength: mirror server rules
+function passwordStrengthLevel(pw) {
+    if (!pw) return 'empty';
+    const hasUpper = /[A-Z]/.test(pw);
+    const hasLower = /[a-z]/.test(pw);
+    const hasDigit = /[0-9]/.test(pw);
+    const hasSymbol = /[\W]/.test(pw);
+    if (pw.length >= 10 && hasUpper && hasLower && hasDigit && hasSymbol) return 'strong';
+    if (pw.length >= 8 && /[a-zA-Z]/.test(pw) && hasDigit) return 'medium';
+    return 'weak';
 }
 
-document.getElementById("password").addEventListener("input", function () {
+document.getElementById('password').addEventListener('input', function () {
     const value = this.value;
-    const score = checkPasswordStrength(value);
+    const lvl = passwordStrengthLevel(value);
+    const text = document.getElementById('password-strength-text');
+    const bar = document.getElementById('password-strength-fill');
 
-    const text = document.getElementById("password-strength-text");
-    const bar = document.getElementById("password-strength-fill");
-
-    if (!value) {
-        text.innerText = "";
-        bar.style.width = "0%";
+    if (lvl === 'empty') {
+        text.innerText = '';
+        bar.style.width = '0%';
         return;
     }
-
-    if (score <= 2) {
-        text.innerText = "Mật khẩu yếu";
-        text.style.color = "red";
-        bar.style.width = "33%";
-        bar.style.background = "red";
-    } 
-    else if (score <= 4) {
-        text.innerText = "Mật khẩu trung bình";
-        text.style.color = "orange";
-        bar.style.width = "66%";
-        bar.style.background = "orange";
-    } 
-    else {
-        text.innerText = "Mật khẩu mạnh";
-        text.style.color = "green";
-        bar.style.width = "100%";
-        bar.style.background = "green";
+    if (lvl === 'weak') {
+        text.innerText = 'Mật khẩu yếu (ít nhất 8 ký tự, gồm chữ và số)';
+        text.style.color = 'red';
+        bar.style.width = '33%';
+        bar.style.background = 'red';
+    } else if (lvl === 'medium') {
+        text.innerText = 'Mật khẩu trung bình (cố gắng dùng ký tự đặc biệt để mạnh hơn)';
+        text.style.color = 'orange';
+        bar.style.width = '66%';
+        bar.style.background = 'orange';
+    } else {
+        text.innerText = 'Mật khẩu mạnh';
+        text.style.color = 'green';
+        bar.style.width = '100%';
+        bar.style.background = 'green';
     }
+});
+
+// Set max date for ngay_sinh to today to prevent future dates
+(function setMaxDob() {
+    const dob = document.getElementById('ngay_sinh');
+    if (!dob) return;
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dob.max = `${yyyy}-${mm}-${dd}`;
+})();
+
+// Form submit validation: match passwords and require at least medium strength
+document.querySelector('form').addEventListener('submit', function (e) {
+    const pw = document.getElementById('password').value;
+    const cpw = document.getElementById('confirm_password').value;
+    const lvl = passwordStrengthLevel(pw);
+    if (pw !== cpw) {
+        e.preventDefault();
+        alert('Mật khẩu và xác nhận mật khẩu không khớp.');
+        return false;
+    }
+    if (lvl === 'weak' || lvl === 'empty') {
+        e.preventDefault();
+        alert('Mật khẩu quá yếu. Vui lòng đặt mật khẩu ít nhất 8 ký tự, gồm chữ và số.');
+        return false;
+    }
+    // DOB checked by 'max' attribute and server-side as well
 });
 </script>
 
