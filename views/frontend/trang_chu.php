@@ -932,6 +932,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </a>
         <div class="dropdown-menu">
             
+            <a href="index.php?action=logout">Đăng xuất</a>
             
         </div>
     </div>
