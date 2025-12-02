@@ -172,6 +172,11 @@ switch ($action) {
         $qcController->delete($_GET['id'] ?? 0);
         break;
 
+    case 'qc_toggle_status':
+        $qcController = new QuangCaoController();
+        $qcController->toggleStatus($_GET['id'] ?? 0);
+        break;
+
     // Các hành động quản trị cho bài viết
     case 'create':
         $baiVietController = new BaiVietController();

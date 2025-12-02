@@ -36,7 +36,7 @@ class QuangCaoModel
             ':hinh_anh' => $data['hinh_anh'] ?? '',
             ':lien_ket' => $data['lien_ket'] ?? '',
             ':vi_tri' => $data['vi_tri'] ?? '',
-            ':trang_thai' => $data['trang_thai'] ?? 'active',
+            ':trang_thai' => $data['trang_thai'] ?? 'on',
             ':ngay_tao' => $data['ngay_tao'] ?? date('Y-m-d H:i:s'),
         ]);
         return $this->db->lastInsertId();
@@ -51,7 +51,7 @@ class QuangCaoModel
             ':hinh_anh' => $data['hinh_anh'] ?? '',
             ':lien_ket' => $data['lien_ket'] ?? '',
             ':vi_tri' => $data['vi_tri'] ?? '',
-            ':trang_thai' => $data['trang_thai'] ?? 'active',
+            ':trang_thai' => $data['trang_thai'] ?? 'on',
             ':id' => (int)$id,
         ]);
     }
@@ -62,10 +62,20 @@ class QuangCaoModel
         return $stmt->execute([(int)$id]);
     }
 
+    public function updateStatus($id, $trang_thai)
+    {
+        $sql = "UPDATE quang_cao SET trang_thai = :trang_thai WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':trang_thai' => $trang_thai,
+            ':id' => (int)$id,
+        ]);
+    }
+
     // existing helper used by frontend controller
     public function getQuangCaoTheoViTri($vi_tri)
     {
-        $stmt = $this->db->prepare("SELECT * FROM quang_cao WHERE vi_tri = ? ORDER BY id DESC");
+        $stmt = $this->db->prepare("SELECT * FROM quang_cao WHERE vi_tri = ? AND trang_thai = 'on' ORDER BY id DESC");
         $stmt->execute([$vi_tri]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

@@ -33,7 +33,7 @@ class QuangCaoController
             'tieu_de' => $_POST['tieu_de'] ?? '',
             'lien_ket' => $_POST['lien_ket'] ?? '',
             'vi_tri' => $_POST['vi_tri'] ?? 'Trang_chu',
-            'trang_thai' => $_POST['trang_thai'] ?? 'active',
+            'trang_thai' => $_POST['trang_thai'] ?? 'on',
             'ngay_tao' => date('Y-m-d H:i:s'),
             'hinh_anh' => '',
         ];
@@ -78,7 +78,7 @@ class QuangCaoController
             'tieu_de' => $_POST['tieu_de'] ?? '',
             'lien_ket' => $_POST['lien_ket'] ?? '',
             'vi_tri' => $_POST['vi_tri'] ?? 'Trang_chu',
-            'trang_thai' => $_POST['trang_thai'] ?? 'active',
+            'trang_thai' => $_POST['trang_thai'] ?? 'on',
             'hinh_anh' => $fileName,
         ];
 
@@ -95,6 +95,17 @@ class QuangCaoController
             if (is_file($path)) @unlink($path);
         }
         $this->model->delete($id);
+        header('Location: admin.php?action=quang_cao');
+        exit;
+    }
+
+    public function toggleStatus($id)
+    {
+        $record = $this->model->find($id);
+        if ($record) {
+            $newStatus = ($record['trang_thai'] === 'on') ? 'off' : 'on';
+            $this->model->updateStatus($id, $newStatus);
+        }
         header('Location: admin.php?action=quang_cao');
         exit;
     }
