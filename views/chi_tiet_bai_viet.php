@@ -343,7 +343,7 @@ $stmt->close();
 
         .save-btn.active,
         .save-btn:hover {
-            background: #0d6efd !important;
+            background: #0d53bcff !important;
             border-color: #0d6efd !important;
             color: white !important;
         }
