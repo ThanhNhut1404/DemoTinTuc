@@ -966,17 +966,17 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
         </a>
         <div class="dropdown-menu">
-<<<<<<< HEAD
+
           
             <a href="http://localhost/DemoTinTuc/public/admin.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
             <a href="index.php?action=update">Đã thích</a>
             <a href="index.php?action=changepass">Đã lưu</a>
              <a href="index.php?action=changepass">Bình luận của tôi</a>
             <a href="index.php?action=logout">Đăng xuất</a>
-=======
+
             
             
->>>>>>> 6dd5ffaf6dcf48b18301bc2b31f051b52be68324
+
         </div>
     </div>
 <?php else: ?>

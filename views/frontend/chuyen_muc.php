@@ -3,11 +3,11 @@ $page = $page ?? 1;
 $totalPages = $totalPages ?? 1;
 use Website\TinTuc\Models\QuangcaoModel;
 $qcModel = new QuangcaoModel();
+// Load only Sidebar ads for category page (Trang_chu ads are only for homepage)
 $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
-$dsQuangCaoTrangChu = $qcModel->getQuangCaoTheoViTri('Trang_chu');
 
 // Prepare unified ads list for rotating slots (ensure 4 items)
-$allAds = array_values(array_filter(array_merge($dsQuangCao, $dsQuangCaoTrangChu)));
+$allAds = array_values(array_filter($dsQuangCao));
 $ads = [];
 if (!empty($allAds)) {
     $take = array_slice($allAds, 0, 4);
