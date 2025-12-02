@@ -206,6 +206,17 @@ class ThanhVienModel {
         return $stmt->execute([$role, $id]);
     }
 
+    /**
+     * Xóa người dùng theo ID
+     */
+    public function deleteById($id)
+    {
+        $idCol = $this->cols['id'];
+        $sql = sprintf("DELETE FROM `%s` WHERE `%s` = ?", $this->table, $idCol);
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([$id]);
+    }
+
     public function layThongTinNguoiDung($id) {
         $idCol = $this->cols['id'];
         $sql = sprintf("SELECT * FROM `%s` WHERE `%s` = ?", $this->table, $idCol);

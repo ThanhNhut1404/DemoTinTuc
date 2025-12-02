@@ -131,6 +131,10 @@ switch ($action) {
         $controller->updateProfile();
         break;
 
+    case 'deleteUser':
+        $controller->deleteUser();
+        break;
+
     // Quản lý banner
     case 'banner':
         $bannerController = new BannerController();

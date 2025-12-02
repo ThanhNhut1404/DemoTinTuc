@@ -112,6 +112,17 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
     background-color: #2563eb; /* Đậm hơn khi hover */
     border-color: #2563eb;
 }
+/* Nút Xóa (hành động) - màu đỏ nhỏ */
+.btn.btn-delete {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: #fff;
+    text-decoration: none;
+}
+.btn.btn-delete:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+}
 /* Nút Bộ lọc - Nền xanh dương, chữ trắng */
 .btn.btn-filter {
     background-color: #0ea5e9; /* Màu xanh dương giống tiêu đề */
