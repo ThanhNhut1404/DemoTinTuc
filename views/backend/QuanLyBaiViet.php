@@ -55,26 +55,50 @@ if (!isset($tagList)) {
 </div>
 
 <style>
+.card {
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 16px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    margin-top: 20px;
+}
+
+.card h2 {
+    color: #007bff;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.card p {
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* Menu link giống nút “Bộ lọc”, “Tìm kiếm” */
 .menu-links {
-    margin-top: 15px;
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
 
 .menu-links .tag {
-    display: inline-block;
-    padding: 8px 12px;
-    background: #f0f0f0;
+    background: #0d6efd;
+    color: #fff;
+    padding: 8px 14px;
     border-radius: 6px;
     text-decoration: none;
-    color: #333;
-    border: 1px solid #ddd;
+    border: none;
+    transition: 0.2s;
 }
 
 .menu-links .tag:hover {
-    background: #e8e8e8;
-    border-color: #ccc;
+    background: #0b5ed7;
 }
-.fragment { margin-top: 18px; }
+
+/* Fragment content */
+.fragment {
+    margin-top: 18px;
+}
+
 </style>
