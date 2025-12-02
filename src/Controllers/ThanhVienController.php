@@ -163,7 +163,7 @@ class ThanhVienController
 
     // Lấy dữ liệu
     $user = $thanhVienModel->layThongTinNguoiDung($userId);
-    $yeuThich = $baiVietModel->layBaiVietYeuThich($userId);
+    // $yeuThich = $baiVietModel->layBaiVietYeuThich($userId);
     $daLuu = $baiVietModel->layBaiVietDaLuu($userId);
     $binhLuan = $binhLuanModel->layBinhLuanTheoNguoiDung($userId);
 

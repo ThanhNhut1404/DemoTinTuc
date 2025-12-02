@@ -52,11 +52,46 @@ $fragments = [
                     <input class="search-input" type="text" placeholder="Tìm kiếm..." onkeydown="if(event.key==='Enter'){this.form?.submit && this.form.submit()}" />
                 </div>
                 <div class="actions">
-                    <div style="font-size:14px;color:var(--muted)">Xin chào, Admin</div>
+                    <?php
+                    $displayName = 'Admin';
+                    if (!empty($_SESSION['user']['ho_ten'] ?? null)) {
+                        $displayName = $_SESSION['user']['ho_ten'];
+                    } elseif (!empty($_SESSION['user']['email'] ?? null)) {
+                        $displayName = $_SESSION['user']['email'];
+                    } elseif (!empty($_SESSION['user_id'])) {
+                        try {
+                            $tv = new \Website\TinTuc\Models\ThanhVienModel();
+                            $u = $tv->findById($_SESSION['user_id']);
+                            if ($u) {
+                                $displayName = $u['ho_ten'] ?? $u['email'] ?? $displayName;
+                            }
+                        } catch (Exception $e) {
+                            // ignore and fallback to 'Admin'
+                        }
+                    }
+                    ?>
+                    <div class="user-area">
+                        <div class="greeting" style="font-size:14px;color:var(--muted);margin-right:8px">Xin chào, <?= htmlspecialchars($displayName) ?></div>
+                        <div class="user-menu-wrapper" style="position:relative">
+                            <button id="userMenuToggle" class="btn btn-hamburger" aria-expanded="false" aria-label="Mở menu người dùng">
+                                <!-- user icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </button>
+                            <div id="userMenu" class="user-menu" aria-hidden="true">
+                                <a href="admin.php?action=settings" class="user-menu-item">Cài đặt</a>
+                                <a href="admin.php?action=userPage" class="user-menu-item">Thông Tin</a>
+                                <a href="admin.php?action=logout" class="user-menu-item">Đăng Xuất</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
 
             <main class="content">
+                <?php if (!empty($_SESSION['flash_success'])): ?>
+                    <div class="admin-flash admin-flash-success"><?= htmlspecialchars($_SESSION['flash_success']) ?></div>
+                    <?php unset($_SESSION['flash_success']); ?>
+                <?php endif; ?>
                 <?php if (isset($fragments[$action]) && file_exists($fragments[$action])): ?>
                     <?php include $fragments[$action]; ?>
                 <?php else: ?>
@@ -67,5 +102,17 @@ $fragments = [
     </div>
 
     <script src="/DemoTinTuc/public/assets/admin.js"></script>
+    <script>
+        (function(){
+            const toggle = document.getElementById('userMenuToggle');
+            const menu = document.getElementById('userMenu');
+            if (!toggle || !menu) return;
+            function closeMenu(){ menu.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); menu.setAttribute('aria-hidden','true'); }
+            function openMenu(){ menu.classList.add('open'); toggle.setAttribute('aria-expanded','true'); menu.setAttribute('aria-hidden','false'); }
+            toggle.addEventListener('click', function(e){ e.stopPropagation(); if (menu.classList.contains('open')) closeMenu(); else openMenu(); });
+            document.addEventListener('click', function(){ closeMenu(); });
+            menu.addEventListener('click', function(e){ e.stopPropagation(); });
+        })();
+    </script>
 </body>
 </html>
