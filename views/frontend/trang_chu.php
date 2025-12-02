@@ -969,7 +969,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <a href="index.php?action=logout">Đăng xuất</a>
 
             
-            <a href="index.php?action=logout">Đăng xuất</a>
+            
             
 
         </div>
