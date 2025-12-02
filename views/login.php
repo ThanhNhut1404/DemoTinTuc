@@ -26,12 +26,16 @@
         }
 
         h2 {
-            margin-bottom: 28px;
-            font-size: 26px;
-            font-weight: 700;
-            color: #222;
-            text-align: center;
-        }
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+
+    text-align: center;     /* căn giữa */
+    font-weight: 700;       /* in đậm */
+    text-transform: uppercase; /* in hoa */
+}
+
 
         label {
             display: block;

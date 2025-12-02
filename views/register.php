@@ -4,132 +4,171 @@
     <meta charset="UTF-8">
     <title>Đăng ký tài khoản</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #007bff, #00c6ff);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
 
-        .register-box {
-            background: rgba(255,255,255,0.95);
-            width: 420px;
-            padding: 45px 40px;
-            border-radius: 26px;
-            border: 1px solid rgba(255,255,255,0.4);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.05);
-            transition: 0.3s;
-        }
+/* ===== ALERT: chỉnh để NẰM ĐÚNG HÀNG với các input ===== */
+.alert {
+    /* chiếm toàn bộ chiều ngang bên trong .register-box */
+    display: block;
+    width: 100%;
+    box-sizing: border-box;   /* rất quan trọng để padding không làm tràn */
+    padding: 12px 14px;       /* giống kiểu padding input */
+    margin: 12px 0 15px 0;    /* cách trên/dưới hợp lý */
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;       /* căn giữa chữ bên trong */
+    animation: fadeIn 0.2s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
 
-        h2 {
-            margin-bottom: 25px;
-            color: #333;
-            font-size: 24px;
-            letter-spacing: 0.5px;
-        }
+.alert.error {
+    background: #ffe3e3;
+    color: #d20000;
+    border: 1px solid #ffb7b7;
+}
 
-        label {
-            display: block;
-            width: 100%;
-            font-weight: 500;
-            color: #444;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
+.alert.success {
+    background: #f7f7f7ff;
+    color: #007c2e;
+    border: 1px solid #ffffffff;
+}
+/* ======================================================= */
 
-        .input-group {
-            position: relative;
-            width: 100%;
-            margin-bottom: 18px;
-        }
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
 
-        input, select {
-            width: 100%;
-            padding: 12px 40px 12px 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #007bff, #00c6ff);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
 
-        input:focus, select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
-            outline: none;
-        }
+.register-box {
+    background: rgba(255,255,255,0.95);
+    width: 420px;
+    padding: 45px 40px; /* <-- inputs căn theo vùng nội dung này */
+    border-radius: 26px;
+    border: 1px solid rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
 
-        .toggle-password {
-            position: absolute;
-            top: 50%;
-            right: 12px;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 18px;
-            color: #666;
-        }
+h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 24px;
+    letter-spacing: 0.5px;
 
-        button {
-            width: 100%;
-            background: #007bff;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+    text-align: center;     /* căn giữa */
+    font-weight: 700;       /* in đậm */
+    text-transform: uppercase; /* in hoa */
+}
 
-        button:hover {
-            background: #0056b3;
-            transform: translateY(-1px);
-        }
 
-        #password-strength-text {
-            font-size: 13px;
-            margin-top: -10px;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-        #password-strength-bar {
-            width: 100%;
-            height: 6px;
-            background: #ddd;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-        #password-strength-fill {
-            height: 100%;
-            width: 0%;
-            background: red;
-            transition: width 0.3s ease, background 0.3s ease;
-        }
+label {
+    display: block;
+    width: 100%;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
 
-        /* ⭐ STYLE GIỐNG LOGIN */
-        .auth-switch {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 15px;
-            color: #333;
-        }
+.input-group {
+    position: relative;
+    width: 100%;
+    margin-bottom: 18px;
+}
 
-        .auth-switch a {
-            color: #007bff;
-            font-weight: 600;
-            text-decoration: none;
-            transition: 0.2s;
-        }
+input, select {
+    width: 100%;
+    padding: 12px 40px 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
 
-        .auth-switch a:hover {
-            text-decoration: underline;
-            color: #0056d2;
-        }
+input:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+    outline: none;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+}
+
+button {
+    width: 100%;
+    background: #007bff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+#password-strength-text {
+    font-size: 13px;
+    margin-top: -10px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+#password-strength-bar {
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+#password-strength-fill {
+    height: 100%;
+    width: 0%;
+    background: red;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 15px;
+    color: #333;
+}
+
+.auth-switch a {
+    color: #007bff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+    color: #0056d2;
+}
     </style>
 </head>
 
@@ -156,6 +195,8 @@
         <input type="email" id="email" name="email" required>
 
         <label for="password">Mật khẩu:</label>
+        <div id="password-strength"></div>
+
         <div class="input-group">
             <input type="password" id="password" name="mat_khau" required>
             <span class="toggle-password" onclick="togglePassword('password', this)">👁️</span>
@@ -172,10 +213,23 @@
             <span class="toggle-password" onclick="togglePassword('confirm_password', this)">👁️</span>
         </div>
 
+        <!-- THÔNG BÁO HIỆN Ở ĐÂY (SẼ NẰM THẲNG HÀNG VỚI INPUTS) -->
+        <?php if(isset($errorMessage)): ?>
+            <div class="alert error">
+                <?= $errorMessage ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if(isset($successMessage)): ?>
+            <div class="alert success">
+                <?= $successMessage ?>
+            </div>
+        <?php endif; ?>
+        <!-- END -->
+
         <button type="submit">Đăng ký</button>
     </form>
 
-    <!-- ⭐ PHẦN MỚI CHUẨN UI -->
     <div class="auth-switch">
         Đã có tài khoản? <a href="index.php?action=login">Đăng nhập</a>
     </div>
