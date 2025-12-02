@@ -240,7 +240,7 @@ if (isset($_SESSION['id_nguoi_dung'])) {
 $stmt = $conn->prepare("SELECT bl.noi_dung, u.ho_ten AS ten_nguoi_dung, bl.ngay_binh_luan 
                         FROM binh_luan bl 
                         JOIN nguoi_dung u ON bl.id_nguoi_dung = u.id 
-                        WHERE bl.id_bai_viet = ? 
+                        WHERE bl.id_bai_viet = ? AND bl.trang_thai = 'Hien'
                         ORDER BY bl.ngay_binh_luan DESC");
 $stmt->bind_param("i", $id);
 $stmt->execute();
