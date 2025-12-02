@@ -125,6 +125,26 @@ class ThanhVienController
         // Gọi xử lý khóa/mở tài khoản (khi action là 'mo_tk')
         $this->khoaMoTaiKhoan();
     }
+    
+    // Xóa người dùng
+    public function deleteUser()
+    {
+        $id = $_GET['id'] ?? null;
+        $role = $_GET['role'] ?? null;
+        $status = $_GET['status'] ?? null;
+        $gender = $_GET['gender'] ?? $_GET['gioi_tinh'] ?? null;
+
+        if ($id) {
+            $this->model->deleteById($id);
+        }
+
+        $loc = 'admin.php?action=index';
+        if ($role) $loc .= '&role=' . urlencode($role);
+        if ($status) $loc .= '&status=' . urlencode($status);
+        if ($gender) $loc .= '&gender=' . urlencode($gender);
+        header("Location: $loc");
+        exit;
+    }
     public function userPage()
 {
     if (session_status() === PHP_SESSION_NONE) session_start();

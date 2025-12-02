@@ -6,6 +6,15 @@ use Website\TinTuc\Models\ChuyenMucModel;
 
 class ChuyenMucController
 {
+    // Backend: Quản lý danh mục
+    public function index()
+    {
+        // Render inside admin layout so it appears in the content frame
+        $_GET['action'] = 'danh_muc';
+        include __DIR__ . '/../../views/backend/layout.php';
+    }
+
+    // Frontend: Hiển thị bài viết theo chuyên mục
     public function hienThiTheoChuyenMuc($id)
     {
         if (!$id || !is_numeric($id)) {

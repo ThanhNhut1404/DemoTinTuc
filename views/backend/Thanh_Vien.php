@@ -136,6 +136,7 @@ function displayStatus($raw)
                         <?php endif; ?>
 
                         <a class="btn btn-edit" href="admin.php?action=editUser&id=<?= urlencode($tv['id']) ?>">Sửa</a>
+                        <a class="btn btn-delete" href="admin.php?action=deleteUser&id=<?= urlencode($tv['id']) ?>" onclick="return confirm('Bạn có chắc muốn xóa tài khoản này?');">Xóa</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
