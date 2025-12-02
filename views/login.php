@@ -145,7 +145,13 @@
         <label for="password">Mật khẩu:</label>
         <div class="input-group">
             <input type="password" id="password" name="mat_khau" required>
-            <span class="toggle-password" onclick="togglePassword('password', this)">👁️</span>
+            <span class="toggle-password" onclick="togglePassword('password', this)" aria-hidden="true">
+                <!-- Rounded eye SVG (open) -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-eye">
+                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="#666" stroke-width="1.4" fill="#ecf6ff"/>
+                    <circle cx="12" cy="12" r="3" fill="#007bff"/>
+                </svg>
+            </span>
         </div>
 
         <div class="forgot-password">
@@ -164,12 +170,15 @@
 <script>
     function togglePassword(id, icon) {
         const input = document.getElementById(id);
-        if (input.type === "password") {
-            input.type = "text";
-            icon.textContent = "🙈";
+        const openSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="#666" stroke-width="1.4" fill="#ecf6ff"/><circle cx="12" cy="12" r="3" fill="#007bff"/></svg>';
+        const closeSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6 0-10-7-10-7 .9-1.53 2.12-2.95 3.58-4.16m2.42-1.77A9.99 9.99 0 0 1 12 5c6 0 10 7 10 7 0 1.12-.23 2.19-.65 3.17M3 3l18 18" stroke="#666" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.innerHTML = closeSvg;
         } else {
-            input.type = "password";
-            icon.textContent = "👁️";
+            input.type = 'password';
+            icon.innerHTML = openSvg;
         }
     }
 </script>

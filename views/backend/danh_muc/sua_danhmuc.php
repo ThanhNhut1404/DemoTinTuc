@@ -15,31 +15,6 @@ if (!$danhMuc) {
     exit;
 }
 
-// Xử lý cập nhật danh mục
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
-    $ten = trim($_POST['ten_chuyen_muc'] ?? '');
-    $mo_ta = trim($_POST['mo_ta'] ?? '');
-    $id_cha = $_POST['id_cha'] ?? null;
-    
-    if ($ten) {
-        try {
-            $stmt = $chuyenMucModel->db->prepare("
-                UPDATE chuyen_muc 
-                SET ten_chuyen_muc = ?, mo_ta = ?, id_cha = ? 
-                WHERE id = ?
-            ");
-            $stmt->execute([$ten, $mo_ta, $id_cha ?: null, $id]);
-            $_SESSION['flash'] = "✅ Cập nhật danh mục thành công!";
-        } catch (\Exception $e) {
-            $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
-        }
-        header('Location: admin.php?action=danh_muc&sub=danhsach');
-        exit;
-    } else {
-        $error_msg = "❌ Tên danh mục không được trống!";
-    }
-}
-
 $danhMucList = $chuyenMucModel->getAll();
 ?>
 
