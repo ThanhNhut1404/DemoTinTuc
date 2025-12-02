@@ -80,11 +80,25 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
+// Determine role and whether the current action is forbidden for Editors.
+$role = strtolower(trim((string)($_SESSION['user_role'] ?? '')));
+$forbiddenForEditor = ['dashboard', 'index', 'thanh_vien_roles'];
+$isForbiddenForEditor = ($role === 'editor' && in_array($action, $forbiddenForEditor, true));
+
 $controller = new ThanhVienController();
 
 switch ($action) {
+    case 'dashboard':
+        // render the admin layout which will include Dashboard.php fragment
+        include __DIR__ . '/../views/backend/layout.php';
+        break;
     case 'index':
-        $controller->index();
+        if ($isForbiddenForEditor) {
+            // Editor: allow clicking but show empty content via layout (will render the permission message)
+            include __DIR__ . '/../views/backend/layout.php';
+        } else {
+            $controller->index();
+        }
         break;
 
     case 'search':
@@ -108,7 +122,11 @@ switch ($action) {
 
     case 'thanh_vien_roles':
         // Show member list (same as index)
-        $controller->index();
+        if ($isForbiddenForEditor) {
+            include __DIR__ . '/../views/backend/layout.php';
+        } else {
+            $controller->index();
+        }
         break;
 
     case 'bai_viet':

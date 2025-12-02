@@ -97,7 +97,7 @@ unset($_SESSION['flash_success']);
 
 <script>
     <?php if (!empty($flash_success)): ?>
-    // redirect to admin index shortly after showing success
+    // redirect to admin index (member management) shortly after showing success
     setTimeout(function(){ window.location.href = 'admin.php?action=index'; }, 1500);
     <?php endif; ?>
     function togglePassword(id, btn) {
