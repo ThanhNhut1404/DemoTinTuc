@@ -22,12 +22,32 @@
 
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:8px">
                 <div style="flex:1;min-width:160px">
-                    <label style="display:block;font-weight:600;margin-bottom:6px">Chuyên mục (ID)</label>
-                    <input type="text" name="id_chuyen_muc" value="<?= htmlspecialchars($baiviet['id_chuyen_muc'] ?? '') ?>" style="width:100%;padding:8px;border:1px solid #e6eef8;border-radius:8px" />
+                    <label style="display:block;font-weight:600;margin-bottom:6px">Chuyên mục</label>
+                    <select name="id_chuyen_muc" style="width:100%;padding:8px;border:1px solid #e6eef8;border-radius:8px">
+                        <option value="">-- Chọn chuyên mục --</option>
+                        <?php if (!empty($chuyenMucList)): ?>
+                            <?php foreach ($chuyenMucList as $cm): ?>
+                                <option value="<?= htmlspecialchars($cm['id'] ?? '') ?>" <?= ($baiviet['id_chuyen_muc'] == $cm['id']) ? 'selected' : '' ?>><?= htmlspecialchars($cm['ten_chuyen_muc'] ?? $cm['name'] ?? '') ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
                 </div>
                 <div style="flex:1;min-width:160px">
                     <label style="display:block;font-weight:600;margin-bottom:6px">Thẻ tag</label>
-                    <input type="text" name="tag" value="<?= htmlspecialchars($baiviet['tag'] ?? '') ?>" style="width:100%;padding:8px;border:1px solid #e6eef8;border-radius:8px" />
+                    <select name="tag" style="width:100%;padding:8px;border:1px solid #e6eef8;border-radius:8px">
+                        <option value="">-- Chọn thẻ tag --</option>
+                        <?php if (!empty($tagList)): ?>
+                            <?php foreach ($tagList as $t): ?>
+                                <?php
+                                    // Support multiple possible field names returned by TagModel/database
+                                    $tagId = $t['id'] ?? $t['the_tag'] ?? $t['tag_id'] ?? '';
+                                    $tagLabel = $t['ten_tag'] ?? $t['the_tag'] ?? $t['name'] ?? '';
+                                    $currentTag = $baiviet['tag'] ?? $baiviet['the_tag'] ?? $baiviet['id_the_tag'] ?? '';
+                                ?>
+                                <option value="<?= htmlspecialchars($tagId) ?>" <?= ((string)$currentTag === (string)$tagId && $tagId !== '') ? 'selected' : '' ?>><?= htmlspecialchars($tagLabel) ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
                 </div>
             </div>
 
@@ -36,9 +56,10 @@
                 <label style="display:flex;align-items:center;gap:8px">Trạng thái
                     <?php $currentStatus = trim(strval($baiviet['trang_thai'] ?? '')) ?>
                     <select name="trang_thai" style="margin-left:6px;padding:6px;border:1px solid #e6eef8;border-radius:8px">
-                        <option value="nhap" <?= ($currentStatus === 'nhap') ? 'selected' : '' ?>>Nháp</option>
-                        <option value="cho_duyet" <?= ($currentStatus === 'cho_duyet') ? 'selected' : '' ?>>Chờ duyệt</option>
-                        <option value="da_dang" <?= ($currentStatus === 'da_dang') ? 'selected' : '' ?>>Đã đăng</option>
+                        <option value="Nhap" <?= ($currentStatus === 'Nhap') ? 'selected' : '' ?>>Nháp</option>
+                        <option value="Cho_duyet" <?= ($currentStatus === 'Cho_duyet') ? 'selected' : '' ?>>Chờ duyệt</option>
+                        <option value="Da_dang" <?= ($currentStatus === 'Da_dang') ? 'selected' : '' ?>>Đã đăng</option>
+                        <option value="Tu_choi" <?= ($currentStatus === 'Tu_choi') ? 'selected' : '' ?>>Từ chối</option>
                     </select>
                 </label>
                 <label style="display:flex;align-items:center;gap:8px">Ngày đăng
@@ -66,3 +87,16 @@
         </aside>
     </form>
 </div>
+
+<!-- Rich editor (CKEditor 5) with simple upload -->
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script>
+ClassicEditor
+    .create(document.querySelector('textarea[name="noi_dung"]'), {
+        simpleUpload: {
+            // The URL that the images are uploaded to.
+            uploadUrl: 'admin.php?action=upload_image'
+        }
+    })
+    .catch(error => { console.error(error); });
+</script>
