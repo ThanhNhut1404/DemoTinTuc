@@ -98,7 +98,9 @@ class LoginController
         $stmt = $this->conn->prepare("INSERT INTO nguoi_dung (email, mat_khau) VALUES (?, ?)");
         $stmt->execute([$email, $hashedPassword]);
 
-        echo "<script>alert('✅ Đăng ký thành công!'); window.location='index.php?action=login';</script>";
+        header("Location: index.php?action=login");
+        exit;
+
     }
 
     // Đăng xuất
@@ -128,4 +130,33 @@ class LoginController
         header("Location: index.php");
         exit;
     }
+
+    private function checkPasswordStrength($password)
+{
+    $length = strlen($password);
+
+    // Kiểm tra mạnh
+    if (
+        $length >= 10 &&
+        preg_match('/[A-Z]/', $password) &&
+        preg_match('/[a-z]/', $password) &&
+        preg_match('/[0-9]/', $password) &&
+        preg_match('/[\W]/', $password)
+    ) {
+        return "strong";
+    }
+
+    // Kiểm tra trung bình
+    if (
+        $length >= 8 &&
+        preg_match('/[a-zA-Z]/', $password) &&
+        preg_match('/[0-9]/', $password)
+    ) {
+        return "medium";
+    }
+
+    // Còn lại là yếu
+    return "weak";
+}
+
 }
