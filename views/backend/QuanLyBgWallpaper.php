@@ -150,7 +150,7 @@ if ($sub === 'create' || $sub === 'edit') {
 </style>
 
 <div class="wallpaper-card">
-    <h2>Quản lý Nền Website</h2>
+    <h2 class="member-title">Quản lý Background</h2>
     
     <?php if (isset($_GET['updated'])): ?>
         <div style="padding:10px;background:#e6ffee;border:1px solid #90ee90;margin-bottom:15px;border-radius:8px; color:#0a7a2a;">Cập nhật thành công.</div>
