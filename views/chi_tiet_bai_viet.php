@@ -63,12 +63,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit;
     }
 
-    $stmt = $conn->prepare("INSERT INTO binh_luan (id_bai_viet, id_nguoi_dung, noi_dung, ngay_binh_luan) VALUES (?, ?, ?, NOW())");
-    $stmt->bind_param("iis", $id, $uid, $noi_dung);
+    // Load active bad words from DB and censor
+    try {
+        $bwRes = $conn->query("SELECT word FROM bad_words WHERE active = 1");
+        $badWords = [];
+        if ($bwRes) {
+            while ($row = $bwRes->fetch_assoc()) {
+                $badWords[] = $row['word'];
+            }
+        }
+    } catch (Exception $e) {
+        $badWords = [];
+    }
+
+    $noi_dung_censored = $noi_dung;
+    if (!empty($badWords)) {
+        $sub = [];
+        foreach ($badWords as $w) {
+            $w = trim($w);
+            if ($w === '') continue;
+            $chars = preg_split('//u', $w, -1, PREG_SPLIT_NO_EMPTY);
+            $parts = array_map(function($ch){ return preg_quote($ch, '/').'+'; }, $chars);
+            $sub[] = implode('', $parts);
+        }
+        if (!empty($sub)) {
+            $pattern = '/(?<!\\p{L})(?:' . implode('|', $sub) . ')(?!\\p{L})/iu';
+            $noi_dung_censored = preg_replace($pattern, '***', $noi_dung_censored);
+        }
+    }
+
+    // Store as pending ('An') for moderation
+    $trang_thai = 'An';
+    $stmt = $conn->prepare("INSERT INTO binh_luan (id_bai_viet, id_nguoi_dung, noi_dung, trang_thai, ngay_binh_luan) VALUES (?, ?, ?, ?, NOW())");
+    $stmt->bind_param("iiss", $id, $uid, $noi_dung_censored, $trang_thai);
     $stmt->execute();
     $stmt->close();
 
-    $_SESSION['flash_message'] = 'Bình luận đã được gửi thành công!';
+    $_SESSION['flash_message'] = 'Bình luận đã gửi và đang chờ duyệt bởi quản trị.';
     header("Location: " . $_SERVER['REQUEST_URI']);
     exit;
 }

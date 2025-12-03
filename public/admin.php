@@ -137,6 +137,99 @@ switch ($action) {
         $baiVietController->index();
         break;
 
+    // Bad-words admin (standalone)
+    case 'bad_words':
+        // show the admin layout which will include the bad_words fragment
+        include __DIR__ . '/../views/backend/layout.php';
+        break;
+
+    case 'bad_words_add':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $kw = trim($_POST['word'] ?? '');
+            if ($kw !== '') {
+                try {
+                    $bw = new \Website\TinTuc\Models\BadWordsModel();
+                    $bw->add($kw);
+                    $_SESSION['flash_success'] = 'Thêm từ khoá thành công.';
+                } catch (Exception $e) {
+                    $_SESSION['flash_error'] = 'Lỗi khi thêm từ khoá.';
+                }
+            }
+        }
+        header('Location: admin.php?action=bad_words');
+        exit;
+
+    case 'bad_words_delete':
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id > 0) {
+            try {
+                $bw = new \Website\TinTuc\Models\BadWordsModel();
+                $bw->delete($id);
+                $_SESSION['flash_success'] = 'Xóa từ khoá thành công.';
+            } catch (Exception $e) {
+                $_SESSION['flash_error'] = 'Lỗi khi xóa từ khoá.';
+            }
+        }
+        header('Location: admin.php?action=bad_words');
+        exit;
+
+    case 'bad_words_update':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int)($_POST['id'] ?? 0);
+            $word = trim($_POST['word'] ?? '');
+            $active = isset($_POST['active']) ? 1 : 0;
+            if ($id > 0 && $word !== '') {
+                try {
+                    $bw = new \Website\TinTuc\Models\BadWordsModel();
+                    $bw->update($id, $word, $active);
+                    $_SESSION['flash_success'] = 'Cập nhật thành công.';
+                } catch (Exception $e) {
+                    $_SESSION['flash_error'] = 'Lỗi khi cập nhật.';
+                }
+            }
+        }
+        header('Location: admin.php?action=bad_words');
+        exit;
+
+    case 'bad_words_copy':
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id > 0) {
+            try {
+                $bw = new \Website\TinTuc\Models\BadWordsModel();
+                $bw->copy($id);
+                $_SESSION['flash_success'] = 'Chép từ khoá thành công.';
+            } catch (Exception $e) {
+                $_SESSION['flash_error'] = 'Lỗi khi chép từ khoá.';
+            }
+        }
+        header('Location: admin.php?action=bad_words');
+        exit;
+
+    case 'bad_words_toggle':
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id > 0) {
+            try {
+                $bw = new \Website\TinTuc\Models\BadWordsModel();
+                $bw->toggleActive($id);
+                $_SESSION['flash_success'] = 'Đổi trạng thái thành công.';
+            } catch (Exception $e) {
+                $_SESSION['flash_error'] = 'Lỗi khi đổi trạng thái.';
+            }
+        }
+        header('Location: admin.php?action=bad_words');
+        exit;
+
+    case 'bad_words_apply':
+        try {
+            // apply censoring on-the-fly is already done in BinhLuanModel->getByPostId
+            // but if you want to permanently replace stored comments, implement here.
+            $_SESSION['flash_success'] = 'Áp dụng thành công (hiển thị sẽ bị che từ khi xem chi tiết).';
+        } catch (Exception $e) {
+            $_SESSION['flash_error'] = 'Lỗi khi áp dụng.';
+        }
+        header('Location: admin.php?action=bad_words');
+        exit;
+
     case 'danh_muc':   
         // Quản lý chuyên mục
         $chuyenMucController = new ChuyenMucController();

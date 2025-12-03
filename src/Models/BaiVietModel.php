@@ -114,21 +114,45 @@ class BaiVietModel
         $status = ucfirst(strtolower(str_replace('_', ' ', $status)));
         $status = str_replace(' ', '_', $status);
 
-        $sql = "INSERT INTO bai_viet (tieu_de, mo_ta_ngan, noi_dung, anh_dai_dien, id_chuyen_muc, id_tac_gia, id_the_tag, la_noi_bat, trang_thai, ngay_dang)
-                VALUES (:tieu_de, :mo_ta_ngan, :noi_dung, :anh_dai_dien, :id_chuyen_muc, :id_tac_gia, :id_the_tag, :la_noi_bat, :trang_thai, :ngay_dang)";
+        // Detect which tag column (if any) exists in the table
+        $tagColumn = null;
+        if ($this->columnExists('id_the_tag')) {
+            $tagColumn = 'id_the_tag';
+        } elseif ($this->columnExists('tag')) {
+            $tagColumn = 'tag';
+        } elseif ($this->columnExists('the_tag')) {
+            $tagColumn = 'the_tag';
+        }
+
+        // Build column list and placeholders dynamically
+        $columns = ['tieu_de','mo_ta_ngan','noi_dung','anh_dai_dien','id_chuyen_muc','id_tac_gia','la_noi_bat','trang_thai','ngay_dang'];
+        $placeholders = [':tieu_de',':mo_ta_ngan',':noi_dung',':anh_dai_dien',':id_chuyen_muc',':id_tac_gia',':la_noi_bat',':trang_thai',':ngay_dang'];
+        if ($tagColumn) {
+            // insert tag column just after id_chuyen_muc for compatibility
+            array_splice($columns, 5, 0, $tagColumn);
+            array_splice($placeholders, 5, 0, ':tag_val');
+        }
+
+        $sql = "INSERT INTO bai_viet (" . implode(',', $columns) . ") VALUES (" . implode(',', $placeholders) . ")";
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
+
+        $params = [
             'tieu_de' => $data['tieu_de'] ?? '',
             'mo_ta_ngan' => $data['mo_ta_ngan'] ?? '',
             'noi_dung' => $data['noi_dung'] ?? '',
             'anh_dai_dien' => $data['anh_dai_dien'] ?? '',
             'id_chuyen_muc' => $data['id_chuyen_muc'] ?? 0,
             'id_tac_gia' => $data['id_tac_gia'] ?? null,
-            'id_the_tag' => $data['tag'] ?? ($data['id_the_tag'] ?? null),
             'la_noi_bat' => $data['la_noi_bat'] ?? 0,
             'trang_thai' => $status,
             'ngay_dang' => $data['ngay_dang'] ?? date('Y-m-d H:i:s'),
-        ]);
+        ];
+
+        if ($tagColumn) {
+            $params['tag_val'] = $data['tag'] ?? ($data['id_the_tag'] ?? null);
+        }
+
+        $stmt->execute($params);
     }
 
     // --- Cập nhật bài viết ---
@@ -140,24 +164,55 @@ class BaiVietModel
         $status = str_replace(' ', '_', $status);
 
         $data['id'] = $id;
-        $sql = "UPDATE bai_viet 
-                SET tieu_de=:tieu_de, mo_ta_ngan=:mo_ta_ngan, noi_dung=:noi_dung, anh_dai_dien=:anh_dai_dien,
-                    id_chuyen_muc=:id_chuyen_muc, id_tac_gia=:id_tac_gia, id_the_tag=:id_the_tag, la_noi_bat=:la_noi_bat, trang_thai=:trang_thai, ngay_dang=:ngay_dang
-                WHERE id=:id";
+        // Detect tag column presence
+        $tagColumn = null;
+        if ($this->columnExists('id_the_tag')) {
+            $tagColumn = 'id_the_tag';
+        } elseif ($this->columnExists('tag')) {
+            $tagColumn = 'tag';
+        } elseif ($this->columnExists('the_tag')) {
+            $tagColumn = 'the_tag';
+        }
+
+        // Build SET clauses dynamically
+        $sets = [
+            'tieu_de = :tieu_de',
+            'mo_ta_ngan = :mo_ta_ngan',
+            'noi_dung = :noi_dung',
+            'anh_dai_dien = :anh_dai_dien',
+            'id_chuyen_muc = :id_chuyen_muc',
+            'id_tac_gia = :id_tac_gia',
+        ];
+        if ($tagColumn) {
+            $sets[] = "{$tagColumn} = :tag_val";
+        }
+        $sets = array_merge($sets, [
+            'la_noi_bat = :la_noi_bat',
+            'trang_thai = :trang_thai',
+            'ngay_dang = :ngay_dang'
+        ]);
+
+        $sql = "UPDATE bai_viet SET " . implode(', ', $sets) . " WHERE id=:id";
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
+
+        $params = [
             'tieu_de' => $data['tieu_de'] ?? '',
             'mo_ta_ngan' => $data['mo_ta_ngan'] ?? '',
             'noi_dung' => $data['noi_dung'] ?? '',
             'anh_dai_dien' => $data['anh_dai_dien'] ?? '',
             'id_chuyen_muc' => $data['id_chuyen_muc'] ?? 0,
             'id_tac_gia' => $data['id_tac_gia'] ?? null,
-            'id_the_tag' => $data['tag'] ?? ($data['id_the_tag'] ?? null),
             'la_noi_bat' => $data['la_noi_bat'] ?? 0,
             'trang_thai' => $status,
             'ngay_dang' => $data['ngay_dang'] ?? date('Y-m-d H:i:s'),
             'id' => $id,
-        ]);
+        ];
+
+        if ($tagColumn) {
+            $params['tag_val'] = $data['tag'] ?? ($data['id_the_tag'] ?? null);
+        }
+
+        $stmt->execute($params);
     }
 
     // --- Xóa bài viết ---

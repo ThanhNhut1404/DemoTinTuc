@@ -23,7 +23,38 @@ class BinhLuanModel {
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$id_bai_viet]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Censor bad words using bad_words table (if exists)
+        try {
+            $bwStmt = $this->conn->query("SELECT word FROM bad_words WHERE active = 1");
+            $badWords = $bwStmt->fetchAll(PDO::FETCH_COLUMN);
+        } catch (\Exception $e) {
+            $badWords = [];
+        }
+
+        if (!empty($badWords)) {
+            // Build patterns that allow repeated letters (e.g. chó -> c+ h+ ó+ to match chóoo)
+            $sub = [];
+            foreach ($badWords as $w) {
+                $w = trim($w);
+                if ($w === '') continue;
+                $chars = preg_split('//u', $w, -1, PREG_SPLIT_NO_EMPTY);
+                $parts = array_map(function($ch){ return preg_quote($ch, '/').'+'; }, $chars);
+                $sub[] = implode('', $parts);
+            }
+            if (!empty($sub)) {
+                $pattern = '/(?<!\p{L})(?:' . implode('|', $sub) . ')(?!\p{L})/iu';
+                foreach ($rows as &$r) {
+                    if (!empty($r['noi_dung'])) {
+                        $r['noi_dung'] = preg_replace($pattern, '***', $r['noi_dung']);
+                    }
+                }
+                unset($r);
+            }
+        }
+
+        return $rows;
     }
 
     // Thêm bình luận
