@@ -17,13 +17,20 @@ if ($sub === 'create' || $sub === 'edit') {
     .wallpaper-card h2 {
         margin-top: 0;
         font-size: 24px; /* match .member-title */
-        margin-bottom: 12px;
         color: #1f2937;
     }
 
+    .wallpaper-card .card-header {
+        display: flex;
+        flex-direction: column; /* stack: heading then button */
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .wallpaper-card .card-header h2{ margin:0 }
+
+    /* Make Add button white text with blue background matching the heading */
     .wallpaper-card .btn-add {
-        background: #007bff; /* match .member-title color */
-        color: #fff;
         border-radius: 8px;
         text-decoration: none;
         display: inline-flex;
@@ -32,12 +39,14 @@ if ($sub === 'create' || $sub === 'edit') {
         padding: 8px 12px; /* match form-inline buttons */
         height: 38px; /* same height as .form-inline .btn-search */
         box-sizing: border-box;
-        font-weight: 400; /* not bold per request */
-        font-size: 24px; /* keep larger text to match heading */
+        font-size: 14px; /* match .form-inline .btn-search */
+        font-weight: 600; /* keep medium weight for legibility */
         margin-bottom: 12px;
         border: none;
+        color: #fff; /* white text */
+        background: #22c55e; /* match .member-title color */
     }
-    .wallpaper-card .btn-add:hover { background: #0056d6 }
+    .wallpaper-card .btn-add:hover { background: #16a34a }
 
     .wallpaper-grid {
         display: grid;
@@ -173,13 +182,14 @@ if ($sub === 'create' || $sub === 'edit') {
 </style>
 
 <div class="wallpaper-card">
-    <h2 class="member-title">Danh sách Background</h2>
+    <div class="card-header">
+        <h2 class="member-title">Danh sách Background</h2>
+        <a href="admin.php?action=bg_wallpaper_create" class="btn btn-search btn-add">Thêm Background</a>
+    </div>
     
     <?php if (isset($_GET['updated'])): ?>
         <div style="padding:10px;background:#e6ffee;border:1px solid #90ee90;margin-bottom:15px;border-radius:8px; color:#0a7a2a;">Cập nhật thành công.</div>
     <?php endif; ?>
-    
-    <p><a href="admin.php?action=bg_wallpaper_create" class="btn-add">Thêm Background</a></p>
 
     <?php if (empty($wallpapers)): ?>
         <div class="empty-state">

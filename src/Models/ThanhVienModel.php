@@ -317,34 +317,57 @@ class ThanhVienModel {
 
     public function createResetToken($email)
 {
-    $token = bin2hex(random_bytes(32));
-    $expires = date("Y-m-d H:i:s", strtotime("+30 minutes"));
+        $token = bin2hex(random_bytes(32));
 
-    $sql = "UPDATE nguoi_dung SET reset_token=?, reset_expires=? WHERE email=?";
-    $stmt = $this->conn->prepare($sql);
-    $stmt->execute([$token, $expires, $email]);
+        // Use DB time to avoid timezone mismatches: set expiry to NOW() + 30 minutes in the database
+        $emailCol = $this->cols['email'];
+        $table = $this->table;
+        $sql = sprintf("UPDATE `%s` SET reset_token = ?, reset_token_expiry = DATE_ADD(NOW(), INTERVAL 30 MINUTE) WHERE `%s` = ?", $table, $emailCol);
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$token, $email]);
 
-    if ($stmt->rowCount() > 0) {
-        return $token;
-    }
+        if ($stmt->rowCount() > 0) {
+            return $token;
+        }
 
-    return false;
+        return false;
 }
 
 public function validateResetToken($token)
 {
-    $sql = "SELECT * FROM nguoi_dung WHERE reset_token=? AND reset_expires > NOW()";
+    // Use the detected table name in case it's `users` or `nguoi_dung`.
+    $table = $this->table;
+    $sql = sprintf("SELECT * FROM `%s` WHERE reset_token = ? AND reset_token_expiry > NOW()", $table);
     $stmt = $this->conn->prepare($sql);
     $stmt->execute([$token]);
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$row) return false;
+
+    // Normalize to logical column names (id, ho_ten, email, etc.)
+    $normalized = [];
+    foreach ($this->cols as $logical => $actual) {
+        $normalized[$logical] = $row[$actual] ?? null;
+    }
+    // also include raw row for any additional checks
+    $normalized['_raw'] = $row;
+
+    return $normalized;
 }
 
 public function resetPasswordByToken($token, $password)
 {
-    $sql = "UPDATE nguoi_dung 
-            SET mat_khau=?, reset_token=NULL, reset_expires=NULL 
-            WHERE reset_token=?";
+    // Update the correct table and password column if available
+    $table = $this->table;
+    // find password column in detected columns or common names
+    $realCols = array_values($this->cols);
+    $passwordCol = $this->findColumnStrict($realCols, ['mat_khau', 'password', 'pass', 'mk']);
+    if (!$passwordCol) {
+        // fallback to common name
+        $passwordCol = 'mat_khau';
+    }
+
+    $sql = sprintf("UPDATE `%s` SET `%s` = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?", $table, $passwordCol);
     $stmt = $this->conn->prepare($sql);
     $stmt->execute([$password, $token]);
 }
