@@ -20,12 +20,12 @@ $conn = $db->connect();
 // Lấy ID người dùng
 $id = $_SESSION['user']['id'];
 
-// Lấy danh sách bình luận của user
-$sql = "SELECT bl.noi_dung AS comment, bl.ngay_binh_luan, b.tieu_de, b.id AS id_bai
-        FROM binh_luan bl
-        JOIN bai_viet b ON bl.id_bai_viet = b.id
-        WHERE bl.id_nguoi_dung = ?
-        ORDER BY bl.ngay_binh_luan DESC";
+// Lấy danh sách bình luận của user (kèm thông tin bài viết: ảnh, mô tả ngắn, ngày đăng)
+$sql = "SELECT bl.noi_dung AS comment, bl.ngay_binh_luan, b.tieu_de, b.id AS id_bai, b.anh_dai_dien, b.mo_ta_ngan, b.ngay_dang
+    FROM binh_luan bl
+    JOIN bai_viet b ON bl.id_bai_viet = b.id
+    WHERE bl.id_nguoi_dung = ?
+    ORDER BY bl.ngay_binh_luan DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute([$id]);
@@ -33,107 +33,29 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <style>
-    body {
-        margin: 0;
-        background: #f4f6f9;
-        font-family: 'Segoe UI', sans-serif;
-    }
+    body { margin:0; font-family:'Segoe UI', Tahoma, sans-serif; background:#f1f5f9; }
 
-    /* HEADER */
-    .header-bar {
-        width: 100%;
-        background: #004a99;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-        position: sticky;
-        top: 0;
-        z-index: 50;
-    }
+    .header-bar { width:100%; background:#005fa3; padding:12px 18px; box-shadow:0 3px 6px rgba(0,0,0,0.08); }
+    .header-bar .header-btn { background:white; color:#0056c7; padding:8px 14px; border-radius:6px; text-decoration:none; font-weight:600; }
 
-    .header-title {
-        color: white;
-        font-size: 22px;
-        margin: 0;
-        font-weight: bold;
-    }
+    .my-comments { max-width:1100px; margin:30px auto; padding:18px; }
+    .page-title { font-size:26px; color:#0b5fa5; margin-bottom:20px; text-align:left; }
 
-    .header-btn {
-        background: white;
-        color: #0056c7;
-        padding: 8px 14px;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: bold;
-        transition: 0.25s;
-    }
+    /* Article item (match search.php) */
+    .article-item { display:flex; gap:18px; align-items:flex-start; background:#fff; border-radius:12px; padding:14px; border:1px solid #e6eef9; margin-bottom:16px; transition:0.18s; }
+    .article-item:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(10,50,100,0.06); }
+    .article-img { width:220px; height:130px; object-fit:cover; border-radius:10px; flex-shrink:0; background:#f0f2f5; }
 
-    .header-btn:hover {
-        background: #e9f1ff;
-    }
+    .article-body { flex:1; }
+    .article-title { margin:0 0 8px 0; font-size:18px; }
+    .article-title a { color:#0b66c2; text-decoration:none; font-weight:700; }
+    .article-title a:hover { text-decoration:underline; }
 
-    /* CONTENT CONTAINER */
-    .my-comments {
-        max-width: 900px;
-        margin: 30px auto;
-        padding: 0 15px;
-    }
+    .article-desc { color:#4b5563; margin-bottom:10px; }
+    .comment-snippet { color:#374151; font-size:15px; margin-top:6px; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #eef2f7; }
 
-    .page-title {
-        font-size: 28px;
-        font-weight: bold;
-        color: #0056c7;
-        text-align: center;
-        margin-bottom: 25px;
-    }
-
-    .comment-card {
-        background: #fff;
-        border: 1px solid #d7e3f8;
-        padding: 20px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-        transition: 0.25s;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-    }
-
-    .comment-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    }
-
-    .comment-title a {
-        color: #0066cc;
-        font-size: 20px;
-        font-weight: bold;
-        text-decoration: none;
-    }
-
-    .comment-title a:hover {
-        text-decoration: underline;
-    }
-
-    .comment-text {
-        margin: 12px 0;
-        font-size: 16px;
-        color: #444;
-        line-height: 1.5;
-    }
-
-    .comment-date {
-        font-size: 13px;
-        color: #777;
-    }
-
-    .no-comment {
-        text-align: center;
-        color: #666;
-        margin-top: 40px;
-        font-style: italic;
-        font-size: 18px;
-    }
+    .meta-row { display:flex; gap:12px; align-items:center; color:#6b7280; font-size:13px; margin-top:10px; }
+    .no-comment { text-align:center; color:#6b7280; margin-top:40px; font-style:italic; }
 </style>
 
 <!-- HEADER -->
@@ -148,23 +70,31 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <?php if (!empty($data)): ?>
         <?php foreach ($data as $c): ?>
-            <div class="comment-card">
-                <div class="comment-title">
-                    <b>Bài viết:</b>
-                    <a href="../index.php?action=xem_bai&id=<?= htmlspecialchars($c['id_bai']) ?>">
-                        <?= htmlspecialchars($c['tieu_de']) ?>
-                    </a>
-                </div>
+            <article class="article-item">
+                <?php $img = !empty($c['anh_dai_dien']) ? $c['anh_dai_dien'] : 'public/uploads/wallpapers/default.jpg'; ?>
+                <a href="index.php?action=chi_tiet_bai_viet&id=<?= htmlspecialchars($c['id_bai']) ?>">
+                    <img class="article-img" src="<?= htmlspecialchars($img) ?>" alt="">
+                </a>
 
-                <div class="comment-text">
-                    <b>Bình luận:</b><br>
-                    <?= nl2br(htmlspecialchars($c['comment'])) ?>
-                </div>
+                <div class="article-body">
+                    <h3 class="article-title">
+                        <a href="index.php?action=chi_tiet_bai_viet&id=<?= htmlspecialchars($c['id_bai']) ?>"><?= htmlspecialchars($c['tieu_de']) ?></a>
+                    </h3>
 
-                <div class="comment-date">
-                    <?= htmlspecialchars($c['ngay_binh_luan']) ?>
+                    <div class="article-desc"><?= htmlspecialchars($c['mo_ta_ngan'] ?? '') ?></div>
+
+                    <div class="comment-snippet">
+                        <strong>Bình luận:</strong>
+                        <div style="margin-top:6px;"><?= nl2br(htmlspecialchars($c['comment'])) ?></div>
+                    </div>
+
+                    <div class="meta-row">
+                        <div>Ngày bình luận: <?= htmlspecialchars($c['ngay_binh_luan']) ?></div>
+                        <div>·</div>
+                        <div>Ngày bài: <?= htmlspecialchars($c['ngay_dang'] ?? '') ?></div>
+                    </div>
                 </div>
-            </div>
+            </article>
         <?php endforeach; ?>
 
     <?php else: ?>

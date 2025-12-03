@@ -174,7 +174,7 @@ input:focus, textarea:focus {
         </div>
       <?php endif; ?>
 
-      <form action="admin.php?action=updateProfile" method="POST" enctype="multipart/form-data">
+      <form action="index.php?action=updateProfile" method="POST" enctype="multipart/form-data">
 
         <div class="avatar-edit">
             <img id="preview" src="<?= $avatar ?>">

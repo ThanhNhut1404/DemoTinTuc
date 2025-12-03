@@ -34,118 +34,118 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <style>
-    body {
-        margin: 0;
-        background: #f4f6f9;
-        font-family: 'Segoe UI', sans-serif;
-    }
+body { 
+    font-family: 'Segoe UI', Tahoma, sans-serif; 
+    background: #eef2f7; 
+    margin:0; 
+}
 
-    /* HEADER */
-    .header-bar {
-        width: 100%;
-        background: #004a99;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-        position: sticky;
-        top: 0;
-        z-index: 50;
-    }
+/* HEADER */
+.header-bar { 
+    width:100%; 
+    background:#005fa3; 
+    padding:12px 0; 
+    text-align:center; 
+}
+.header-bar h1 { 
+    color:white; 
+    margin:0; 
+    font-size:22px; 
+}
 
-    .header-title {
-        color: white;
-        font-size: 22px;
-        margin: 0;
-        font-weight: bold;
-    }
+/* Container */
+.search-container { 
+    max-width:1150px; 
+    margin:40px auto; 
+    background:#fff; 
+    padding:30px; 
+    border-radius:15px; 
+    box-shadow:0 6px 20px rgba(0,0,0,0.08); 
+}
 
-    .header-btn {
-        background: white;
-        color: #0056c7;
-        padding: 8px 14px;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: bold;
-        transition: 0.25s;
-    }
+.layout-wrapper { 
+    display:flex; 
+    gap:25px; 
+}
 
-    .header-btn:hover {
-        background: #e9f1ff;
-    }
+.left-content { 
+    flex:1; 
+}
 
-    /* CONTENT */
-    .liked-posts {
-        max-width: 900px;
-        margin: 30px auto;
-        padding: 0 15px;
-    }
+/* Article item */
+.article-item { 
+    display:flex; 
+    gap:20px; 
+    padding:18px; 
+    margin-bottom:18px; 
+    border-radius:12px; 
+    background:#fafafa; 
+    border:1px solid #eee; 
+    transition:0.25s; 
+}
 
-    .page-title {
-        font-size: 28px;
-        font-weight: bold;
-        color: #0056c7;
-        text-align: center;
-        margin-bottom: 25px;
-    }
+.article-item:hover { 
+    background:#fff; 
+    border-color:#ccc; 
+    transform:translateY(-3px); 
+}
 
-    .post-card {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #d7e3f8;
-        margin-bottom: 18px;
-        transition: 0.25s;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-    }
+.article-img { 
+    width:200px; 
+    height:130px; 
+    border-radius:10px; 
+    object-fit:cover; 
+}
 
-    .post-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    }
+.back-home { 
+    display:inline-block; 
+    margin-top:25px; 
+    padding:10px 18px; 
+    background:#007bff; 
+    color:white; 
+    border-radius:8px; 
+    text-decoration:none; 
+    transition:0.25s; 
+}
 
-    .post-card a {
-        text-decoration: none;
-        color: #0066cc;
-        font-size: 20px;
-        font-weight: bold;
-    }
+.back-home:hover { 
+    background:#005fa3; 
+}
 
-    .post-card a:hover {
-        text-decoration: underline;
-    }
-
-    .no-post {
-        text-align: center;
-        color: #777;
-        margin-top: 40px;
-        font-size: 18px;
-        font-style: italic;
-    }
+.no-post { 
+    text-align:center; 
+    color:#777; 
+    margin-top:40px; 
+    font-size:18px; 
+    font-style:italic; 
+}
 </style>
 
 <!-- HEADER -->
 <div class="header-bar">
-    
-    <a href="index.php" class="header-btn">Trang chủ</a>
+    <h1>Danh sách bài viết đã thích</h1>
 </div>
 
 <!-- CONTENT -->
-<div class="liked-posts">
+<div class="search-container">
+    <div class="layout-wrapper">
+        <div class="left-content">
+            <?php if (empty($posts)): ?>
+                <p class="no-post">Bạn chưa thích bài viết nào.</p>
+            <?php else: ?>
+                <?php foreach ($posts as $row): ?>
+                    <div class="article-item">
+                        <img src="<?= !empty($row['anh_dai_dien']) ? 'uploads/' . htmlspecialchars($row['anh_dai_dien']) : htmlspecialchars($row['hinh_anh'] ?? 'https://via.placeholder.com/200x130?text=No+Image') ?>" class="article-img" alt="Ảnh bài">
+                        <div>
+                            <h3><a href="index.php?action=chi_tiet_bai_viet&id=<?= urlencode($row['id']) ?>"><?= htmlspecialchars($row['tieu_de'] ?? $row['Tieu_de'] ?? '') ?></a></h3>
+                            <div><?= htmlspecialchars($row['mo_ta_ngan'] ?? $row['Mo_ta'] ?? '') ?></div>
+                            <div>📅 <?= htmlspecialchars($row['ngay_dang'] ?? '') ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
 
-    <h2 class="page-title">Danh sách bài viết đã thích</h2>
-
-    <?php if (!empty($posts)): ?>
-        <?php foreach ($posts as $row): ?>
-            <div class="post-card">
-                <a href="index.php?action=xem_bai&id=<?= htmlspecialchars($row['id']) ?>">
-                    <?= htmlspecialchars($row['Tieu_de'] ?? $row['tieu_de']) ?>
-                </a>
-            </div>
-        <?php endforeach; ?>
-
-    <?php else: ?>
-        <p class="no-post">Bạn chưa thích bài viết nào.</p>
-    <?php endif; ?>
+                <a href="index.php" class="back-home">Trang chủ</a>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>

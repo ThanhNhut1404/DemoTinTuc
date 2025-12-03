@@ -1,11 +1,14 @@
 <?php
+// Khởi động session nếu chưa
 if (session_status() === PHP_SESSION_NONE) session_start();
 
+// Kiểm tra người dùng đã đăng nhập
 if (!isset($_SESSION['user']['id'])) {
     echo "<p style='text-align:center;color:red;margin-top:50px;'>Bạn cần đăng nhập để xem bài viết đã lưu.</p>";
     return;
 }
 
+// Include class Database
 require_once __DIR__ . '/../../src/Database.php';
 use Website\TinTuc\Database;
 
@@ -26,159 +29,58 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <style>
-    body {
-        background: #f4f6f9;
-        font-family: 'Segoe UI', sans-serif;
-        margin: 0;
-        padding: 0;
-    }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:0; }
 
-    /* HEADER */
-    .header-bar {
-        width: 100%;
-        background: #004a99;
-        padding: 15px 20px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
+/* HEADER */
+.header-bar { width:100%; background:#005fa3; padding:12px 0; text-align:center; }
+.header-bar h1 { color:white; margin:0; font-size:22px; }
 
-    .header-title {
-        font-size: 22px;
-        font-weight: bold;
-        color: white;
-        margin: 0;
-    }
+/* Container */
+.container-saved, .search-container { max-width:1150px; margin:40px auto; background:#fff; padding:30px; border-radius:15px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+.layout-wrapper { display:flex; gap:25px; }
+.left-content { flex:1; }
 
-    .header-btn {
-        background: white;
-        color: #0056c7;
-        padding: 8px 14px;
-        text-decoration: none;
-        border-radius: 6px;
-        transition: 0.25s;
-        font-weight: bold;
-        border: 2px solid transparent;
-    }
+/* Article item */
+.article-item { display:flex; gap:20px; padding:18px; margin-bottom:18px; border-radius:12px; background:#fafafa; border:1px solid #eee; transition:0.25s; }
+.article-item:hover { background:#fff; border-color:#ccc; transform:translateY(-3px); }
+.article-img { width:200px; height:130px; border-radius:10px; object-fit:cover; }
 
-    .header-btn:hover {
-        background: #e6efff;
-        border-color: white;
-    }
+.back-home { display:inline-block; margin-top:25px; padding:10px 18px; background:#007bff; color:white; border-radius:8px; text-decoration:none; transition:0.25s; }
+.back-home:hover { background:#005fa3; }
 
-    /* CONTENT */
-    .container-saved {
-        max-width: 900px;
-        margin: 30px auto;
-        padding: 0 20px;
-        margin-top: 30px;
-    }
-
-    .page-title {
-        font-size: 28px;
-        font-weight: bold;
-        color: #0056c7;
-        text-align: center;
-        margin-bottom: 20px;
-        letter-spacing: 0.5px;
-    }
-
-    /* CARD */
-    .post-card {
-        background: white;
-        border-radius: 14px;
-        padding: 20px 25px;
-        margin-bottom: 18px;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0px 4px 18px rgba(0,0,0,0.06);
-        transition: 0.25s;
-    }
-    .post-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0px 6px 25px rgba(0,0,0,0.1);
-    }
-
-    .post-title {
-        font-size: 20px;
-        font-weight: bold;
-        color: #0055cc;
-        text-decoration: none;
-    }
-    .post-title:hover {
-        text-decoration: underline;
-        color: #003e96;
-    }
-
-    .post-actions {
-        margin-top: 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .btn-remove {
-        padding: 7px 14px;
-        background: #0066cc;
-        color: #fff !important;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 14px;
-        transition: 0.25s;
-    }
-    .btn-remove:hover {
-        background: #0066cc;
-    }
-
-    .empty-text {
-        text-align: center;
-        color: #777;
-        font-size: 18px;
-        margin-top: 40px;
-        font-style: italic;
-    }
+.empty-text, .no-post { text-align:center; color:#777; margin-top:40px; font-size:18px; font-style:italic; }
 </style>
-
 
 <!-- HEADER -->
 <div class="header-bar">
-    
-
-    <a href="index.php" class="header-btn">Trang chủ</a>
+    <h1>Danh sách bài viết đã lưu</h1>
 </div>
 
+<!-- CONTENT -->
 <div class="container-saved">
 
-    <h2 class="page-title">Danh sách bài viết đã lưu</h2>
-
     <?php if (!empty($posts)): ?>
-        <?php foreach ($posts as $row): ?>
-            <div class="post-card">
-
-                <!-- Bấm vào xem bài viết -->
-                <a class="post-title" href="../index.php?action=xem_bai&id=<?= $row['id'] ?>">
-                    <?= htmlspecialchars($row['tieu_de']) ?>
-                </a>
-
-                <div class="post-actions">
-                    <span style="color:#555;">ID bài viết: <?= $row['id'] ?></span>
-
-                    <!-- Bỏ lưu -->
-                    <a class="btn-remove" 
-                       href="../index.php?action=bo_luu&id_luu=<?= $row['id_luu'] ?>"
-                       onclick="return confirm('Bạn có chắc muốn bỏ lưu bài viết này không?');">
-                        Bỏ lưu
-                    </a>
-                </div>
-
+        <div class="layout-wrapper">
+            <div class="left-content">
+                <?php foreach ($posts as $row): ?>
+                    <div class="article-item">
+                        <img src="<?= !empty($row['anh_dai_dien']) ? 'uploads/' . htmlspecialchars($row['anh_dai_dien']) : htmlspecialchars($row['hinh_anh'] ?? 'https://via.placeholder.com/200x130?text=No+Image') ?>" class="article-img" alt="Ảnh bài">
+                        <div>
+                            <h3><a href="index.php?action=chi_tiet_bai_viet&id=<?= urlencode($row['id']) ?>"><?= htmlspecialchars($row['tieu_de'] ?? $row['Tieu_de'] ?? '') ?></a></h3>
+                            <div><?= htmlspecialchars($row['mo_ta_ngan'] ?? $row['Mo_ta'] ?? '') ?></div>
+                            <div>📅 <?= htmlspecialchars($row['ngay_dang'] ?? '') ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-        <?php endforeach; ?>
-
+        </div>
     <?php else: ?>
         <p class="empty-text">Bạn chưa lưu bài viết nào.</p>
     <?php endif; ?>
+
+    <!-- Nút trở về trang chủ (căn trái) -->
+    <div style="text-align:left;">
+        <a href="index.php" class="back-home">Trang chủ</a>
+    </div>
 
 </div>
