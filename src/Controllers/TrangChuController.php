@@ -74,12 +74,21 @@ class TrangChuController
             }
         }
         $tinXemNhieu = $baiVietModel->getTinXemNhieu(5);
-        // --- Lấy bài viết theo từng chuyên mục (phục vụ phần “📂 Bài viết theo chuyên mục”) ---
+        // --- Lấy bài viết theo từng CHUYÊN MỤC CHA (nhóm các chuyên mục con thuộc về cha) ---
+        $chuyenMucChaModel = new \Website\TinTuc\Models\ChuyenMucChaModel();
+        $chuyenMucModel = new \Website\TinTuc\Models\ChuyenMucModel();
+
+        $parents = $chuyenMucChaModel->getAll();
         $baiVietTheoChuyenMuc = [];
-        foreach ($chuyenMuc as $cm) {
-            // Lấy toàn bộ bài viết theo chuyên mục, từ mới đến cũ
-            $baiVietTheoChuyenMuc[$cm['id']] = $baiVietModel->getTinTheoChuyenMuc($cm['id']);
+        foreach ($parents as $parent) {
+            // Lấy id các chuyên mục con thuộc parent
+            $children = $chuyenMucModel->getChildren($parent['id']);
+            $childIds = array_map(function($c){ return $c['id']; }, $children);
+            // Lấy bài theo danh sách id chuyên mục con
+            $baiVietTheoChuyenMuc[$parent['id']] = $baiVietModel->getTinTheoChuyenMucList($childIds, 6);
         }
+        // expose parents to view as $chuyenMucCha
+        $chuyenMucCha = $parents;
 
         // Biến $banners, $tinMoiNhat... sẽ có sẵn trong view
         // Lấy wallpaper nền website đang kích hoạt

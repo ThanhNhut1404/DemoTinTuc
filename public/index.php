@@ -140,11 +140,11 @@ switch ($action) {
 
     // PROFILE
     case 'profile':
-        include 'views/frontend/profile.php';
+        include __DIR__ . '/../views/frontend/profile.php';
         break;
 
     case 'profile_edit':
-        include 'views/frontend/profile_edit.php';
+        include __DIR__ . '/../views/frontend/profile_edit.php';
         break;
 
     case 'profile_update':

@@ -145,7 +145,32 @@ switch ($action) {
     
     case 'tag':
         // Quản lý thẻ tag
-        include __DIR__ . '/../views/backend/QuanLyTag.php';
+        // Handle direct deletion (GET &sub=xoa&id=...) before any output so header() redirects work
+        if (($_SERVER['REQUEST_METHOD'] === 'GET') && (($_GET['sub'] ?? '') === 'xoa') && isset($_GET['id'])) {
+            try {
+                $tagModel = new \Website\TinTuc\Models\TagModel();
+                $id = $_GET['id'];
+                if ($tagModel->delete($id)) {
+                    $_SESSION['flash_success'] = '✅ Xóa thẻ tag thành công!';
+                } else {
+                    $_SESSION['flash_error'] = '❌ Lỗi khi xóa thẻ tag!';
+                }
+            } catch (Exception $e) {
+                $_SESSION['flash_error'] = '❌ Lỗi khi xóa thẻ tag!';
+            }
+            header('Location: admin.php?action=tag');
+            exit;
+        }
+
+        // If this is an AJAX POST for create/update (expects JSON), include the fragment directly
+        // so the fragment can return JSON without the surrounding layout HTML.
+        $isAjaxPost = ($_SERVER['REQUEST_METHOD'] === 'POST') && !empty($_GET['sub']);
+        if ($isAjaxPost) {
+            include __DIR__ . '/../views/backend/QuanLyTag.php';
+        } else {
+            // normal page view: render the admin layout which will include the fragment inside <main class="content">
+            include __DIR__ . '/../views/backend/layout.php';
+        }
         break;
 
     // Quản lý bình luận

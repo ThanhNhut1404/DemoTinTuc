@@ -25,6 +25,14 @@ $wallpaperUrl = '';
 if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
     $wallpaperUrl = 'uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
 }
+$cmModel = new \Website\TinTuc\Models\ChuyenMucModel();
+$dsChuyenMuc = $cmModel->getAll();
+$cmChaModel = new \Website\TinTuc\Models\ChuyenMucChaModel();
+$chuyenMucCha = $cmChaModel->getAll();
+$childrenMap = [];
+foreach ($dsChuyenMuc as $c) {
+    if (!empty($c['id_cha'])) $childrenMap[$c['id_cha']][] = $c;
+}
 // Helper to normalize image URLs (matches homepage behavior)
 function img_url($src)
 {
@@ -67,10 +75,10 @@ function img_url($src)
     }
 
     /* Local tweaks for category page layout */
-    main { display:flex; gap:6px; align-items:stretch; }
-    /* use 24% / 52% / 24% layout so sidebars sit flush with main; stretch to same height */
-    main > aside { width:24%; display:flex; flex-direction:column; box-sizing:border-box; }
-    main > section { width:52%; }
+    main { display:flex; gap:12px; align-items:stretch; max-width:1200px; margin:12px auto; padding:0 10px; }
+    /* single left removed: section takes majority and right aside occupies ~28% */
+    main > section { width:72%; }
+    main > aside { width:26%; display:flex; flex-direction:column; box-sizing:border-box; }
     .tin-link { display:block; text-decoration:none; color:inherit; }
     .tin { padding:12px; transition: transform .18s ease, box-shadow .18s ease; }
     .tin:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
@@ -82,91 +90,59 @@ function img_url($src)
     /* Make the wrapper inside aside fill available height and stack ad-slots vertically */
     main > aside > div { display:flex; flex-direction:column; gap:10px; height:100%; margin-top:0; padding:0; }
     
-    /* === MENU CHUYÊN MỤC STYLE === */
-    .category-menu-toggle {
-        display: none;
-        background: linear-gradient(90deg, #0d6efd, #0b5ed7);
-        color: white;
-        border: none;
-        padding: 10px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 0.95rem;
-        margin-bottom: 12px;
-        width: 100%;
-        transition: all 0.3s;
-    }
-    
-    .category-menu-toggle:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-    }
-    
-    .category-menu {
-        max-height: 500px;
-        overflow-y: auto;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 8px 0;
-        background: white;
-        transition: max-height 0.3s ease;
-    }
-    
-    .category-menu.collapsed {
-        max-height: 0;
-        overflow: hidden;
-        border: none;
-        padding: 0;
-    }
-    
-    .category-menu li {
-        list-style: none;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .category-menu li:last-child {
-        border-bottom: none;
-    }
-    
-    .category-menu a {
-        display: block;
-        padding: 10px 15px;
-        color: #333;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    
-    .category-menu a:hover {
-        background: #f5f5f5;
-        color: #005fa3;
-        padding-left: 20px;
-    }
-    
-    .category-menu a[style*="font-weight"] {
-        background: #e3f2fd;
-        color: #005fa3;
-        font-weight: 600;
-    }
-    
-    /* Scrollbar styling */
-    .category-menu::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .category-menu::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    .category-menu::-webkit-scrollbar-thumb {
-        background: #0d6efd;
-        border-radius: 10px;
-    }
-    
-    .category-menu::-webkit-scrollbar-thumb:hover {
-        background: #0b5ed7;
-    }
+        /* Category bar (reuse homepage styles) */
+        .category-bar {
+            background: white;
+            border-bottom: 1px solid #e6e6e6;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            margin-bottom: 12px;
+        }
+
+        .category-bar .cat-list {
+            list-style: none;
+            display: flex;
+            gap: 18px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 12px;
+            align-items: center;
+        }
+
+        .category-bar .cat-item { position: relative; }
+
+        .category-bar .cat-link {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .category-bar .cat-link:hover { color: #005fa3; }
+
+        .category-bar .cat-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            box-shadow: 0 6px 18px rgba(10,20,30,0.08);
+            min-width: 220px;
+            z-index: 1500;
+            padding: 8px 0;
+        }
+
+        .category-bar .cat-dropdown ul { list-style:none; margin:0; padding:0; }
+        .category-bar .cat-dropdown li a { display:block; padding:8px 14px; color:#333; text-decoration:none; }
+        .category-bar .cat-dropdown li a:hover { background:#f4f8ff; color:#005fa3; }
+
+        .category-bar .cat-item:hover .cat-dropdown { display: block; }
+
+        @media (max-width: 900px) {
+            .category-bar .cat-list { overflow:auto; padding:8px; gap:12px; }
+        }
     </style>
 </head>
 
@@ -189,41 +165,30 @@ function img_url($src)
             </div>
     </header>
 
+    <!-- Category navigation bar (parents horizontal, children dropdown on hover) -->
+    <nav class="category-bar">
+        <ul class="cat-list">
+            <?php foreach ($chuyenMucCha as $parent): ?>
+                <li class="cat-item">
+                    <a href="index.php?action=chuyenmuccha&id=<?= $parent['id'] ?>" class="cat-link"><?= htmlspecialchars($parent['ten_chuyen_muc']) ?></a>
+                    <div class="cat-dropdown">
+                        <ul>
+                            <?php if (!empty($childrenMap[$parent['id']])): ?>
+                                <?php foreach ($childrenMap[$parent['id']] as $child): ?>
+                                    <li><a href="index.php?action=chuyenmuc&id=<?= $child['id'] ?>"><?= htmlspecialchars($child['ten_chuyen_muc']) ?></a></li>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <li class="no-child">(Chưa có chuyên mục con)</li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
+
     <!-- === MAIN CONTENT === -->
     <main>
-        <!-- Cột trái: Danh sách chuyên mục -->
-        <aside class="category-list">
-            <h2>Chuyên mục</h2>
-            <button class="category-menu-toggle" id="categoryToggle" onclick="toggleCategoryMenu()">
-                ⊕ Mở menu
-            </button>
-            <ul class="category-menu" id="categoryMenu">
-                <?php
-
-                use Website\TinTuc\Models\ChuyenMucModel;
-
-                $chuyenMucModel = new ChuyenMucModel();
-                $dsChuyenMuc = $chuyenMucModel->getAll();
-                foreach ($dsChuyenMuc as $cm):
-                ?>
-                    <li>
-<a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>" <?= ($cm['id'] == $chuyenMuc['id']) ? 'style="font-weight:bold;color:#005fa3;"' : '' ?>>
-                            <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-
-            <!-- Left ad slots (2) -->
-            <div style="margin-top:14px;">
-                <div class="ad-slot" data-ad-slot="0" style="margin-bottom:10px;">
-                    <a class="ad-link" href="#" target="_blank"><img class="ad-img" src="" alt=""></a>
-                </div>
-                <div class="ad-slot" data-ad-slot="1">
-                    <a class="ad-link" href="#" target="_blank"><img class="ad-img" src="" alt=""></a>
-                </div>
-            </div>
-        </aside>
 
         <!-- Cột giữa: Danh sách bài viết -->
         <section class="section">
@@ -297,14 +262,6 @@ function img_url($src)
     
 
     <script>
-        // Toggle category menu
-        function toggleCategoryMenu() {
-            const menu = document.getElementById('categoryMenu');
-            const btn = document.getElementById('categoryToggle');
-            menu.classList.toggle('collapsed');
-            btn.textContent = menu.classList.contains('collapsed') ? '⊕ Mở menu' : '⊖ Đóng menu';
-        }
-
         document.addEventListener("DOMContentLoaded", function() {
             const ads = <?= json_encode($ads) ?> || [];
             // Normalize image path: prefer absolute or uploads/ prefix

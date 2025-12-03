@@ -213,6 +213,34 @@ class BaiVietModel
         }
     }
 
+    /**
+     * Lấy bài viết theo danh sách id chuyên mục (dùng khi nhóm theo chuyên mục cha)
+     * @param array $chuyenMucIds
+     * @param int $limit
+     * @return array
+     */
+    public function getTinTheoChuyenMucList(array $chuyenMucIds, $limit = 6)
+    {
+        if (empty($chuyenMucIds)) return [];
+        // Prepare a dynamic placeholder list
+        $placeholders = implode(',', array_fill(0, count($chuyenMucIds), '?'));
+        $sql = "SELECT bv.*, cm.ten_chuyen_muc FROM bai_viet bv LEFT JOIN chuyen_muc cm ON bv.id_chuyen_muc = cm.id WHERE bv.id_chuyen_muc IN ($placeholders) ORDER BY bv.ngay_dang DESC LIMIT ?";
+        $stmt = $this->conn->prepare($sql);
+
+        // Bind each chuyen_muc id as integer to avoid being treated as string
+        $pos = 1;
+        foreach ($chuyenMucIds as $id) {
+            $stmt->bindValue($pos, (int)$id, PDO::PARAM_INT);
+            $pos++;
+        }
+
+        // Bind LIMIT as integer (important: some MySQL/MariaDB versions error if LIMIT is quoted)
+        $stmt->bindValue($pos, (int)$limit, PDO::PARAM_INT);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // --- Lấy chi tiết bài viết ---
     public function getById($id)
     {
