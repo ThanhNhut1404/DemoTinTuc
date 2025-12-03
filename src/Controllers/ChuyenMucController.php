@@ -3,6 +3,7 @@ namespace Website\TinTuc\Controllers;
 
 use Website\TinTuc\Models\BaiVietModel;
 use Website\TinTuc\Models\ChuyenMucModel;
+use Website\TinTuc\Models\ChuyenMucChaModel;
 
 class ChuyenMucController
 {
@@ -11,6 +12,25 @@ class ChuyenMucController
     {
         // Xử lý POST logic TRƯỚC khi include layout
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Parent category actions (separate table)
+            if (isset($_POST['parent_action'])) {
+                switch ($_POST['parent_action']) {
+                    case 'add':
+                        $this->handleAddParent();
+                        break;
+                    case 'update':
+                        $this->handleUpdateParent();
+                        break;
+                    case 'delete':
+                        $this->handleDeleteParent();
+                        break;
+                    case 'update_order':
+                        $this->handleUpdateParentOrder();
+                        break;
+                }
+            }
+
+            // Child category actions (existing)
             if (isset($_POST['action'])) {
                 switch ($_POST['action']) {
                     case 'add':
@@ -123,6 +143,84 @@ class ChuyenMucController
             $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
         }
         header('Location: admin.php?action=danh_muc&sub=danhsach');
+        exit;
+    }
+
+    // ===== Parent category handlers (chuyen_muc_cha) =====
+    private function handleAddParent()
+    {
+        $parentModel = new ChuyenMucChaModel();
+        $ten = trim($_POST['ten_chuyen_muc'] ?? '');
+        $mo_ta = trim($_POST['mo_ta'] ?? '');
+
+        if (empty($ten)) {
+            $_SESSION['flash'] = "❌ Tên danh mục cha không được trống!";
+        } else {
+            try {
+                $parentModel->add($ten, $mo_ta);
+                $_SESSION['flash'] = "✅ Thêm danh mục cha thành công!";
+                header('Location: admin.php?action=danh_muc&sub=parents');
+                exit;
+            } catch (\Exception $e) {
+                $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
+            }
+        }
+    }
+
+    private function handleUpdateParent()
+    {
+        $parentModel = new ChuyenMucChaModel();
+        $id = $_POST['id'] ?? null;
+        $ten = trim($_POST['ten_chuyen_muc'] ?? '');
+        $mo_ta = trim($_POST['mo_ta'] ?? '');
+
+        if (empty($id) || empty($ten)) {
+            $_SESSION['flash'] = "❌ Dữ liệu không hợp lệ!";
+        } else {
+            try {
+                $parentModel->update($id, $ten, $mo_ta);
+                $_SESSION['flash'] = "✅ Cập nhật danh mục cha thành công!";
+                header('Location: admin.php?action=danh_muc&sub=parents');
+                exit;
+            } catch (\Exception $e) {
+                $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
+            }
+        }
+    }
+
+    private function handleDeleteParent()
+    {
+        $parentModel = new ChuyenMucChaModel();
+        $id = $_POST['id'] ?? null;
+
+        if (empty($id)) {
+            $_SESSION['flash'] = "❌ ID không hợp lệ!";
+        } else {
+            try {
+                $parentModel->delete($id);
+                $_SESSION['flash'] = "✅ Xóa danh mục cha thành công!";
+                header('Location: admin.php?action=danh_muc&sub=parents');
+                exit;
+            } catch (\Exception $e) {
+                $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
+            }
+        }
+    }
+
+    private function handleUpdateParentOrder()
+    {
+        $parentModel = new ChuyenMucChaModel();
+        $items = $_POST['items'] ?? [];
+
+        try {
+            foreach ($items as $index => $id) {
+                $parentModel->db->prepare("UPDATE chuyen_muc_cha SET thu_tu = ? WHERE id = ?")->execute([$index + 1, $id]);
+            }
+            $_SESSION['flash'] = "✅ Cập nhật thứ tự danh mục cha thành công!";
+        } catch (\Exception $e) {
+            $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
+        }
+        header('Location: admin.php?action=danh_muc&sub=parents');
         exit;
     }
 

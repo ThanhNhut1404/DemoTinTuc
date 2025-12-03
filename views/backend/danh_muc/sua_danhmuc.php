@@ -1,7 +1,9 @@
 <?php
 use Website\TinTuc\Models\ChuyenMucModel;
+use Website\TinTuc\Models\ChuyenMucChaModel;
 
 $chuyenMucModel = new ChuyenMucModel();
+$parentModel = new ChuyenMucChaModel();
 $id = $_GET['id'] ?? null;
 
 if (!$id || !is_numeric($id)) {
@@ -16,6 +18,7 @@ if (!$danhMuc) {
 }
 
 $danhMucList = $chuyenMucModel->getAll();
+$parentList = $parentModel->getAll();
 ?>
 
 <h3>Sửa Danh mục</h3>
@@ -43,10 +46,8 @@ $danhMucList = $chuyenMucModel->getAll();
         <label>Danh mục cha:</label>
         <select name="id_cha" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
             <option value="">-- Không có danh mục cha --</option>
-            <?php foreach ($danhMucList as $dm): 
-                if ($dm['id'] == $id) continue; // Không cho chọn chính nó làm cha
-            ?>
-                <option value="<?= $dm['id'] ?>" <?= $danhMuc['id_cha'] == $dm['id'] ? 'selected' : '' ?>>
+            <?php foreach ($parentList as $dm): ?>
+                <option value="<?= $dm['id'] ?>" <?= ($danhMuc['id_cha'] == $dm['id']) ? 'selected' : '' ?>>
                     <?= htmlspecialchars($dm['ten_chuyen_muc']) ?>
                 </option>
             <?php endforeach; ?>

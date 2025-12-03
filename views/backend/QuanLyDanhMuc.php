@@ -7,6 +7,10 @@ $subFragments = [
     'danhsach' => __DIR__ . '/danh_muc/danhsach_danhmuc.php',
     'them' => __DIR__ . '/danh_muc/them_danhmuc.php',
     'sua' => __DIR__ . '/danh_muc/sua_danhmuc.php',
+    // Parent category management
+    'parents' => __DIR__ . '/danh_muc/parents_list.php',
+    'parents_add' => __DIR__ . '/danh_muc/parents_add.php',
+    'parents_edit' => __DIR__ . '/danh_muc/parents_edit.php',
 ];
 
 $chuyenMucModel = new ChuyenMucModel();
@@ -21,6 +25,7 @@ $danhMucList = $chuyenMucModel->getAll();
         <a href="admin.php?action=danh_muc&sub=danhsach" class="tag">📂 Danh sách danh mục</a>
         <a href="admin.php?action=danh_muc&sub=them" class="tag">➕ Thêm danh mục</a>
         <a href="admin.php?action=danh_muc&sub=sap_xep" class="tag">🔀 Sắp xếp thứ tự</a>
+        <a href="admin.php?action=danh_muc&sub=parents" class="tag">🏷️ Danh mục cha</a>
     </div>
 
     <div class="fragment">
