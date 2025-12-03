@@ -2,7 +2,7 @@
 :root{ --bg:#f4f6fb; --card:#ffffff; --sidebar:#0b5ed7; --accent:#0ea5e9; --text:#0f1724; --muted:#6b7280; }
 html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
 .admin-wrap{display:flex;min-height:100vh}
-.sidebar{width:250px;background:var(--sidebar);color:#fff;transition:width .24s ease;overflow:hidden}
+.sidebar{width:220px;background:var(--sidebar);color:#fff;transition:width .24s ease;overflow:hidden}
 .sidebar.collapsed{width:72px}
 .sidebar .brand{font-weight:700;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.8);display:flex;align-items:center;gap:10px}
 .sidebar .brand .brand-text{ color:#fff; font-weight:700; letter-spacing:0.4px }
@@ -14,7 +14,44 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 .nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
 .nav a.active{background:linear-gradient(90deg,#0d6efd,#0b5ed7);color:#fff}
 .nav a.active .icon,.nav a.active svg{color:#fff;fill:#fff;stroke:#fff}
+
 .nav .icon{width:20px;text-align:center}
+
+/* Collapsed sidebar: show icons only */
+.sidebar.collapsed .brand-text{display:none}
+.sidebar.collapsed .brand{padding:12px 8px}
+.sidebar.collapsed .brand .brand-icon{margin:0;display:flex;justify-content:center;width:100%}
+.sidebar.collapsed .nav a{justify-content:center;padding:10px 6px}
+.sidebar.collapsed .nav a .label{display:none}
+.sidebar.collapsed .nav .icon{width:100%;text-align:center}
+.sidebar.collapsed .nav a svg{display:block;margin:0 auto}
+.sidebar.collapsed .nav a .label{opacity:0;height:0;overflow:hidden}
+
+/* Subtle separators between sidebar nav items */
+.nav a{position:relative}
+.nav a::after{
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    bottom: -6px; /* placed between items given existing margins */
+    border-radius: 1px;
+}
+.nav a:last-child::after{ display: none }
+.sidebar.collapsed .nav a::after{ display: none } /* hide separators when icons-only */
+/* Default label style: white and normal weight; keep active label same weight (no bold-on-click) */
+.nav a .label{ color:#fff; font-weight:400 }
+.nav a.active .label{ font-weight:400 }
+
+/* Ensure the "Quản lý Thành viên" label stays white like other sidebar links */
+.nav a.member-link .label{ color: #fff; font-weight:400 }
+.nav a.member-link .icon{ color: #fff }
+.nav a.member-link.active .label{ color: #fff; font-weight:400 } /* active state: keep normal weight */
+/* Background sidebar label: match the other sidebar labels (white, normal weight) */
+.nav a .label.bg-label{ color: inherit; font-weight:400; font-size:inherit; letter-spacing:0 }
+.nav a.active .label.bg-label{ color: #fff } /* active state remains white */
 .main{flex:1;display:flex;flex-direction:column}
 .topbar{height:64px;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #eef2f6}
 .topbar .left{display:flex;align-items:center;gap:12px}
@@ -62,8 +99,8 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 .btn:hover{background:#eef6ff;border-color:#cfe7ff}
 .btn:focus{outline:2px solid rgba(14,165,233,0.35);outline-offset:2px}
 .btn:active{transform:translateY(1px)}
-.btn.btn-role{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.btn-role:hover{filter:brightness(0.95)}
+.btn.btn-role{background:#007bff;border-color:#007bff;color:#fff}
+.btn.btn-role:hover{background:#0056d6;border-color:#0056d6}
 /* Nút Khóa - Nền đỏ đặc, chữ trắng */
 .btn.btn-lock {
     background-color: #ef4444; /* Màu đỏ đậm */
@@ -126,11 +163,11 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 .filter-panel{position:absolute;left:0;top:110%;width:360px;background:var(--card);border:1px solid #e6eef8;box-shadow:0 18px 40px rgba(2,6,23,0.08);padding:14px;border-radius:12px;display:none;z-index:50}
 .filter-panel.open{display:block}
 .filter-panel fieldset{border:1px solid #eef2f6;padding:10px 12px;border-radius:10px;margin:10px 0}
-.filter-panel legend{padding:0 6px;font-weight:600;color:#0ea5e9}
+.filter-panel legend{padding:0 6px;font-weight:600;color:#007bff}
 .filter-panel select{width:100%}
 
 .filter-close{position:absolute;right:8px;top:8px;background:#f1f5f9;border:1px solid #e6eef8;border-radius:8px;padding:4px 8px;cursor:pointer}
-@media (max-width:900px){.sidebar{position:fixed;left:-260px;top:0;height:100vh;z-index:90}.sidebar.open{left:0}.sidebar.collapsed{width:250px}}
+@media (max-width:900px){.sidebar{position:fixed;left:-240px;top:0;height:100vh;z-index:90}.sidebar.open{left:0}.sidebar.collapsed{width:220px}}
 /* Dashboard stats */
 .dashboard h2{margin:0 0 14px 0;font-size:22px;font-weight:700;letter-spacing:.3px}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
@@ -139,18 +176,18 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 .stat-value{font-size:24px;font-weight:700;color:#0f1724;line-height:1.1}
 .stat-note{font-size:12px;color:#64748b}
 .stat-card:hover{border-color:#dbe3eb;box-shadow:0 4px 14px rgba(2,6,23,.08)}
-/* Member page heading */
-.member-title{margin:0 0 12px 0;color:#0369a1!important;font-weight:700;letter-spacing:.3px;}
+/* Member page heading - match the blue used for post list headings */
+.member-title{margin:0 0 12px 0;color:#007bff!important;font-weight:700;letter-spacing:.3px;font-size:24px}
 /* Nút Sửa - Nền xanh dương, chữ trắng */
 .btn.btn-edit {
-    background-color: #3b82f6; /* Màu xanh dương */
-    border-color: #3b82f6;
+    background-color: #007bff; /* match .member-title */
+    border-color: #007bff;
     color: #fff;
     text-decoration: none;
 }
 .btn.btn-edit:hover {
-    background-color: #2563eb; /* Đậm hơn khi hover */
-    border-color: #2563eb;
+    background-color: #0056d6; /* Đậm hơn khi hover */
+    border-color: #0056d6;
 }
 /* Nút Xóa (hành động) - màu đỏ nhỏ */
 .btn.btn-delete {
@@ -165,13 +202,13 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 }
 /* Nút Bộ lọc - Nền xanh dương, chữ trắng */
 .btn.btn-filter {
-    background-color: #0ea5e9; /* Màu xanh dương giống tiêu đề */
-    border-color: #0ea5e9;
+    background-color: #007bff; /* match .member-title */
+    border-color: #007bff;
     color: #fff;
 }
 .btn.btn-filter:hover {
-    background-color: #0284c7; /* Đậm hơn khi hover */
-    border-color: #0284c7;
+    background-color: #0056d6; /* Đậm hơn khi hover */
+    border-color: #0056d6;
 }
 
 .form-inline .btn-search,
@@ -201,7 +238,7 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 
 /* Màu cho tiêu đề của bộ lọc */
 .filter-title {
-    color: #0ea5e9; /* Màu xanh giống tiêu đề "Danh sách thành viên" */
+    color: #007bff; /* Match member title color */
     font-weight: 700; /* Làm chữ đậm hơn cho giống tiêu đề chính */
 }
 

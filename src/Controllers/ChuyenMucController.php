@@ -9,9 +9,121 @@ class ChuyenMucController
     // Backend: Quản lý danh mục
     public function index()
     {
-        // Render inside admin layout so it appears in the content frame
+        // Xử lý POST logic TRƯỚC khi include layout
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['action'])) {
+                switch ($_POST['action']) {
+                    case 'add':
+                        $this->handleAddCategory();
+                        break;
+                    case 'update':
+                        $this->handleUpdateCategory();
+                        break;
+                    case 'delete':
+                        $this->handleDeleteCategory();
+                        break;
+                    case 'update_order':
+                        $this->handleUpdateOrder();
+                        break;
+                }
+            }
+        }
+        
+        // Sau khi xử lý POST, render layout
         $_GET['action'] = 'danh_muc';
         include __DIR__ . '/../../views/backend/layout.php';
+    }
+
+    private function handleAddCategory()
+    {
+        $chuyenMucModel = new ChuyenMucModel();
+        $ten = trim($_POST['ten_chuyen_muc'] ?? '');
+        $mo_ta = trim($_POST['mo_ta'] ?? '');
+        $id_cha = $_POST['id_cha'] ?? null;
+        
+        if (empty($ten)) {
+            $_SESSION['flash'] = "❌ Tên danh mục không được trống!";
+        } else {
+            try {
+                $result = $chuyenMucModel->db->query("SELECT COALESCE(MAX(thu_tu), 0) + 1 as next_thu_tu FROM chuyen_muc");
+                $row = $result->fetch(\PDO::FETCH_ASSOC);
+                $next_thu_tu = $row['next_thu_tu'] ?? 1;
+                
+                $stmt = $chuyenMucModel->db->prepare("
+                    INSERT INTO chuyen_muc (ten_chuyen_muc, mo_ta, id_cha, thu_tu) 
+                    VALUES (?, ?, ?, ?)
+                ");
+                $stmt->execute([$ten, $mo_ta, $id_cha ?: null, $next_thu_tu]);
+                $_SESSION['flash'] = "✅ Thêm danh mục thành công!";
+                header('Location: admin.php?action=danh_muc&sub=danhsach');
+                exit;
+            } catch (\Exception $e) {
+                $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
+            }
+        }
+    }
+
+    private function handleUpdateCategory()
+    {
+        $chuyenMucModel = new ChuyenMucModel();
+        $id = $_POST['id'] ?? null;
+        $ten = trim($_POST['ten_chuyen_muc'] ?? '');
+        $mo_ta = trim($_POST['mo_ta'] ?? '');
+        $id_cha = $_POST['id_cha'] ?? null;
+        
+        if (empty($id) || empty($ten)) {
+            $_SESSION['flash'] = "❌ Dữ liệu không hợp lệ!";
+        } else {
+            try {
+                $stmt = $chuyenMucModel->db->prepare("
+                    UPDATE chuyen_muc SET ten_chuyen_muc = ?, mo_ta = ?, id_cha = ? WHERE id = ?
+                ");
+                $stmt->execute([$ten, $mo_ta, $id_cha ?: null, $id]);
+                $_SESSION['flash'] = "✅ Cập nhật danh mục thành công!";
+                header('Location: admin.php?action=danh_muc&sub=danhsach');
+                exit;
+            } catch (\Exception $e) {
+                $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
+            }
+        }
+    }
+
+    private function handleDeleteCategory()
+    {
+        $chuyenMucModel = new ChuyenMucModel();
+        $id = $_POST['id'] ?? null;
+        
+        if (empty($id)) {
+            $_SESSION['flash'] = "❌ ID danh mục không hợp lệ!";
+        } else {
+            try {
+                $stmt = $chuyenMucModel->db->prepare("DELETE FROM chuyen_muc WHERE id = ?");
+                $stmt->execute([$id]);
+                $_SESSION['flash'] = "✅ Xóa danh mục thành công!";
+                header('Location: admin.php?action=danh_muc&sub=danhsach');
+                exit;
+            } catch (\Exception $e) {
+                $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
+            }
+        }
+    }
+
+    private function handleUpdateOrder()
+    {
+        $chuyenMucModel = new ChuyenMucModel();
+        $items = $_POST['items'] ?? [];
+        
+        try {
+            foreach ($items as $index => $id) {
+                $stmt = $chuyenMucModel->db->prepare("UPDATE chuyen_muc SET thu_tu = ? WHERE id = ?");
+                $stmt->execute([$index + 1, $id]);
+            }
+            $_SESSION['flash'] = "✅ Cập nhật thứ tự thành công!";
+        } catch (\Exception $e) {
+            $_SESSION['flash'] = "❌ Lỗi: " . $e->getMessage();
+        }
+        header('Location: admin.php?action=danh_muc&sub=danhsach');
+        exit;
     }
 
     // Frontend: Hiển thị bài viết theo chuyên mục

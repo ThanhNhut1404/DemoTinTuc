@@ -24,6 +24,7 @@ use Website\TinTuc\Controllers\ChuyenMucController;
 use Website\TinTuc\Controllers\QuangCaoController;
 use Website\TinTuc\Controllers\BannerController;
 use Website\TinTuc\Controllers\BgWallpaperController;
+use Website\TinTuc\Controllers\BinhLuanAdminController;
 
 // Actions: allow login/logout without authentication
 $action = $_GET['action'] ?? 'index';
@@ -55,6 +56,7 @@ if ($action === 'login_submit') {
         $_SESSION['user'] = $user;
         // flash success to show on login page briefly before redirect
         $_SESSION['flash_success'] = 'Đăng nhập thành công';
+        // Render the login view so the flash is visible briefly; client JS will redirect
         include __DIR__ . '/../views/backend/admin_login.php';
         exit;
     }
@@ -140,6 +142,27 @@ switch ($action) {
         $chuyenMucController = new ChuyenMucController();
         $chuyenMucController->index();
         break; 
+    
+    case 'tag':
+        // Quản lý thẻ tag
+        include __DIR__ . '/../views/backend/QuanLyTag.php';
+        break;
+
+    // Quản lý bình luận
+    case 'binh_luan':
+        $blAdminController = new BinhLuanAdminController();
+        $blAdminController->index();
+        break;
+
+    case 'comment_toggle_status':
+        $blAdminController = new BinhLuanAdminController();
+        $blAdminController->toggleStatus($_GET['id'] ?? 0);
+        break;
+
+    case 'comment_delete':
+        $blAdminController = new BinhLuanAdminController();
+        $blAdminController->delete($_GET['id'] ?? 0);
+        break;
 
     // Quản lý quảng cáo
     case 'quang_cao':
@@ -170,6 +193,11 @@ switch ($action) {
     case 'qc_delete':
         $qcController = new QuangCaoController();
         $qcController->delete($_GET['id'] ?? 0);
+        break;
+
+    case 'qc_toggle_status':
+        $qcController = new QuangCaoController();
+        $qcController->toggleStatus($_GET['id'] ?? 0);
         break;
 
     // Các hành động quản trị cho bài viết

@@ -3,7 +3,7 @@ $page = $page ?? 1;
 $totalPages = $totalPages ?? 1;
 use Website\TinTuc\Models\QuangcaoModel;
 $qcModel = new QuangcaoModel();
-// Load only Sidebar ads for category page (Trang_chu ads are only for homepage)
+// Load only Sidebar ads (active status only) for category page
 $dsQuangCao = $qcModel->getQuangCaoTheoViTri('Sidebar');
 
 // Prepare unified ads list for rotating slots (ensure 4 items)
@@ -11,7 +11,7 @@ $allAds = array_values(array_filter($dsQuangCao));
 $ads = [];
 if (!empty($allAds)) {
     $take = array_slice($allAds, 0, 4);
-    while (count($take) < 4) {
+    while (count($take) < 4 && !empty($allAds)) {
         $take = array_merge($take, $allAds);
         $take = array_slice($take, 0, 4);
     }
@@ -81,6 +81,92 @@ function img_url($src)
     .ad-slot { overflow:hidden; background:transparent; padding:0; border-radius:0; box-shadow: none; margin:0; flex:1 1 0; }
     /* Make the wrapper inside aside fill available height and stack ad-slots vertically */
     main > aside > div { display:flex; flex-direction:column; gap:10px; height:100%; margin-top:0; padding:0; }
+    
+    /* === MENU CHUYÊN MỤC STYLE === */
+    .category-menu-toggle {
+        display: none;
+        background: linear-gradient(90deg, #0d6efd, #0b5ed7);
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+        width: 100%;
+        transition: all 0.3s;
+    }
+    
+    .category-menu-toggle:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+    
+    .category-menu {
+        max-height: 500px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 8px 0;
+        background: white;
+        transition: max-height 0.3s ease;
+    }
+    
+    .category-menu.collapsed {
+        max-height: 0;
+        overflow: hidden;
+        border: none;
+        padding: 0;
+    }
+    
+    .category-menu li {
+        list-style: none;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .category-menu li:last-child {
+        border-bottom: none;
+    }
+    
+    .category-menu a {
+        display: block;
+        padding: 10px 15px;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .category-menu a:hover {
+        background: #f5f5f5;
+        color: #005fa3;
+        padding-left: 20px;
+    }
+    
+    .category-menu a[style*="font-weight"] {
+        background: #e3f2fd;
+        color: #005fa3;
+        font-weight: 600;
+    }
+    
+    /* Scrollbar styling */
+    .category-menu::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .category-menu::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .category-menu::-webkit-scrollbar-thumb {
+        background: #0d6efd;
+        border-radius: 10px;
+    }
+    
+    .category-menu::-webkit-scrollbar-thumb:hover {
+        background: #0b5ed7;
+    }
     </style>
 </head>
 
@@ -108,7 +194,10 @@ function img_url($src)
         <!-- Cột trái: Danh sách chuyên mục -->
         <aside class="category-list">
             <h2>Chuyên mục</h2>
-            <ul class="category-menu">
+            <button class="category-menu-toggle" id="categoryToggle" onclick="toggleCategoryMenu()">
+                ⊕ Mở menu
+            </button>
+            <ul class="category-menu" id="categoryMenu">
                 <?php
 
                 use Website\TinTuc\Models\ChuyenMucModel;
@@ -208,6 +297,14 @@ function img_url($src)
     
 
     <script>
+        // Toggle category menu
+        function toggleCategoryMenu() {
+            const menu = document.getElementById('categoryMenu');
+            const btn = document.getElementById('categoryToggle');
+            menu.classList.toggle('collapsed');
+            btn.textContent = menu.classList.contains('collapsed') ? '⊕ Mở menu' : '⊖ Đóng menu';
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const ads = <?= json_encode($ads) ?> || [];
             // Normalize image path: prefer absolute or uploads/ prefix

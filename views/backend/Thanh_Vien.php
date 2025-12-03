@@ -19,7 +19,7 @@ function displayStatus($raw)
 ?>
 
 <div class="card">
-    <h2 class="member-title" style="color: #0ea5e9 !important;">Danh sách thành viên</h2>
+    <h2 class="member-title">Danh sách thành viên</h2>
 
     <?php if (!empty($filterWarning)): ?>
         <div style="margin:8px 0; padding:8px; background:#fff3cd; color:#856404; border:1px solid #ffeeba; border-radius:4px;">

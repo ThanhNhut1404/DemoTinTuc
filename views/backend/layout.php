@@ -28,15 +28,12 @@ $fragments = [
 <body>
     <div class="admin-wrap">
         <aside id="sidebar" class="sidebar">
-            <a href="admin.php?action=index" class="brand" style="text-decoration:none;display:flex;align-items:center;gap:10px" aria-label="Trang tổng quan" title="Trang tổng quan">
+            <a href="admin.php?action=dashboard" class="brand" style="text-decoration:none;display:flex;align-items:center;gap:10px" aria-label="Trang tổng quan" title="Trang tổng quan">
                 <div class="brand-icon" style="display:flex;align-items:center;gap:10px">
-                    <!-- shield with user (admin) -->
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2l7 3v5c0 5-3.58 9.74-7 12-3.42-2.26-7-7-7-12V5l7-3z" fill="#00c6ff"/>
-                        <g fill="#fff">
-                            <circle cx="12" cy="9.5" r="2.2" />
-                            <path d="M7.5 18c1.2-1.6 3.6-2.5 6.5-2.5s5.3.9 6.5 2.5" fill="#fff"/>
-                        </g>
+                    <!-- simple shield icon -->
+                    <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                        <path d="M12 2L4 5v6c0 5 3.58 9.74 8 12 4.42-2.26 8-7 8-12V5l-8-3z" fill="#ffffff"/>
+                        <path d="M8 9c0-2.21 1.79-4 4-4s4 1.79 4 4v2c0 2.21-1.79 4-4 4s-4-1.79-4-4V9z" fill="#ffffff" opacity="0"/>
                     </svg>
                 </div>
                 <div class="brand-text">ADMIN</div>
@@ -88,9 +85,9 @@ $fragments = [
                     <span class="icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H3v14h18V3z"/><path d="M3 17l5-5 4 4 5-7 5 7"/></svg>
                     </span>
-                    <span class="label">Quản lý Nền</span>
+                    <span class="label bg-label">Quản lý Background</span>
                 </a>
-                <a href="admin.php?action=thanh_vien_roles" class="<?= ($action === 'thanh_vien_roles' || $action === 'index') ? 'active' : '' ?>">
+                <a href="admin.php?action=thanh_vien_roles" class="member-link <?= ($action === 'thanh_vien_roles' || $action === 'index') ? 'active' : '' ?>">
                     <span class="icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </span>
