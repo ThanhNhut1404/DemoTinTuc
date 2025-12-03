@@ -417,14 +417,65 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+            line-clamp: 2;
         }
 
         /* Title is shown below image (visible) */
+
+        /* Featured layout */
+        .featured {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .featured-main img {
+            width: 100%;
+            height: 420px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .featured-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 18px;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.7) 100%);
+            border-radius: 0 0 12px 12px;
+        }
+
+        .featured-main { position: relative; }
+        .featured-main h3 { margin: 0; color: #fff; font-size: 1.35rem; line-height: 1.2; }
+
+        .featured-side .side-top img { width:100%; height: 420px; object-fit: cover; border-radius: 12px; display:block; }
+        .side-top { position: relative; }
+        .side-top .side-overlay { position: absolute; left:0; right:0; bottom:0; padding:12px; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.7) 100%); border-radius: 0 0 12px 12px; }
+        .side-top h4 { margin:0; color:#fff; font-size:1rem; }
+
+        .featured-thumbs { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .thumb-item img { width:100%; height:140px; object-fit: cover; border-radius: 8px; display:block; }
+        .thumb-title { margin-top:8px; color:var(--muted); font-weight:600; font-size:0.95rem; }
 
         .top5-meta {
             margin-left: auto;
             font-size: 0.85em;
             opacity: 0.9;
+        }
+
+        /* Responsive featured */
+        @media (max-width: 992px) {
+            .featured { grid-template-columns: 1fr; }
+            .featured-side .side-top img, .featured-main img { height: 320px; }
+            .featured-thumbs { grid-template-columns: repeat(2,1fr); }
+        }
+
+        @media (max-width: 576px) {
+            .featured-side .side-top img, .featured-main img { height: 220px; }
+            .featured-thumbs { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 992px) {
@@ -1014,16 +1065,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="content">
             <!-- Tin nổi bật -->
-            <div class="section">
-                <h2>Top 5 tin nổi bật</h2>
-                <div class="top5-grid" id="highlight-grid">
-                    <?php foreach ($tinNoiBat as $tin): ?>
-                        <article class="top5-item">
-                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="top5-link">
-                                <img src="<?= htmlspecialchars(img_url($tin['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
-                                <div class="top5-info">
-                                    <h4><?= htmlspecialchars($tin['tieu_de']) ?></h4>
+            <div class="section" id="featured-section">
+                <h2>Tin nổi bật</h2>
+                <?php
+                $featured = is_array($tinNoiBat) ? array_values($tinNoiBat) : [];
+                $main = $featured[0] ?? null;
+                $side = $featured[1] ?? null;
+                $thumbs = array_slice($featured, 2, 3);
+                ?>
+
+                <div class="featured">
+                    <?php if ($main): ?>
+                        <article class="featured-main">
+                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $main['id'] ?>">
+                                <img src="<?= htmlspecialchars(img_url($main['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($main['tieu_de']) ?>">
+                                <div class="featured-overlay">
+                                    <h3><?= htmlspecialchars($main['tieu_de']) ?></h3>
                                 </div>
+                            </a>
+                        </article>
+                    <?php endif; ?>
+
+                    <div class="featured-side">
+                        <?php if ($side): ?>
+                            <article class="side-top">
+                                <a href="index.php?action=chi_tiet_bai_viet&id=<?= $side['id'] ?>">
+                                    <img src="<?= htmlspecialchars(img_url($side['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($side['tieu_de']) ?>">
+                                    <div class="side-overlay">
+                                        <h4><?= htmlspecialchars($side['tieu_de']) ?></h4>
+                                    </div>
+                                </a>
+                            </article>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="featured-thumbs">
+                    <?php foreach ($thumbs as $t): ?>
+                        <article class="thumb-item">
+                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $t['id'] ?>">
+                                <img src="<?= htmlspecialchars(img_url($t['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($t['tieu_de']) ?>">
+                                <div class="thumb-title"><?= htmlspecialchars($t['tieu_de']) ?></div>
                             </a>
                         </article>
                     <?php endforeach; ?>

@@ -27,10 +27,16 @@ class ChuyenMucModel extends Database
     }
 
     public function add($ten, $mo_ta = null, $id_cha = null) {
-        $sql = "INSERT INTO chuyen_muc (ten_chuyen_muc, mo_ta, id_cha, thu_tu) 
-                VALUES (?, ?, ?, (SELECT COALESCE(MAX(thu_tu), 0) + 1 FROM chuyen_muc))";
+        // Compute next thu_tu separately to avoid MySQL 1093 error (same-table INSERT SELECT)
+        $sql = "SELECT COALESCE(MAX(thu_tu), 0) + 1 AS next_order FROM chuyen_muc";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$ten, $mo_ta, $id_cha ?: null]);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $next = $row && isset($row['next_order']) ? (int)$row['next_order'] : 1;
+
+        $sql = "INSERT INTO chuyen_muc (ten_chuyen_muc, mo_ta, id_cha, thu_tu) VALUES (?, ?, ?, ?)";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$ten, $mo_ta, $id_cha ?: null, $next]);
     }
 
     public function update($id, $ten, $mo_ta = null, $id_cha = null) {
