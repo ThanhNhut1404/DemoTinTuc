@@ -1,37 +1,19 @@
 <?php
-require 'vendor/autoload.php';
+// Ensure composer autoload is loaded from project root
+require_once __DIR__ . '/../vendor/autoload.php';
 use Website\TinTuc\Models\ThanhVienModel;
 
 $model = new ThanhVienModel();
 $token = $_GET['token'] ?? '';
-$message = '';
-$success = false;
 
 // ✅ Bảo vệ token XSS
 $token_safe = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
 
 if (!$token) die("Link không hợp lệ");
 
-// ✅ Kiểm tra token hợp lệ
+// ✅ Kiểm tra token hợp lệ (display page only if valid)
 $user = $model->validateResetToken($token);
 if (!$user) die("Link đã hết hạn hoặc không hợp lệ");
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $password = $_POST['password'] ?? '';
-    $confirm = $_POST['confirm_password'] ?? '';
-
-    if (!$password || !$confirm) {
-        $message = "Vui lòng nhập đủ thông tin";
-    } elseif ($password !== $confirm) {
-        $message = "Mật khẩu xác nhận không khớp";
-    } else {
-        // ✅ Hash password trước khi lưu
-        $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $model->resetPasswordByToken($token, $hashed);
-        $message = "Mật khẩu đã được đổi thành công!";
-        $success = true;
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -51,10 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="form-container">
         <h2>Đặt mật khẩu mới</h2>
         <form method="post" action="index.php?controller=forgot_password&action=submitReset">
-            <input type="hidden" name="token" value="<?= htmlspecialchars($_GET['token']) ?>">
-            <input type="password" name="password" placeholder="Nhập mật khẩu mới" required>
-            <button type="submit">Đặt mật khẩu mới</button>
+                    <input type="hidden" name="token" value="<?= $token_safe ?>">
+                    <input type="password" name="password" placeholder="Nhập mật khẩu mới" required>
+                    <input type="password" name="confirm_password" placeholder="Xác nhận mật khẩu" required>
+                    <button type="submit">Đặt mật khẩu mới</button>
         </form>
+                <?php if ($message): ?>
+                    <p style="color: <?= $success ? 'green' : 'red' ?>; margin-top:12px;"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
+                <?php endif; ?>
     </div>
 </body>
 </html>

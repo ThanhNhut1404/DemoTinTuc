@@ -11,11 +11,13 @@ if ($id) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id) {
     $ten_tag = trim($_POST['ten_tag'] ?? '');
+    $related_tags = trim($_POST['related_tags'] ?? '');
+    $seo_keywords = trim($_POST['seo_keywords'] ?? '');
     
     if (empty($ten_tag)) {
         $errorMessage = "❌ Vui lòng nhập tên thẻ tag!";
     } else {
-        if ($tagModel->update($id, $ten_tag)) {
+        if ($tagModel->update($id, $ten_tag, $related_tags ?: null, $seo_keywords ?: null)) {
             $successMessage = "✅ Cập nhật thẻ tag thành công!";
             // Refresh tag data
             $tag = $tagModel->getById($id);
@@ -31,6 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id) {
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #333;">Tên thẻ tag:</label>
             <input type="text" name="ten_tag" value="<?= htmlspecialchars($tag['ten_tag'] ?? '') ?>" required 
+                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #333;">Tag liên quan (phân tách bằng dấu phẩy):</label>
+            <input type="text" name="related_tags" value="<?= htmlspecialchars($tag['related_tags'] ?? '') ?>" placeholder="ví dụ: đời sống, chính trị, văn học" 
+                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #333;">SEO keywords (phân tách bằng dấu phẩy):</label>
+            <input type="text" name="seo_keywords" value="<?= htmlspecialchars($tag['seo_keywords'] ?? '') ?>" placeholder="ví dụ: tin tức, cập nhật, xu hướng" 
                 style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
         </div>
         
