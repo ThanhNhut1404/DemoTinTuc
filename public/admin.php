@@ -282,6 +282,13 @@ switch ($action) {
         $blAdminController->delete($_GET['id'] ?? 0);
         break;
 
+    case 'comment_toggle_status_ajax':
+        header('Content-Type: application/json');
+        $blAdminController = new BinhLuanAdminController();
+        $result = $blAdminController->toggleStatusAjax($_GET['id'] ?? 0);
+        echo json_encode($result);
+        exit;
+
     // Quản lý quảng cáo
     case 'quang_cao':
         $qcController = new QuangCaoController();
