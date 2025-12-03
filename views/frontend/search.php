@@ -8,6 +8,8 @@ use Website\TinTuc\Database;
 
 $db = new Database();
 $conn = $db->connect();
+// Helper để chuẩn hoá đường dẫn ảnh giống trang chủ
+require_once __DIR__ . '/../../src/helpers.php';
 
 // Khởi tạo biến an toàn
 $results = isset($results) && is_array($results) ? $results : [];
@@ -120,8 +122,19 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
                 <p>Không tìm thấy bài viết nào.</p>
             <?php else: ?>
                 <?php foreach ($results as $r): ?>
+                    <?php
+                    // Build image src consistently with other views
+                    $imgSrc = '';
+                    if (!empty($r['anh_dai_dien'])) {
+                        $imgSrc = 'uploads/' . htmlspecialchars($r['anh_dai_dien']);
+                    } elseif (!empty($r['hinh_anh'])) {
+                        $imgSrc = htmlspecialchars($r['hinh_anh']);
+                    } else {
+                        $imgSrc = 'https://via.placeholder.com/200x130?text=No+Image';
+                    }
+                    ?>
                     <div class="article-item">
-                        <img src="<?= htmlspecialchars($r['hinh_anh'] ?? 'uploads/default.jpg') ?>" class="article-img">
+                        <img src="<?= $imgSrc ?>" class="article-img" alt="<?= htmlspecialchars($r['tieu_de'] ?? '') ?>">
                         <div>
                             <h3><a href="index.php?action=chi_tiet_bai_viet&id=<?= $r['id'] ?>"><?= htmlspecialchars($r['tieu_de']) ?></a></h3>
                             <div><?= htmlspecialchars($r['mo_ta_ngan']) ?></div>
