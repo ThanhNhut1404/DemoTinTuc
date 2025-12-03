@@ -34,96 +34,34 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <style>
-body { 
-    font-family: 'Segoe UI', Tahoma, sans-serif; 
-    background: #eef2f7; 
-    margin:0; 
-}
+    body { margin:0; font-family:'Segoe UI', Tahoma, sans-serif; background:#f1f5f9; }
 
-/* HEADER */
-.header-bar { 
-    width:100%; 
-    background:#005fa3; 
-    padding:12px 0; 
-    text-align:center; 
-}
-.header-bar h1 { 
-    color:white; 
-    margin:0; 
-    font-size:22px; 
-}
+    .header-bar { width:100%; background:#005fa3; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; }
+    .header-bar h1 { color:white; margin:0; font-size:22px; text-align:center; flex:1; }
+    .header-bar .back-home { color:white; text-decoration:none; font-weight:600; background:transparent; padding:6px 10px; border-radius:6px; }
 
-/* Container */
-.search-container { 
-    max-width:1150px; 
-    margin:40px auto; 
-    background:#fff; 
-    padding:30px; 
-    border-radius:15px; 
-    box-shadow:0 6px 20px rgba(0,0,0,0.08); 
-}
+    /* Container */
+    .search-container { max-width:1150px; margin:40px auto; background:#fff; padding:30px; border-radius:15px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
 
-.layout-wrapper { 
-    display:flex; 
-    gap:25px; 
-}
+    .layout-wrapper { display:flex; gap:25px; }
+    .left-content { flex:1; }
 
-.left-content { 
-    flex:1; 
-}
+    /* Article item */
+    .article-item { display:flex; gap:20px; padding:18px; margin-bottom:18px; border-radius:12px; background:#fff; border:1px solid #e6eef9; transition:0.25s; align-items:flex-start; }
+    .article-item:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(10,50,100,0.06); }
+    .article-img { width:220px; height:130px; border-radius:10px; object-fit:cover; }
 
-/* Article item */
-.article-item { 
-    display:flex; 
-    gap:20px; 
-    padding:18px; 
-    margin-bottom:18px; 
-    border-radius:12px; 
-    background:#fafafa; 
-    border:1px solid #eee; 
-    transition:0.25s; 
-}
+    .back-home { display:inline-block; margin-top:0; padding:6px 10px; background:transparent; color:white; border-radius:6px; text-decoration:none; transition:0.25s; }
+    .back-home:hover { opacity:0.92; }
 
-.article-item:hover { 
-    background:#fff; 
-    border-color:#ccc; 
-    transform:translateY(-3px); 
-}
-
-.article-img { 
-    width:200px; 
-    height:130px; 
-    border-radius:10px; 
-    object-fit:cover; 
-}
-
-.back-home { 
-    display:inline-block; 
-    margin-top:25px; 
-    padding:10px 18px; 
-    background:#007bff; 
-    color:white; 
-    border-radius:8px; 
-    text-decoration:none; 
-    transition:0.25s; 
-}
-
-.back-home:hover { 
-    background:#005fa3; 
-}
-
-.no-post { 
-    text-align:center; 
-    color:#777; 
-    margin-top:40px; 
-    font-size:18px; 
-    font-style:italic; 
-}
+    .no-post { text-align:center; color:#777; margin-top:40px; font-size:18px; font-style:italic; }
 </style>
 
 <!-- HEADER -->
 <div class="header-bar">
+    <a href="index.php" class="back-home">Trang chủ</a>
     <h1>Danh sách bài viết đã thích</h1>
+    <div style="width:86px;"></div>
 </div>
 
 <!-- CONTENT -->
@@ -143,8 +81,6 @@ body {
                         </div>
                     </div>
                 <?php endforeach; ?>
-
-                <a href="index.php" class="back-home">Trang chủ</a>
             <?php endif; ?>
         </div>
     </div>

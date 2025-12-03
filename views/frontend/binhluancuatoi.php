@@ -35,11 +35,12 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <style>
     body { margin:0; font-family:'Segoe UI', Tahoma, sans-serif; background:#f1f5f9; }
 
-    .header-bar { width:100%; background:#005fa3; padding:12px 18px; box-shadow:0 3px 6px rgba(0,0,0,0.08); }
-    .header-bar .header-btn { background:white; color:#0056c7; padding:8px 14px; border-radius:6px; text-decoration:none; font-weight:600; }
+    .header-bar { width:100%; background:#005fa3; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; }
+    .header-bar h1 { color:white; margin:0; font-size:22px; text-align:center; flex:1; }
+    .header-bar .back-home { color:white; text-decoration:none; font-weight:600; background:transparent; padding:6px 10px; border-radius:6px; }
 
     .my-comments { max-width:1100px; margin:30px auto; padding:18px; }
-    .page-title { font-size:26px; color:#0b5fa5; margin-bottom:20px; text-align:left; }
+    .page-title { font-size:26px; color:#0b5fa5; margin-bottom:20px; text-align:center; }
 
     /* Article item (match search.php) */
     .article-item { display:flex; gap:18px; align-items:flex-start; background:#fff; border-radius:12px; padding:14px; border:1px solid #e6eef9; margin-bottom:16px; transition:0.18s; }
@@ -60,13 +61,13 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- HEADER -->
 <div class="header-bar">
-  
-    <a href="index.php" class="header-btn">Trang chủ</a>
+    <a href="index.php" class="back-home">Trang chủ</a>
+    <h1>Danh sách các bài viết đã bình luận</h1>
+    <div style="width:86px;"></div>
 </div>
 
 <!-- PAGE TITLE -->
 <div class="my-comments">
-    <h2 class="page-title">Danh sách các bài viết đã bình luận</h2>
 
     <?php if (!empty($data)): ?>
         <?php foreach ($data as $c): ?>
@@ -100,4 +101,5 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php else: ?>
         <p class="no-comment">Bạn chưa bình luận bài viết nào.</p>
     <?php endif; ?>
-</div>
+
+    

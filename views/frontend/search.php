@@ -30,7 +30,8 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 
 /* HEADER */
 .main-header { width:100%; background:#005fa3; padding:12px 0; }
-.main-header-wrapper { max-width:2000px; margin:0 auto; display:flex; justify-content:flex-start; /* vẫn căn trái */ align-items:center; gap:15px; padding-left:800px; /* nhích sang phải 20px, nghĩa là nhìn tổng thể nhích sang trái so với container */ }
+.main-header-wrapper { max-width:2000px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:15px; padding:0 18px; }
+    .header-right { display:flex; align-items:center; gap:8px; }
 
 /* Search box */
 .header-search-form { display:flex; width:380px; background:white; border-radius:25px; overflow:hidden; border:1px solid #ddd; }
@@ -62,8 +63,8 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 .pagination a:hover { background:#005fa3; color:white; }
 
 /* Quay về trang chủ */
-.back-home { display:inline-block; margin-top:25px; padding:10px 18px; background:#007bff; color:white; border-radius:8px; text-decoration:none; transition:0.25s; }
-.back-home:hover { background:#005fa3; }
+.back-home { color:white; text-decoration:none; font-weight:600; background:transparent; padding:6px 10px; border-radius:6px; display:inline-block; transition:0.25s; }
+.back-home:hover { opacity:0.92; }
 
 /* Dropdown click */
 .dropdown.open .dropdown-menu { display:block; }
@@ -73,32 +74,18 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 
 <div class="main-header">
     <div class="main-header-wrapper">
+        <a href="index.php" class="back-home">Trang chủ</a>
 
-        <!-- Search -->
-        <form action="index.php" method="GET" class="header-search-form">
-            <input type="hidden" name="action" value="search">
-            <input type="text" name="q" value="<?= $query ?>" placeholder="Bạn muốn tìm gì hôm nay?">
-            <button type="submit">🔍</button>
-        </form>
+        <div class="header-right">
+            <!-- Search -->
+            <form action="index.php" method="GET" class="header-search-form">
+                <input type="hidden" name="action" value="search">
+                <input type="text" name="q" value="<?= $query ?>" placeholder="Bạn muốn tìm gì hôm nay?">
+                <button type="submit">🔍</button>
+            </form>
 
-        <!-- Dropdown Chuyên mục -->
-        <div class="dropdown" tabindex="0">
-            <span class="dropdown-toggle">Chuyên mục ▾</span>
-            <div class="dropdown-menu">
-                <?php if(!empty($chuyenMuc)): ?>
-                    <?php foreach($chuyenMuc as $cm): ?>
-                        <a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>">
-                            <?= htmlspecialchars($cm['ten_chuyen_muc']) ?>
-                        </a>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <span style="display:block; padding:10px 15px; color:#999;">Chưa có chuyên mục</span>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Dropdown Tài khoản -->
-        <div class="dropdown" tabindex="0">
+            <!-- Dropdown Tài khoản -->
+            <div class="dropdown" tabindex="0">
             <?php if(isset($_SESSION['user'])): ?>
                 <span class="dropdown-toggle">Tài khoản ▾</span>
                 <div class="dropdown-menu">
@@ -115,6 +102,7 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
                     <a href="index.php?action=register">Đăng ký</a>
                 </div>
             <?php endif; ?>
+            </div>
         </div>
 
     </div>
@@ -173,8 +161,7 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
                     </div>
                 <?php endif; ?>
 
-                <!-- Nút quay về trang chủ -->
-                <a href="index.php" class="back-home">Trang chủ</a>
+             
 
             <?php endif; ?>
         </div>
