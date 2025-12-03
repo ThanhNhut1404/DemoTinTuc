@@ -87,7 +87,9 @@ class ForgotPasswordController
             $mail->Body    = "Click vào link để đặt lại mật khẩu: $resetLink";
 
             $mail->send();
-            echo 'Gửi email thành công.';
+            // Redirect back to the forgot password page with a success flag to avoid a plain text response
+            header('Location: index.php?action=forgot_password&sent=1');
+            exit;
         } catch (Exception $e) {
             // Log details for admin/developer, but show a friendly message to user
             error_log('Mail Error: ' . ($mail->ErrorInfo ?? 'N/A'));
@@ -127,17 +129,12 @@ class ForgotPasswordController
         $hashed = password_hash($password, PASSWORD_DEFAULT);
         $this->model->resetPasswordByToken($token, $hashed);
 
-        // Log the user in automatically using the normalized user data
-        $email = $user['email'] ?? null;
-        if ($email) {
-            $normalized = $this->model->findByEmailNormalized($email);
-            if ($normalized) {
-                $_SESSION['user'] = $normalized;
-            }
-        }
-
-        // Redirect to profile (or home) after successful reset+login
-        header('Location: index.php?action=profile');
+        // Do NOT auto-login. Show friendly success message and redirect to login after 3 seconds.
+        echo '<!doctype html><html><head><meta charset="utf-8"><title>Đổi mật khẩu</title>';
+        echo '<style>body{font-family:Arial,Helvetica,sans-serif;padding:40px;background:#f4f6f8} .card{max-width:600px;margin:0 auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.06);text-align:center}</style>';
+        echo '</head><body><div class="card"><h2>Đổi mật khẩu thành công</h2><p>Bạn sẽ được chuyển về trang đăng nhập trong <span id="count">3</span> giây.</p></div>';
+        echo '<script>var t=3;var el=document.getElementById("count");var iv=setInterval(function(){t--; if(t>=0) el.textContent=t; if(t<=0){clearInterval(iv); window.location.href="index.php?action=login";} },1000);</script>';
+        echo '</body></html>';
         exit;
     }
 }

@@ -6,6 +6,9 @@ use Website\TinTuc\Models\ThanhVienModel;
 $model = new ThanhVienModel();
 $token = $_GET['token'] ?? '';
 
+$message = '';
+$success = false;
+
 // ✅ Bảo vệ token XSS
 $token_safe = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
 
@@ -32,7 +35,7 @@ if (!$user) die("Link đã hết hạn hoặc không hợp lệ");
 <body>
     <div class="form-container">
         <h2>Đặt mật khẩu mới</h2>
-        <form method="post" action="index.php?controller=forgot_password&action=submitReset">
+        <form method="post" action="index.php?action=submit_reset">
                     <input type="hidden" name="token" value="<?= $token_safe ?>">
                     <input type="password" name="password" placeholder="Nhập mật khẩu mới" required>
                     <input type="password" name="confirm_password" placeholder="Xác nhận mật khẩu" required>
