@@ -2,6 +2,8 @@
 use Website\TinTuc\Models\ChuyenMucModel;
 
 $chuyenMucModel = new ChuyenMucModel();
+
+// Get all children (danh mục con)
 $danhMucList = $chuyenMucModel->getAll();
 
 if (isset($_SESSION['flash'])) {
@@ -15,49 +17,54 @@ if (isset($_SESSION['flash'])) {
 }
 ?>
 
-<h3>Danh sách danh mục</h3>
+<h3>Danh sách danh mục con</h3>
 <?php if (count($danhMucList) > 0): ?>
+
     <form method="POST">
         <input type="hidden" name="action" value="update_order">
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
             <thead>
                 <tr style="background: #f0f0f0; border-bottom: 2px solid #ddd;">
                     <th style="padding: 12px; text-align: left; width: 5%;">#</th>
-                    <th style="padding: 12px; text-align: left; width: 25%;">Tên danh mục</th>
+                    <th style="padding: 12px; text-align: left; width: 30%;">Tên danh mục con</th>
                     <th style="padding: 12px; text-align: left; width: 35%;">Mô tả</th>
                     <th style="padding: 12px; text-align: left; width: 15%;">Danh mục cha</th>
-                    <th style="padding: 12px; text-align: center; width: 20%;">Thao tác</th>
+                    <th style="padding: 12px; text-align: center; width: 15%;">Thao tác</th>
                 </tr>
             </thead>
             <tbody id="sortable" style="display: contents;">
-                <?php foreach ($danhMucList as $dm): ?>
+                <?php foreach ($danhMucList as $child): ?>
                     <tr style="border-bottom: 1px solid #eee; cursor: move;" draggable="true">
                         <td style="padding: 12px;">
-                            <input type="hidden" name="items[]" value="<?= $dm['id'] ?>">
+                            <input type="hidden" name="items[]" value="<?= $child['id'] ?>">
                             <span>☰</span>
                         </td>
-                        <td style="padding: 12px;"><?= htmlspecialchars($dm['ten_chuyen_muc']) ?></td>
-                        <td style="padding: 12px;"><?= htmlspecialchars($dm['mo_ta'] ?? '') ?></td>
+                        <td style="padding: 12px;"><?= htmlspecialchars($child['ten_chuyen_muc']) ?></td>
+                        <td style="padding: 12px;"><?= htmlspecialchars($child['mo_ta'] ?? '') ?></td>
                         <td style="padding: 12px;">
                             <?php 
-                            if ($dm['id_cha']) {
-                                $parent = $chuyenMucModel->getById($dm['id_cha']);
-                                echo htmlspecialchars($parent['ten_chuyen_muc'] ?? 'N/A');
-                            } else {
-                                echo '-';
-                            }
+                                if ($child['id_cha']) {
+                                    // Fetch parent name from chuyen_muc_cha table
+                                    $parentStmt = $chuyenMucModel->db->prepare("SELECT ten_chuyen_muc FROM chuyen_muc_cha WHERE id = ?");
+                                    $parentStmt->execute([$child['id_cha']]);
+                                    $parent = $parentStmt->fetch(PDO::FETCH_ASSOC);
+                                    echo htmlspecialchars($parent['ten_chuyen_muc'] ?? '');
+                                } else {
+                                    echo '-';
+                                }
                             ?>
                         </td>
                         <td style="padding: 12px; text-align: center;">
-                            <a href="admin.php?action=danh_muc&sub=sua&id=<?= $dm['id'] ?>" class="btn-icon" title="Sửa">✏️</a>
+                            <a href="admin.php?action=danh_muc&sub=sua&id=<?= $child['id'] ?>" class="btn-icon" title="Sửa">✏️</a>
                             <form method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
                                 <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="id" value="<?= $dm['id'] ?>">
+                                <input type="hidden" name="id" value="<?= $child['id'] ?>">
                                 <button type="submit" class="btn-icon" title="Xóa">🗑️</button>
                             </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
+            </tbody>
             </tbody>
         </table>
         <button type="submit" class="btn btn-primary">💾 Lưu thứ tự</button>

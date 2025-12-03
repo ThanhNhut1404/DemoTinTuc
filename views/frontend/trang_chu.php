@@ -118,6 +118,11 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             flex-wrap: wrap;
         }
 
+        /* Reserve left space for the fixed category button */
+        .auth-nav.with-left-menu {
+            padding-left: 220px;
+        }
+
         .search-box {
             position: relative;
             margin-right: auto;
@@ -163,8 +168,12 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         }
 
         /* Dropdown Chuyên mục */
+        /* Place the category dropdown button at the top-left of the header */
         .dropdown {
-            position: relative;
+            position: absolute;
+            left: 12px;
+            top: 8px;
+            z-index: 2500;
         }
 
         .dropdown-toggle {
@@ -179,15 +188,15 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         .dropdown-menu {
             display: none;
             position: absolute;
-            right: 0;
-            top: 40px;
+            left: 12px; /* anchor to left corner */
+            top: 48px;
             background: white;
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: var(--shadow);
-            min-width: 200px;
+            min-width: 640px; /* wider menu */
             z-index: 1000;
-            padding: 8px 0;
+            padding: 12px;
         }
 
         .dropdown-menu a {
@@ -205,8 +214,101 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         }
 
         .dropdown.show .dropdown-menu {
-            display: block;
+            display: grid;
+            grid-template-columns: 1fr 2fr; /* parents on left, children pane on right */
+            gap: 16px;
             animation: fadeIn 0.2s ease;
+        }
+
+        /* Parent -> child submenu */
+        .parent-list {
+            min-width: 260px;
+            max-height: 420px;
+            overflow: auto;
+        }
+
+        .parent-list .parent-item {
+            position: relative;
+        }
+
+        .parent-list .parent-item > .parent-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* hide nested submenu (we'll render children into the right pane) */
+        .parent-list .submenu {
+            display: none !important;
+        }
+
+        .parent-list .submenu li { list-style: none; }
+        .parent-list .submenu li a { padding: 8px 12px; display:block; color:var(--primary); }
+
+        .children-pane {
+            min-height: 120px;
+            max-height: 520px;
+            overflow: auto;
+            padding: 6px 12px;
+        }
+
+        /* Mobile: fall back to inline submenu under parent (if JS unavailable) */
+        @media (max-width: 720px) {
+            .dropdown.show .dropdown-menu { grid-template-columns: 1fr; }
+            .children-pane { display: block; }
+        }
+
+        /* Category bar (new) */
+        .category-bar {
+            background: white;
+            border-bottom: 1px solid #e6e6e6;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .category-bar .cat-list {
+            list-style: none;
+            display: flex;
+            gap: 18px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 12px;
+            align-items: center;
+        }
+
+        .category-bar .cat-item { position: relative; }
+
+        .category-bar .cat-link {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .category-bar .cat-link:hover { color: var(--primary); }
+
+        .category-bar .cat-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            box-shadow: 0 6px 18px rgba(10,20,30,0.08);
+            min-width: 220px;
+            z-index: 1500;
+            padding: 8px 0;
+        }
+
+        .category-bar .cat-dropdown ul { list-style:none; margin:0; padding:0; }
+        .category-bar .cat-dropdown li a { display:block; padding:8px 14px; color:#333; text-decoration:none; }
+        .category-bar .cat-dropdown li a:hover { background:#f4f8ff; color:var(--primary); }
+
+        .category-bar .cat-item:hover .cat-dropdown { display: block; }
+
+        @media (max-width: 900px) {
+            .category-bar .cat-list { overflow:auto; padding:8px; gap:12px; }
         }
 
         @keyframes fadeIn {
@@ -219,6 +321,7 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             padding: 12px 10px;
             background: white;
             border-bottom: 4px solid var(--primary);
+            position: relative; /* allow absolutely positioned dropdown to align to left */
         }
 
         header h1 {
@@ -417,14 +520,65 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+            line-clamp: 2;
         }
 
         /* Title is shown below image (visible) */
+
+        /* Featured layout */
+        .featured {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .featured-main img {
+            width: 100%;
+            height: 420px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .featured-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 18px;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.7) 100%);
+            border-radius: 0 0 12px 12px;
+        }
+
+        .featured-main { position: relative; }
+        .featured-main h3 { margin: 0; color: #fff; font-size: 1.35rem; line-height: 1.2; }
+
+        .featured-side .side-top img { width:100%; height: 420px; object-fit: cover; border-radius: 12px; display:block; }
+        .side-top { position: relative; }
+        .side-top .side-overlay { position: absolute; left:0; right:0; bottom:0; padding:12px; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.7) 100%); border-radius: 0 0 12px 12px; }
+        .side-top h4 { margin:0; color:#fff; font-size:1rem; }
+
+        .featured-thumbs { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .thumb-item img { width:100%; height:140px; object-fit: cover; border-radius: 8px; display:block; }
+        .thumb-title { margin-top:8px; color:var(--muted); font-weight:600; font-size:0.95rem; }
 
         .top5-meta {
             margin-left: auto;
             font-size: 0.85em;
             opacity: 0.9;
+        }
+
+        /* Responsive featured */
+        @media (max-width: 992px) {
+            .featured { grid-template-columns: 1fr; }
+            .featured-side .side-top img, .featured-main img { height: 320px; }
+            .featured-thumbs { grid-template-columns: repeat(2,1fr); }
+        }
+
+        @media (max-width: 576px) {
+            .featured-side .side-top img, .featured-main img { height: 220px; }
+            .featured-thumbs { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 992px) {
@@ -952,14 +1106,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
             
 
-           <div class="dropdown">
-    <a href="#" class="auth-link dropdown-toggle">Chuyên mục ▾</a>
-    <ul class="dropdown-menu">
-        <?php foreach ($chuyenMuc as $cm): ?>
-            <li><a href="index.php?action=chuyenmuc&id=<?= $cm['id'] ?>"><?= htmlspecialchars($cm['ten_chuyen_muc']) ?></a></li>
-        <?php endforeach; ?>
-    </ul>
-</div>
+    <?php
+    // Load parent categories (chuyen_muc_cha) if controller didn't provide them
+    if (!isset($chuyenMucCha) || !is_array($chuyenMucCha)) {
+        try {
+            $cmChaModel = new \Website\TinTuc\Models\ChuyenMucChaModel();
+            $chuyenMucCha = $cmChaModel->getAll();
+        } catch (Exception $e) {
+            $chuyenMucCha = [];
+        }
+    }
+
+    // Load child categories (chuyen_muc) if missing
+    if (!isset($chuyenMuc) || !is_array($chuyenMuc)) {
+        try {
+            $cmModel = new \Website\TinTuc\Models\ChuyenMucModel();
+            $chuyenMuc = $cmModel->getAll();
+        } catch (Exception $e) {
+            $chuyenMuc = [];
+        }
+    }
+
+    // Build a map of children by parent id for the horizontal category bar below
+    $childrenMap = [];
+    foreach ($chuyenMuc as $c) {
+        if (!empty($c['id_cha'])) {
+            $childrenMap[$c['id_cha']][] = $c;
+        }
+    }
+    ?>
 
 <?php if(isset($_SESSION['user'])): ?>
     <div class="dropdown">
@@ -968,11 +1143,11 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="dropdown-menu">
 
           
-            <a href="http://localhost/DemoTinTuc/public/index.php?action=userPage">Cập nhật hồ sơ cá nhân</a>
-            <a href="index.php?action=update">Đã thích</a>
-            <a href="index.php?action=changepass">Đã lưu</a>
-             <a href="index.php?action=changepass">Bình luận của tôi</a>
-            <a href="index.php?action=logout">Đăng xuất</a>
+            <a href="http://localhost/DemoTinTuc/public/index.php?action=userPage">Cập nhật thông tin cá nhân</a>
+         <a href="index.php?action=dathich">Đã thích</a>
+        <a href="index.php?action=daluu">Đã lưu</a>
+        <a href="index.php?action=binhluancuatoi">Bình luận của tôi</a>
+        <a href="index.php?action=logout">Đăng xuất</a>
 
             
             
@@ -990,6 +1165,27 @@ document.addEventListener("DOMContentLoaded", () => {
         <h1>Website Tin Tức</h1>
         <p>Cập nhật tin tức mới nhất, nhanh chóng & chính xác</p>
     </header>
+    <!-- Category navigation bar (parents horizontal, children dropdown on hover) -->
+    <nav class="category-bar">
+        <ul class="cat-list">
+            <?php foreach ($chuyenMucCha as $parent): ?>
+                <li class="cat-item">
+                    <a href="index.php?action=chuyenmuccha&id=<?= $parent['id'] ?>" class="cat-link"><?= htmlspecialchars($parent['ten_chuyen_muc']) ?></a>
+                    <div class="cat-dropdown">
+                        <ul>
+                            <?php if (!empty($childrenMap[$parent['id']])): ?>
+                                <?php foreach ($childrenMap[$parent['id']] as $child): ?>
+                                    <li><a href="index.php?action=chuyenmuc&id=<?= $child['id'] ?>"><?= htmlspecialchars($child['ten_chuyen_muc']) ?></a></li>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <li class="no-child">(Chưa có chuyên mục con)</li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
 
     <main>
         <aside class="ad-columns">
@@ -1014,16 +1210,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="content">
             <!-- Tin nổi bật -->
-            <div class="section">
-                <h2>Top 5 tin nổi bật</h2>
-                <div class="top5-grid" id="highlight-grid">
-                    <?php foreach ($tinNoiBat as $tin): ?>
-                        <article class="top5-item">
-                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="top5-link">
-                                <img src="<?= htmlspecialchars(img_url($tin['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($tin['tieu_de']) ?>">
-                                <div class="top5-info">
-                                    <h4><?= htmlspecialchars($tin['tieu_de']) ?></h4>
+            <div class="section" id="featured-section">
+                <h2>Tin nổi bật</h2>
+                <?php
+                $featured = is_array($tinNoiBat) ? array_values($tinNoiBat) : [];
+                $main = $featured[0] ?? null;
+                $side = $featured[1] ?? null;
+                $thumbs = array_slice($featured, 2, 3);
+                ?>
+
+                <div class="featured">
+                    <?php if ($main): ?>
+                        <article class="featured-main">
+                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $main['id'] ?>">
+                                <img src="<?= htmlspecialchars(img_url($main['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($main['tieu_de']) ?>">
+                                <div class="featured-overlay">
+                                    <h3><?= htmlspecialchars($main['tieu_de']) ?></h3>
                                 </div>
+                            </a>
+                        </article>
+                    <?php endif; ?>
+
+                    <div class="featured-side">
+                        <?php if ($side): ?>
+                            <article class="side-top">
+                                <a href="index.php?action=chi_tiet_bai_viet&id=<?= $side['id'] ?>">
+                                    <img src="<?= htmlspecialchars(img_url($side['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($side['tieu_de']) ?>">
+                                    <div class="side-overlay">
+                                        <h4><?= htmlspecialchars($side['tieu_de']) ?></h4>
+                                    </div>
+                                </a>
+                            </article>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="featured-thumbs">
+                    <?php foreach ($thumbs as $t): ?>
+                        <article class="thumb-item">
+                            <a href="index.php?action=chi_tiet_bai_viet&id=<?= $t['id'] ?>">
+                                <img src="<?= htmlspecialchars(img_url($t['anh_dai_dien'])) ?>" alt="<?= htmlspecialchars($t['tieu_de']) ?>">
+                                <div class="thumb-title"><?= htmlspecialchars($t['tieu_de']) ?></div>
                             </a>
                         </article>
                     <?php endforeach; ?>
@@ -1085,9 +1312,9 @@ document.addEventListener("DOMContentLoaded", () => {
         </aside>
     </main>
 
-    <!-- CHUYÊN MỤC - SCROLL NGANG -->
+    <!-- CHUYÊN MỤC CHA - SCROLL NGANG (hiển thị bài theo các chuyên mục con của mỗi chuyên mục cha) -->
     <div class="chuyen-muc-wrapper">
-        <?php foreach ($chuyenMuc as $cm): ?>
+        <?php foreach ($chuyenMucCha as $cm): ?>
             <?php $baiViet = $baiVietTheoChuyenMuc[$cm['id']] ?? []; ?>
             <div class="chuyen-muc-block">
                 <h3>
@@ -1176,17 +1403,53 @@ document.addEventListener("DOMContentLoaded", () => {
             populateAdSlots();
         }, 5000);
 
-        // Dropdown
-        document.querySelector('.dropdown-toggle').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelector('.dropdown').classList.toggle('show');
-        });
+        // Dropdown (parent -> child menu)
+        (function() {
+            const dropdown = document.querySelector('.dropdown');
+            if (!dropdown) return;
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const parentItems = dropdown.querySelectorAll('.parent-item');
 
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.dropdown')) {
-                document.querySelector('.dropdown').classList.remove('show');
-            }
-        });
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                dropdown.classList.toggle('show');
+            });
+
+            // Populate children pane when clicking or hovering a parent
+            const childrenPane = dropdown.querySelector('#children-pane');
+            dropdown.querySelectorAll('.parent-item').forEach(li => {
+                const link = li.querySelector('.parent-link');
+                const submenu = li.querySelector('.submenu');
+
+                // on hover (desktop) show children
+                li.addEventListener('mouseenter', function() {
+                    // populate children pane
+                    if (submenu) childrenPane.innerHTML = submenu.innerHTML;
+                    parentItems.forEach(pi => { if (pi !== li) pi.classList.remove('active'); });
+                    li.classList.add('active');
+                });
+
+                // on click: open children pane first; second click follows link
+                link.addEventListener('click', function(e) {
+                    if (li.classList.contains('active')) {
+                        // allow navigation on second click
+                        return;
+                    }
+                    e.preventDefault();
+                    if (submenu) childrenPane.innerHTML = submenu.innerHTML;
+                    parentItems.forEach(pi => { if (pi !== li) pi.classList.remove('active'); });
+                    li.classList.add('active');
+                });
+            });
+
+            // Click outside closes everything
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    dropdown.classList.remove('show');
+                    parentItems.forEach(pi => pi.classList.remove('active'));
+                }
+            });
+        })();
 
         // Scroll ngang
         function scrollLeft(id) {

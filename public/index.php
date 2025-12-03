@@ -160,6 +160,21 @@ case 'updateProfile':
     $controller = new \Website\TinTuc\Controllers\ThanhVienController();
     $controller->updateProfile();
     break;
+    case 'dathich':
+    include __DIR__ . '/../views/frontend/dathich.php';
+
+    break;
+
+case 'daluu':
+  include __DIR__ . '/../views/frontend/daluu.php';
+
+    break;
+
+case 'binhluancuatoi':
+ include __DIR__ . '/../views/frontend/binhluancuatoi.php';
+
+    break;
+
 
 
     // DEFAULT
