@@ -1160,7 +1160,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="dropdown-menu">
 
           
-            <a href="http://localhost/DemoTinTuc/public/index.php?action=userPage">Cập nhật thông tin cá nhân</a>
+            <a href="index.php?action=userPage">Cập nhật thông tin cá nhân</a>
          <a href="index.php?action=dathich">Đã thích</a>
         <a href="index.php?action=daluu">Đã lưu</a>
         <a href="index.php?action=binhluancuatoi">Bình luận của tôi</a>
