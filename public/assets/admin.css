@@ -92,7 +92,14 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-seri
 .user-menu-item:hover{background:#f1f7ff}
 .search-input{padding:8px 12px;border-radius:12px;border:1px solid #e6eef8;min-width:260px}
 .actions{display:flex;align-items:center;gap:12px}
-.content{padding:20px;flex:1;overflow:auto}
+.content{padding:24px 20px;flex:1;overflow:auto}
+/* Constrain and center main fragment content so page has side gutters */
+.content > * {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 20px; /* side spacing inside the content frame */
+    box-sizing: border-box;
+}
 .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.06)}
 .card h2{margin:0 0 12px 0}
 .btn{background:#f8fafc;border:1px solid #e6eef8;padding:8px 12px;border-radius:8px;cursor:pointer;color:#0f1724;transition:all .15s ease;text-decoration:none;display:inline-block}
