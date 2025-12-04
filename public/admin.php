@@ -86,13 +86,21 @@ if ($action === 'login_submit') {
     $user = $tv->findByEmailNormalized(trim($email));
     $allowed = ['admin', 'editor'];
     $ok = false;
+    $failureMessages = [];
     if ($user) {
         $role = isset($user['quyen']) ? strtolower(trim((string)$user['quyen'])) : '';
         $hash = $user['mat_khau'] ?? null;
-        if ($hash && password_verify($password, $hash) && in_array($role, $allowed, true)) {
+        if (! $hash || ! password_verify($password, $hash)) {
+            $failureMessages[] = 'Sai email hoặc mật khẩu.';
+        } elseif (! in_array($role, $allowed, true)) {
+            $failureMessages[] = 'Bạn không có quyền truy cập Admin.';
+        } else {
             $ok = true;
         }
+    } else {
+        $failureMessages[] = 'Sai email hoặc mật khẩu.';
     }
+
     if ($ok) {
         // Store admin-specific session keys so admin login doesn't overwrite frontend user session
         $_SESSION['admin_user_id'] = $user['id'];
@@ -105,11 +113,13 @@ if ($action === 'login_submit') {
         include __DIR__ . '/../views/backend/admin_login.php';
         exit;
     }
-    // provide two separate message lines for clarity
-    $_SESSION['flash_login_error'] = [
-        'Đăng nhập thất bại',
-        'Bạn không có quyền truy cập Admin.'
-    ];
+    // set a clear failure message (string or array) to be shown on the login page
+    if (!empty($failureMessages)) {
+        // if there's only one message, store as string for simpler display
+        $_SESSION['flash_login_error'] = count($failureMessages) === 1 ? $failureMessages[0] : $failureMessages;
+    } else {
+        $_SESSION['flash_login_error'] = 'Đăng nhập thất bại.';
+    }
     include __DIR__ . '/../views/backend/admin_login.php';
     exit;
 }
@@ -292,12 +302,12 @@ switch ($action) {
                 $tagModel = new \Website\TinTuc\Models\TagModel();
                 $id = $_GET['id'];
                 if ($tagModel->delete($id)) {
-                    $_SESSION['flash_success'] = '✅ Xóa thẻ tag thành công!';
+                    $_SESSION['flash_success'] = 'Xóa thẻ tag thành công!';
                 } else {
-                    $_SESSION['flash_error'] = '❌ Lỗi khi xóa thẻ tag!';
+                    $_SESSION['flash_error'] = 'Lỗi khi xóa thẻ tag!';
                 }
             } catch (Exception $e) {
-                $_SESSION['flash_error'] = '❌ Lỗi khi xóa thẻ tag!';
+                $_SESSION['flash_error'] = 'Lỗi khi xóa thẻ tag!';
             }
             header('Location: admin.php?action=tag');
             exit;

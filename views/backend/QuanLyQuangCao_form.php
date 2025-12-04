@@ -13,7 +13,8 @@ $qc = $isEdit ? ($quangcao ?? null) : null;
         background: #f7f9fc;
         border-radius: 16px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        max-width: 1000px;
+        max-width: 1280px; /* increased to give more horizontal room */
+        width: calc(100% - 2px);
         margin: 0 auto;
     }
 
@@ -141,7 +142,7 @@ $qc = $isEdit ? ($quangcao ?? null) : null;
 </style>
 
 <div class="backend-form-card-qc">
-    <h2><?= $isEdit ? '✏️ Sửa Quảng Cáo' : '✨ Thêm Quảng Cáo Mới' ?></h2>
+    <h2><?= $isEdit ? 'Sửa Quảng Cáo' : 'Thêm Quảng Cáo' ?></h2>
 
     <form method="post" action="admin.php?action=<?= $isEdit ? 'qc_update' : 'qc_store' ?><?= $isEdit ? '&id=' . intval($qc['id']) : '' ?>" enctype="multipart/form-data" class="form-layout-qc">
         

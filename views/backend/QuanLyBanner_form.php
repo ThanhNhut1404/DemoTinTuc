@@ -138,7 +138,8 @@ $banner = $isEdit ? ($banner ?? null) : null;
     }
 
     /* actions placed in the left info column underneath the status field */
-    .info-actions { margin-top: 60px; }
+    /* Reduced top margin so buttons sit slightly higher under status */
+    .info-actions { margin-top: 28px; }
 
     /* preview footer layout: note on the left, actions on the right (same horizontal row) */
     .preview-footer {
