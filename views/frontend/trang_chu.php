@@ -118,6 +118,10 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             flex-wrap: wrap;
         }
 
+        /* place search + auth links on the right when not logged in */
+        .search-container { order: 1; margin-left: auto; }
+        .auth-link, .auth-links { order: 1; margin-left: 8px; color: #fff; }
+
         /* Account avatar + dropdown (left side) */
         .account-dropdown { position: relative; order: -1; }
         .account-btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; color:#fff; text-decoration:none; background:transparent; border:none; padding:0; }
