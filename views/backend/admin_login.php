@@ -52,7 +52,7 @@ unset($_SESSION['flash_success']);
         .toggle-password:hover{color:#007bff}
         .forgot-password{ text-align:right; margin-bottom:20px }
         button.login-btn{ width:100%; padding:14px; font-size:17px; background:linear-gradient(90deg,#22c55e,#16a34a); border:none; border-radius:12px; color:#fff; cursor:pointer; font-weight:600 }
-        button.login-btn:hover{ transform:translateY(-2px); background:linear-gradient(90deg,#16a34a,#15803d) }
+        button.login-btn:hover{ background:linear-gradient(90deg,#16a34a,#15803d) }
         .flash{ background:#fff0f0;padding:6px 8px;border:none;color:#b91c1c;border-radius:6px;margin:8px auto 12px;max-width:100%;text-align:center;font-size:14px }
         .flash-line{ color:#b91c1c; font-weight:600; margin:1px 0; line-height:1.0; text-align:center; font-size:15px }
         .flash-success{ background:#ecfdf5;padding:6px 8px;border-radius:6px;margin:8px auto 12px;max-width:100%;text-align:center;color:#065f46;font-weight:700 }
