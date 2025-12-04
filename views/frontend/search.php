@@ -17,6 +17,11 @@ $totalResults = $totalResults ?? 0;
 $currentPage = $currentPage ?? 1;
 $query = htmlspecialchars($query ?? '');
 
+// Debug session user when requested
+if (!empty($_GET['debug'])) {
+    echo "<pre style='background:#fff8e1;border:1px solid #ffd54f;padding:10px;max-width:1000px;margin:10px auto;'>SESSION USER:\n" . htmlspecialchars(print_r($_SESSION['user'] ?? '(not set)', true)) . "</pre>";
+}
+
 // Lấy chuyên mục từ DB
 $stmt = $conn->query("SELECT id, ten_chuyen_muc FROM chuyen_muc ORDER BY id ASC");
 $chuyenMuc = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -60,8 +65,8 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 .small-link:hover { text-decoration:underline; }
 .account-actions { display:flex; flex-direction:column; gap:6px; }
 .account-actions a { color:#333; padding:8px 10px; border-radius:6px; }
-.account-footer { text-align:right; }
-.logout-btn { display:inline-block; padding:8px 12px; background:#e04b4b; color:white; border-radius:8px; text-decoration:none; }
+.account-footer { text-align:center; }
+.logout-btn { display:inline-block; padding:8px 12px; background:#0066cc; color:white; border-radius:8px; text-decoration:none; }
 .logout-btn:hover { background:#c93b3b; }
 
 /* CONTENT */
@@ -104,22 +109,31 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 
             <!-- Dropdown Tài khoản (modern compact card) -->
             <div class="dropdown account-dropdown" tabindex="0">
-            <?php if(isset($_SESSION['user'])): ?>
-                <?php $user = $_SESSION['user'];
-                $avatar = !empty($user['avatar']) ? htmlspecialchars($user['avatar']) : 'uploads/no_avatar.png';
-                $displayName = htmlspecialchars($user['ten'] ?? $user['email'] ?? 'Tài khoản'); ?>
+            <?php if(!empty($_SESSION['user'])): ?>
+                <?php
+                    $user = $_SESSION['user'];
+                    // Support various possible fields used across the app
+                    $displayName = $user['name'] ?? $user['ten'] ?? $user['ho_ten'] ?? $user['email'] ?? 'Tài khoản';
+                    $avatarVal = $user['avatar'] ?? $user['anh_dai_dien'] ?? $user['avatar_url'] ?? $user['anh'] ?? '';
+                    // Normalize via helper (may return '../uploads/...' or absolute URL)
+                    $avatarUrl = trim((string)$avatarVal) === '' ? '../uploads/no_avatar.png' : img_url($avatarVal);
+                    // If helper returned a ../ prefix but page expects public path, remove it (fix relative mismatch)
+                    if (strncmp($avatarUrl, '../', 3) === 0) {
+                        $avatarUrl = substr($avatarUrl, 3);
+                    }
+                ?>
                 <button class="dropdown-toggle" aria-expanded="false">
-                    <img src="<?= $avatar ?>" alt="avatar" class="account-avatar">
-                    <span class="account-name"><?= $displayName ?></span>
+                    <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="account-avatar">
+                    <span class="account-name"><?= htmlspecialchars($displayName) ?></span>
                     <span class="caret">▾</span>
                 </button>
 
                 <div class="dropdown-menu">
                     <div class="account-card">
                         <div class="account-card-header">
-                            <img src="<?= $avatar ?>" alt="avatar" class="account-avatar-lg">
+                            <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="account-avatar-lg">
                             <div class="account-info">
-                                <div class="account-name-lg"><?= $displayName ?></div>
+                                <div class="account-name-lg"><?= htmlspecialchars($displayName) ?></div>
                                 <a href="index.php?action=userPage" class="small-link">Cập nhật thông tin</a>
                             </div>
                         </div>
