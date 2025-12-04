@@ -174,13 +174,38 @@
                     </div>
                 </form>
 
-                <!-- Tài khoản -->
-                <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                    <span class="text-white fw-medium">Xin chào, <strong><?= htmlspecialchars($_SESSION['ho_ten'] ?? 'User') ?></strong>!</span>
-                    <a href="index.php?action=logout" class="btn btn-outline-light btn-sm px-4"
-                       onclick="return confirm('Bạn có chắc muốn đăng xuất không?')">
-                        Đăng xuất
-                    </a>
+                <!-- Tài khoản (compact card) -->
+                <?php if (isset($_SESSION['id_nguoi_dung'])):
+                    $user = [
+                        'ten' => $_SESSION['ho_ten'] ?? null,
+                        'avatar' => $_SESSION['avatar'] ?? null
+                    ];
+                    $avatar = !empty($user['avatar']) ? htmlspecialchars($user['avatar']) : '/uploads/no_avatar.png';
+                    $displayName = htmlspecialchars($user['ten'] ?? 'Tài khoản');
+                ?>
+                    <div class="dropdown account-dropdown" style="position:relative;">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" aria-expanded="false">
+                            <img src="<?= $avatar ?>" alt="avatar" class="account-avatar" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;"> 
+                            <?= $displayName ?>
+                        </button>
+                        <div class="dropdown-menu account-dropdown-menu" style="display:none;position:absolute;right:0;top:48px;min-width:260px;border-radius:10px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,0.12);background:#fff;border:1px solid #eee;z-index:1100;">
+                            <div style="display:flex;gap:12px;align-items:center;padding-bottom:8px;border-bottom:1px solid #f1f5f9;margin-bottom:8px;">
+                                <img src="<?= $avatar ?>" alt="avatar" style="width:54px;height:54px;border-radius:50%;object-fit:cover;">
+                                <div>
+                                    <div style="font-weight:700;color:#222;"><?= $displayName ?></div>
+                                    <a href="index.php?action=userPage" style="color:#0b5ed7;font-size:13px;text-decoration:none;">Cập nhật thông tin</a>
+                                </div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:6px;">
+                                <a href="index.php?action=dathich" style="padding:8px 10px;border-radius:6px;color:#222;text-decoration:none;">Đã thích</a>
+                                <a href="index.php?action=daluu" style="padding:8px 10px;border-radius:6px;color:#222;text-decoration:none;">Đã lưu</a>
+                                <a href="index.php?action=binhluancuatoi" style="padding:8px 10px;border-radius:6px;color:#222;text-decoration:none;">Bình luận của tôi</a>
+                            </div>
+                            <div style="text-align:right;margin-top:8px;">
+                                <a href="index.php?action=logout" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn đăng xuất không?')">Đăng xuất</a>
+                            </div>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <a href="index.php?action=login" class="btn btn-outline-light btn-sm px-4">Đăng Nhập</a>
                 <?php endif; ?>
@@ -247,6 +272,40 @@
             }
         });
     });
+    </script>
+    <script>
+    // Dropdown behavior for account card in header partial
+    (function(){
+        document.addEventListener('click', function(ev){
+            // close any open account menus when clicking outside
+            document.querySelectorAll('.account-dropdown').forEach(drop => {
+                const menu = drop.querySelector('.account-dropdown-menu');
+                const toggle = drop.querySelector('.dropdown-toggle');
+                if (!menu || !toggle) return;
+                if (drop.contains(ev.target)) return; // clicked inside -> do nothing
+                menu.style.display = 'none';
+                toggle.setAttribute('aria-expanded','false');
+            });
+        });
+
+        document.querySelectorAll('.account-dropdown').forEach(drop => {
+            const toggle = drop.querySelector('.dropdown-toggle');
+            const menu = drop.querySelector('.account-dropdown-menu');
+            if (!toggle || !menu) return;
+            toggle.addEventListener('click', function(ev){
+                ev.stopPropagation();
+                const isOpen = menu.style.display === 'block';
+                document.querySelectorAll('.account-dropdown-menu').forEach(m => m.style.display = 'none');
+                if (!isOpen) {
+                    menu.style.display = 'block';
+                    toggle.setAttribute('aria-expanded','true');
+                } else {
+                    menu.style.display = 'none';
+                    toggle.setAttribute('aria-expanded','false');
+                }
+            });
+        });
+    })();
     </script>
 </body>
 </html>

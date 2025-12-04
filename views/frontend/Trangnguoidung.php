@@ -209,7 +209,7 @@ input:focus, textarea:focus {
           <!-- Right button group -->
           <div class="right-buttons">
             <button class="btn-save" type="submit">Lưu thay đổi</button>
-            <button type="button" class="btn-cancel" onclick="location.reload()">Hủy bỏ</button>
+            <button type="button" class="btn-cancel" onclick="window.location.href='index.php?action=home'">Hủy bỏ</button>
           </div>
 
         </div>

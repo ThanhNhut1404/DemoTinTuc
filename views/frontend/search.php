@@ -42,11 +42,27 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 
 /* Dropdown */
 .dropdown { position:relative; }
-.dropdown-toggle { color:white; text-decoration:none; padding:8px 12px; border-radius:6px; background:#007bff; font-size:14px; cursor:pointer; user-select:none; }
+.dropdown-toggle { color:white; text-decoration:none; padding:8px 10px; border-radius:8px; background:#007bff; font-size:14px; cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px; border:none; }
 .dropdown-toggle:hover, .dropdown-toggle:focus { background:#0069d9; }
-.dropdown-menu { position:absolute; top:38px; left:0; background:white; min-width:200px; border-radius:8px; border:1px solid #ddd; padding:8px 0; display:none; z-index:200; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
-.dropdown-menu a { display:block; padding:10px 15px; color:#333; text-decoration:none; font-size:14px; }
-.dropdown-menu a:hover { background:#f2f2f2; }
+.dropdown-menu { position:absolute; top:44px; right:0; background:white; min-width:240px; border-radius:10px; border:1px solid #eee; padding:12px; display:none; z-index:200; box-shadow:0 10px 30px rgba(0,0,0,0.12); }
+.dropdown-menu a { display:block; padding:8px 12px; color:#333; text-decoration:none; font-size:14px; border-radius:6px; }
+.dropdown-menu a:hover { background:#f7f9fb; }
+
+/* Account avatar + card styles */
+.account-avatar { width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.15); }
+.account-name { color:white; font-weight:600; }
+.account-card { display:flex; flex-direction:column; gap:10px; }
+.account-card-header { display:flex; gap:12px; align-items:center; }
+.account-avatar-lg { width:54px; height:54px; border-radius:50%; object-fit:cover; }
+.account-info { display:flex; flex-direction:column; }
+.account-name-lg { font-weight:700; color:#222; }
+.small-link { color:#007bff; text-decoration:none; font-size:13px; }
+.small-link:hover { text-decoration:underline; }
+.account-actions { display:flex; flex-direction:column; gap:6px; }
+.account-actions a { color:#333; padding:8px 10px; border-radius:6px; }
+.account-footer { text-align:right; }
+.logout-btn { display:inline-block; padding:8px 12px; background:#e04b4b; color:white; border-radius:8px; text-decoration:none; }
+.logout-btn:hover { background:#c93b3b; }
 
 /* CONTENT */
 .search-container { max-width:1150px; margin:40px auto; background:#fff; padding:30px; border-radius:15px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
@@ -86,22 +102,54 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
                 <button type="submit">🔍</button>
             </form>
 
-            <!-- Dropdown Tài khoản -->
-            <div class="dropdown" tabindex="0">
+            <!-- Dropdown Tài khoản (modern compact card) -->
+            <div class="dropdown account-dropdown" tabindex="0">
             <?php if(isset($_SESSION['user'])): ?>
-                <span class="dropdown-toggle">Tài khoản ▾</span>
+                <?php $user = $_SESSION['user'];
+                $avatar = !empty($user['avatar']) ? htmlspecialchars($user['avatar']) : 'uploads/no_avatar.png';
+                $displayName = htmlspecialchars($user['ten'] ?? $user['email'] ?? 'Tài khoản'); ?>
+                <button class="dropdown-toggle" aria-expanded="false">
+                    <img src="<?= $avatar ?>" alt="avatar" class="account-avatar">
+                    <span class="account-name"><?= $displayName ?></span>
+                    <span class="caret">▾</span>
+                </button>
+
                 <div class="dropdown-menu">
+<<<<<<< HEAD
                     <a href="index.php?action=userPage">Cập nhật thông tin cá nhân</a>
                      <a href="index.php?action=dathich">Đã thích</a>
                      <a href="index.php?action=daluu">Đã lưu</a>
                      <a href="index.php?action=binhluancuatoi">Bình luận của tôi</a>
                     <a href="index.php?action=logout">Đăng xuất</a>
+=======
+                    <div class="account-card">
+                        <div class="account-card-header">
+                            <img src="<?= $avatar ?>" alt="avatar" class="account-avatar-lg">
+                            <div class="account-info">
+                                <div class="account-name-lg"><?= $displayName ?></div>
+                                <a href="index.php?action=userPage" class="small-link">Cập nhật thông tin</a>
+                            </div>
+                        </div>
+                        <div class="account-actions">
+                            <a href="index.php?action=dathich">Đã thích</a>
+                            <a href="index.php?action=daluu">Đã lưu</a>
+                            <a href="index.php?action=binhluancuatoi">Bình luận của tôi</a>
+                        </div>
+                        <div class="account-footer">
+                            <a href="index.php?action=logout" class="logout-btn">Đăng xuất</a>
+                        </div>
+                    </div>
+>>>>>>> de0165fe93eac18bd0a20b9a8c60cd6e2da7f34b
                 </div>
             <?php else: ?>
-                <span class="dropdown-toggle">Tài khoản ▾</span>
+                <button class="dropdown-toggle" aria-expanded="false">Đăng nhập / Đăng ký ▾</button>
                 <div class="dropdown-menu">
-                    <a href="index.php?action=login">Đăng nhập</a>
-                    <a href="index.php?action=register">Đăng ký</a>
+                    <div class="account-card">
+                        <div class="account-actions">
+                            <a href="index.php?action=login">Đăng nhập</a>
+                            <a href="index.php?action=register">Đăng ký</a>
+                        </div>
+                    </div>
                 </div>
             <?php endif; ?>
             </div>
@@ -201,11 +249,34 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 </div>
 
 <script>
-// Mở dropdown khi bấm vào chữ
+// Dropdown behavior: toggle, click-outside close, Esc to close
 document.querySelectorAll('.dropdown').forEach(drop => {
     const toggle = drop.querySelector('.dropdown-toggle');
-    toggle.addEventListener('click', () => {
-        drop.classList.toggle('open');
+    const menu = drop.querySelector('.dropdown-menu');
+    if (!toggle) return;
+
+    const open = () => {
+        drop.classList.add('open');
+        toggle.setAttribute('aria-expanded', 'true');
+    };
+    const close = () => {
+        drop.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    };
+
+    toggle.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        drop.classList.contains('open') ? close() : open();
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (ev) => {
+        if (!drop.contains(ev.target)) close();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape' || ev.key === 'Esc') close();
     });
 });
 </script>
