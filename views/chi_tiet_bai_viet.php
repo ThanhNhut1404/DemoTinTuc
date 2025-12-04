@@ -226,50 +226,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save'], $_POST
     }
 }
 
-// === TĂNG LƯỢT XEM – CHỐNG SPAM ===
-// Mục tiêu: mỗi tài khoản đã đăng nhập chỉ được tính 1 lượt sau mỗi
-// $VIEW_COUNT_THRESHOLD_SECONDS (mặc định 300 giây = 5 phút).
-// Khách (chưa đăng nhập) vẫn sử dụng cookie ngắn (30s) để giảm spam reload.
+// === TĂNG LƯỢT XEM – CHỐNG SPAM (5 phút cho user, 5 phút cho guest) ===
+// We'll use a DB table for logged-in users and a cookie for guests.
 if (isset($VIEW_COUNT_ENABLED) && $VIEW_COUNT_ENABLED) {
     $threshold = isset($VIEW_COUNT_THRESHOLD_SECONDS) ? (int)$VIEW_COUNT_THRESHOLD_SECONDS : 300;
     $now = time();
     $didCount = false;
 
     if (isset($_SESSION['id_nguoi_dung']) && !empty($_SESSION['id_nguoi_dung'])) {
-        // Logged-in user: enforce per-account threshold using session per-user
+        // Logged-in user: DB-backed tracking so it's resilient across sessions
         $uid = (int)$_SESSION['id_nguoi_dung'];
-        if (!isset($_SESSION['views_by_user']) || !is_array($_SESSION['views_by_user'])) {
-            $_SESSION['views_by_user'] = [];
-        }
-        if (!isset($_SESSION['views_by_user'][$uid]) || !is_array($_SESSION['views_by_user'][$uid])) {
-            $_SESSION['views_by_user'][$uid] = [];
-        }
 
-        $last = (int)($_SESSION['views_by_user'][$uid][$id] ?? 0);
-        if (($now - $last) >= $threshold) {
-            $conn->query("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = " . (int)$id);
-            $_SESSION['views_by_user'][$uid][$id] = $now;
+        // Create table if missing (safe no-op if exists)
+        $conn->query("CREATE TABLE IF NOT EXISTS `bai_viet_views_users` (
+            `id_bai_viet` INT NOT NULL,
+            `id_nguoi_dung` INT NOT NULL,
+            `last_view` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id_bai_viet`, `id_nguoi_dung`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Get last view timestamp
+        $stmt = $conn->prepare("SELECT UNIX_TIMESTAMP(last_view) AS last_ts FROM bai_viet_views_users WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
+        $stmt->bind_param('ii', $id, $uid);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res ? $res->fetch_assoc() : null;
+        $stmt->close();
+
+        $last_ts = isset($row['last_ts']) ? (int)$row['last_ts'] : 0;
+        if (($now - $last_ts) >= $threshold) {
+            // Upsert last_view and increment
+            $stmt = $conn->prepare("INSERT INTO bai_viet_views_users (id_bai_viet, id_nguoi_dung, last_view) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE last_view = NOW()");
+            $stmt->bind_param('ii', $id, $uid);
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt2 = $conn->prepare("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?");
+            $stmt2->bind_param('i', $id);
+            $stmt2->execute();
+            $stmt2->close();
             $didCount = true;
         }
     } else {
-        // Guest: simple cookie-based short window (30s) to avoid rapid reloads
-        $cookie = "v_{$id}";
-        if (!isset($_COOKIE[$cookie])) {
-            setcookie($cookie, "1", time() + 30, "/");
-            $conn->query("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = " . (int)$id);
+        // Guest: use DB-backed fingerprint (hash of IP + User-Agent) to avoid
+        // depending on cookies which may be blocked or not set.
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $fingerprint = hash('sha256', $ip . '|' . $ua);
+
+        // Create guest tracking table if missing
+        $conn->query("CREATE TABLE IF NOT EXISTS `bai_viet_views_guests` (
+            `id_bai_viet` INT NOT NULL,
+            `fingerprint` VARCHAR(64) NOT NULL,
+            `last_view` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id_bai_viet`, `fingerprint`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Check last view for this fingerprint
+        $stmt = $conn->prepare("SELECT UNIX_TIMESTAMP(last_view) AS last_ts FROM bai_viet_views_guests WHERE id_bai_viet = ? AND fingerprint = ?");
+        $stmt->bind_param('is', $id, $fingerprint);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res ? $res->fetch_assoc() : null;
+        $stmt->close();
+
+        $last_ts = isset($row['last_ts']) ? (int)$row['last_ts'] : 0;
+        if (($now - $last_ts) >= $threshold) {
+            // Upsert last_view and increment
+            $stmt = $conn->prepare("INSERT INTO bai_viet_views_guests (id_bai_viet, fingerprint, last_view) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE last_view = NOW()");
+            $stmt->bind_param('is', $id, $fingerprint);
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt2 = $conn->prepare("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?");
+            $stmt2->bind_param('i', $id);
+            $stmt2->execute();
+            $stmt2->close();
             $didCount = true;
         }
     }
 
-    // Optional debug logging when enabled
+    // Debug log if enabled
     if (isset($VIEW_COUNT_DEBUG) && $VIEW_COUNT_DEBUG) {
         $logDir = __DIR__ . '/../storage';
-        if (!is_dir($logDir)) {
-            @mkdir($logDir, 0755, true);
-        }
+        if (!is_dir($logDir)) @mkdir($logDir, 0755, true);
         $logFile = $logDir . '/view_debug.log';
         $uidLog = isset($uid) ? $uid : 0;
-        $line = date('Y-m-d H:i:s') . " | post={$id} | user={$uidLog} | didCount=" . ($didCount ? '1' : '0') . " | now={$now} | threshold={$threshold}\n";
+        $cookieFlag = isset($cookieName) ? (isset($_COOKIE[$cookieName]) ? '1' : '0') : '0';
+        $line = date('Y-m-d H:i:s') . " | post={$id} | user={$uidLog} | cookieExists={$cookieFlag} | didCount=" . ($didCount ? '1' : '0') . " | now={$now} | threshold={$threshold}\n";
         @file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
     }
 }
