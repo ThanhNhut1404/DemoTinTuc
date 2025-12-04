@@ -688,6 +688,23 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
             font-size: 0.9em;
         }
 
+        /* Scroll area for remaining items - collapsed by default so only head items show */
+        .tin-scroll {
+            max-height: 320px; /* always expanded for Tin xem nhiều (show rest in scroll)"); */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 8px; /* room for scrollbar when expanded */
+            margin-top: 12px;
+        }
+
+        .tin-scroll .tin {
+            padding: 8px;
+            background: #fff;
+            border: 1px solid #f0f0f0;
+        }
+
         /* ===== QUẢNG CÁO PHẢI ===== */
         .qc-right {
             margin-bottom: 15px;
@@ -732,8 +749,8 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         .ad-slot {
             overflow: hidden;
             border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg-light);
+            border: none; /* removed border for cleaner ad look */
+            background: transparent; /* let ad images define their own background */
         }
 
         .ad-slot .ad-link { display:block; }
@@ -1260,7 +1277,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <!-- Tin mới nhất -->
             <div class="section">
                 <h2>Tin mới nhất</h2>
-                <?php foreach ($tinMoiNhat as $tin): ?>
+                <?php
+                    // Ensure newest-first ordering by date, then reindex and slice to 5
+                    $tinMoiNhat = $tinMoiNhat ?: [];
+                    usort($tinMoiNhat, function($a, $b){
+                        return strtotime($b['ngay_dang'] ?? 0) <=> strtotime($a['ngay_dang'] ?? 0);
+                    });
+                    $tinMoiNhat = array_values($tinMoiNhat);
+                    $moiNhat_head = array_slice($tinMoiNhat, 0, 4);
+                    $moiNhat_rest = array_slice($tinMoiNhat, 4);
+                ?>
+                <?php foreach ($moiNhat_head as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
                         <div class="tin">
                             <img src="<?= htmlspecialchars(img_url($tin['anh_dai_dien'])) ?>" alt="">
@@ -1276,7 +1303,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <!-- Tin xem nhiều -->
             <div class="section">
                 <h2>Tin xem nhiều</h2>
-                <?php foreach ($tinXemNhieu as $tin): ?>
+                <?php
+                    // Ensure most-viewed ordering by luot_xem desc, reindex and slice
+                    $tinXemNhieu = $tinXemNhieu ?: [];
+                    usort($tinXemNhieu, function($a, $b){
+                        return ($b['luot_xem'] ?? 0) <=> ($a['luot_xem'] ?? 0);
+                    });
+                    $tinXemNhieu = array_values($tinXemNhieu);
+                    $xemNhieu_head = array_slice($tinXemNhieu, 0, 4);
+                    $xemNhieu_rest = array_slice($tinXemNhieu, 4);
+                ?>
+                <?php foreach ($xemNhieu_head as $tin): ?>
                     <a href="index.php?action=chi_tiet_bai_viet&id=<?= $tin['id'] ?>" class="tin-link">
                         <div class="tin">
                             <img src="<?= htmlspecialchars(img_url($tin['anh_dai_dien'])) ?>" alt="">
@@ -1287,6 +1324,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </a>
                 <?php endforeach; ?>
+
+                <?php // Remaining 'Tin xem nhiều' intentionally not rendered; only the 4 head items are shown ?>
             </div>
         </div>
 
@@ -1461,6 +1500,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const container = document.getElementById('scroll-' + id);
             container.scrollBy({ left: 300, behavior: 'smooth' });
         }
+
+        // Removed toggle button for Tin xem nhiều; rest is shown in scroll by default.
 
         // Load background on page load
         document.addEventListener('DOMContentLoaded', loadBackground);

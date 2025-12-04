@@ -38,8 +38,8 @@ class BinhLuanController {
                 die("Không thể kết nối database");
             }
 
-            // Gọi Model
-            $model = new BinhLuanModel($conn);
+            // Gọi Model (BinhLuanModel tự tạo kết nối nội bộ nên không cần truyền $conn)
+            $model = new BinhLuanModel();
 
             // Lưu bình luận
             $model->add($id_bai_viet, $id_nguoi_dung, $noi_dung);
