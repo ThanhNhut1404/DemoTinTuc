@@ -29,6 +29,50 @@ use Website\TinTuc\Controllers\BinhLuanAdminController;
 // Actions: allow login/logout without authentication
 $action = $_GET['action'] ?? 'index';
 
+// Simple helpers for tab registration/unregistration used by the admin layout JS.
+if ($action === 'register_tab') {
+    $token = $_POST['token'] ?? $_GET['token'] ?? '';
+    if ($token) {
+        if (!isset($_SESSION['admin_tab_tokens']) || !is_array($_SESSION['admin_tab_tokens'])) {
+            $_SESSION['admin_tab_tokens'] = [];
+        }
+        $_SESSION['admin_tab_tokens'][$token] = time();
+        // cancel any pending logout because a tab re-registered
+        if (isset($_SESSION['pending_logout'])) {
+            unset($_SESSION['pending_logout']);
+        }
+    }
+    // Return a minimal response
+    header('Content-Type: text/plain');
+    echo 'ok';
+    exit;
+}
+
+if ($action === 'unregister_tab') {
+    $token = $_POST['token'] ?? $_GET['token'] ?? '';
+    if ($token && isset($_SESSION['admin_tab_tokens'][$token])) {
+        unset($_SESSION['admin_tab_tokens'][$token]);
+    }
+    // if no tabs remain, schedule a pending logout a few seconds in the future
+    if (empty($_SESSION['admin_tab_tokens'])) {
+        $_SESSION['pending_logout'] = time() + 5; // grace period (seconds)
+    }
+    header('Content-Type: text/plain');
+    echo 'ok';
+    exit;
+}
+
+// If a pending logout was scheduled and its time has passed, destroy the session now
+if (!empty($_SESSION['pending_logout']) && is_numeric($_SESSION['pending_logout'])) {
+    if (time() >= (int)$_SESSION['pending_logout']) {
+        session_unset();
+        session_destroy();
+        // redirect to login page
+        header('Location: admin.php?action=login');
+        exit;
+    }
+}
+
 if ($action === 'login') {
     include __DIR__ . '/../views/backend/admin_login.php';
     exit;

@@ -2,6 +2,7 @@
 // Bài viết management menu + sub-fragment loader
 use Website\TinTuc\Models\ChuyenMucModel;
 use Website\TinTuc\Models\TagModel;
+use Website\TinTuc\Models\ChuyenMucChaModel;
 
 $sub = $_GET['sub'] ?? null;
 $subFragments = [
@@ -17,6 +18,16 @@ $subFragments = [
 if (!isset($chuyenMucList)) {
     $chuyenMucModel = new ChuyenMucModel();
     $chuyenMucList = $chuyenMucModel->getAll();
+}
+
+// Fetch parent categories (chuyen_muc_cha) so we can display readable names in the 'them' fragment
+if (!isset($chuyenMucChaList)) {
+    try {
+        $cmChaModel = new ChuyenMucChaModel();
+        $chuyenMucChaList = $cmChaModel->getAll();
+    } catch (\Exception $e) {
+        $chuyenMucChaList = [];
+    }
 }
 
 // Fetch tags for dropdowns in 'them' and 'sua' subfragments

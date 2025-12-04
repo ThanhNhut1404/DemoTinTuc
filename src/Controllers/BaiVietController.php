@@ -255,8 +255,8 @@ class BaiVietController
             // Lấy thông tin chuyên mục (nếu cần hiển thị)
             $cm = $chuyenMucModel->getById($baiViet['id_chuyen_muc']);
 
-            // Tăng lượt xem
-            $baiVietModel->tangLuotXem($id);
+            // Lượt xem được xử lý trong view `chi_tiet_bai_viet.php`
+            // để áp dụng cơ chế chống spam (per-user / cookie / DB).
 
         } catch (\PDOException $e) {
             die("Lỗi khi lấy bài viết: " . $e->getMessage());
