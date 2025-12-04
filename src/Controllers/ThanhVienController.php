@@ -206,7 +206,9 @@ public function updateProfile()
 
         try {
             // Cập nhật DB — ❌ KHÔNG cập nhật email
-            $model->capNhatThongTin($id, $hoTen, $anhDaiDien, $ngaySinh, $gioiTinh);
+            // capNhatThongTin signature: ($id, $hoTen, $email = null, $anh = null, $ngaySinh = null, $gioiTinh = null)
+            // Controller previously passed parameters in wrong order; ensure we pass `null` for email then avatar, dob, gender
+            $model->capNhatThongTin($id, $hoTen, null, $anhDaiDien, $ngaySinh, $gioiTinh);
 
             // cập nhật session — ❌ KHÔNG đổi email
             $_SESSION['user']['ho_ten'] = $hoTen;
@@ -216,7 +218,7 @@ public function updateProfile()
                 $_SESSION['user']['anh_dai_dien'] = $anhDaiDien;
             }
 
-            $_SESSION['flash_message'] = "✅ Cập nhật thành công!";
+            $_SESSION['flash_message'] = "Cập nhật thành công!";
         } catch (\Exception $e) {
             $_SESSION['flash_message'] = "⚠️ " . $e->getMessage();
         }
