@@ -136,6 +136,7 @@
             border-radius: 50px !important;
             padding: 0.6rem 1.6rem !important;
             font-weight: 600;
+            color: #fff !important;
             transition: all 0.3s ease;
         }
 
@@ -145,6 +146,16 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
+        /* Account name inside avatar button */
+        .account-name {
+            color: #fff;
+            font-weight: 700;
+            display: inline-block;
+            margin-right: 6px;
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+        .account-dropdown .btn-outline-light { padding-left:10px !important; padding-right:14px !important; }
     </style>
 </head>
 
@@ -215,7 +226,13 @@
                             $sessionAvatarUrl = '/public/uploads/' . ltrim($sv, '/');
                         }
                     }
-                    $displayName = htmlspecialchars($user['ten'] ?? 'Tài khoản');
+                    // Prefer several possible sources for the display name (session top-level, user array, email)
+                    $rawDisplay = $_SESSION['ho_ten'] ?? $user['ten'] ?? ($_SESSION['user']['ho_ten'] ?? null) ?? ($_SESSION['user']['email'] ?? null) ?? 'Tài khoản';
+                    $displayName = htmlspecialchars($rawDisplay);
+                    // Short display for header: first word (first name) — keep full name in title attribute
+                    $parts = preg_split('/\s+/', trim((string)$rawDisplay));
+                    $firstName = $parts[0] ?? $rawDisplay;
+                    $displayShort = htmlspecialchars($firstName);
 
                     // Choose avatar for the header button: prefer author (when on detail), else session
                     $buttonAvatarUrl = $authorAvatarUrl ?: $sessionAvatarUrl;
@@ -223,9 +240,9 @@
                     $menuAvatarUrl = $buttonAvatarUrl;
                 ?>
                     <div class="dropdown account-dropdown" style="position:relative;">
-                        <button class="btn btn-outline-light dropdown-toggle" type="button" aria-expanded="false" style="display:flex;align-items:center;gap:10px;padding:8px 14px;">
-                            <img src="<?= htmlspecialchars($buttonAvatarUrl) ?>" alt="avatar" class="account-avatar" style="width:34px;height:34px;border-radius:50%;object-fit:cover;margin-right:6px;border:2px solid rgba(255,255,255,0.85);"> 
-                            <?= $displayName ?>
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" aria-expanded="false" title="<?= $displayName ?>" style="display:flex;align-items:center;gap:10px;padding:8px 14px;">
+                            <img src="<?= htmlspecialchars($buttonAvatarUrl) ?>" alt="avatar" class="account-avatar" style="width:34px;height:34px;border-radius:50%;object-fit:cover;margin-right:8px;border:2px solid rgba(255,255,255,0.85);"> 
+                            <span class="account-name"><?= $displayShort ?></span>
                         </button>
                         <div class="dropdown-menu account-dropdown-menu" style="display:none;position:absolute;right:0;top:48px;min-width:260px;border-radius:10px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,0.12);background:#fff;border:1px solid #eee;z-index:1100;">
                             <div style="display:flex;gap:12px;align-items:center;padding-bottom:8px;border-bottom:1px solid #f1f5f9;margin-bottom:8px;">
