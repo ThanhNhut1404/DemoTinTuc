@@ -115,13 +115,6 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
                 </button>
 
                 <div class="dropdown-menu">
-<<<<<<< HEAD
-                    <a href="index.php?action=userPage">Cập nhật thông tin cá nhân</a>
-                     <a href="index.php?action=dathich">Đã thích</a>
-                     <a href="index.php?action=daluu">Đã lưu</a>
-                     <a href="index.php?action=binhluancuatoi">Bình luận của tôi</a>
-                    <a href="index.php?action=logout">Đăng xuất</a>
-=======
                     <div class="account-card">
                         <div class="account-card-header">
                             <img src="<?= $avatar ?>" alt="avatar" class="account-avatar-lg">
@@ -139,7 +132,6 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
                             <a href="index.php?action=logout" class="logout-btn">Đăng xuất</a>
                         </div>
                     </div>
->>>>>>> de0165fe93eac18bd0a20b9a8c60cd6e2da7f34b
                 </div>
             <?php else: ?>
                 <button class="dropdown-toggle" aria-expanded="false">Đăng nhập / Đăng ký ▾</button>

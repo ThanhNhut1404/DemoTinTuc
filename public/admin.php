@@ -57,6 +57,11 @@ if ($action === 'login_submit') {
         $_SESSION['admin_user'] = $user;
         // flash success to show on login page briefly before redirect
         $_SESSION['flash_success'] = 'Đăng nhập thành công';
+        // Ensure frontend session keys are not set by admin login (keep admin/frontend isolated)
+        $frontendKeys = ['user', 'user_id', 'id_nguoi_dung', 'ho_ten', 'avatar', 'anh_dai_dien'];
+        foreach ($frontendKeys as $k) {
+            if (isset($_SESSION[$k])) unset($_SESSION[$k]);
+        }
         // Render the login view so the flash is visible briefly; client JS will redirect
         include __DIR__ . '/../views/backend/admin_login.php';
         exit;
