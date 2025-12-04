@@ -119,10 +119,7 @@ switch ($action) {
         $controller->chiTiet($_GET['id']);
         break;
 
-        case 'suggest':
-    $controller = new \Website\TinTuc\Controllers\SuggestController();
-    $controller->index();
-    break;
+        
 //            case 'profile':
 //     include 'views/frontend/profile.php';
 //     break;
@@ -140,7 +137,7 @@ switch ($action) {
     // ❌ Mặc định: về trang chủ
     // SEARCH
     case 'search':
-        $controller = new \Website\TinTuc\Controllers\searchController();
+        $controller = new \Website\TinTuc\Controllers\SearchController();
         $controller->index();
         break;
 
@@ -151,18 +148,18 @@ switch ($action) {
         break;
 
     // PROFILE
-    case 'profile':
-        include __DIR__ . '/../views/frontend/profile.php';
-        break;
+    // case 'profile':
+    //     include __DIR__ . '/../views/frontend/profile.php';
+    //     break;
 
-    case 'profile_edit':
-        include __DIR__ . '/../views/frontend/profile_edit.php';
-        break;
+    // case 'profile_edit':
+    //     include __DIR__ . '/../views/frontend/profile_edit.php';
+    //     break;
 
-    case 'profile_update':
-        $_SESSION['user']['name'] = $_POST['name'];
-        header("Location: index.php?action=profile");
-        break;
+    // case 'profile_update':
+    //     $_SESSION['user']['name'] = $_POST['name'];
+    //     header("Location: index.php?action=profile");
+    //     break;
    case 'userPage':
     $controller = new \Website\TinTuc\Controllers\ThanhVienController();
     $controller->userPage();
