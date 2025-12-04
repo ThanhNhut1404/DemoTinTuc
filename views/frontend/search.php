@@ -128,6 +128,24 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; margin:
 
         <!-- LEFT CONTENT -->
         <div class="left-content">
+            <?php
+            // Tag-based suggestions (controller sets $tagSuggestions if any)
+            $tagSuggestions = $tagSuggestions ?? [];
+            if (!empty($tagSuggestions)): ?>
+                <h2>Bài viết theo thẻ liên quan</h2>
+                <?php foreach ($tagSuggestions as $r): ?>
+                    <div class="article-item">
+                        <img src="<?= htmlspecialchars($r['hinh_anh'] ?? 'uploads/default.jpg') ?>" class="article-img">
+                        <div>
+                            <h3><a href="index.php?action=chi_tiet_bai_viet&id=<?= $r['id'] ?>"><?= htmlspecialchars($r['tieu_de']) ?></a></h3>
+                            <div><?= htmlspecialchars(mb_substr(strip_tags($r['mo_ta_ngan'] ?? ''), 0, 140)) ?>...</div>
+                            <div>📅 <?= htmlspecialchars($r['ngay_dang'] ?? '') ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <hr style="margin:20px 0;border:none;border-top:1px solid #eee">
+            <?php endif; ?>
+
             <?php if (empty($results)): ?>
                 <p>Không tìm thấy bài viết nào.</p>
             <?php else: ?>
