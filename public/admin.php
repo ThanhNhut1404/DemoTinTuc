@@ -29,6 +29,50 @@ use Website\TinTuc\Controllers\BinhLuanAdminController;
 // Actions: allow login/logout without authentication
 $action = $_GET['action'] ?? 'index';
 
+// Simple helpers for tab registration/unregistration used by the admin layout JS.
+if ($action === 'register_tab') {
+    $token = $_POST['token'] ?? $_GET['token'] ?? '';
+    if ($token) {
+        if (!isset($_SESSION['admin_tab_tokens']) || !is_array($_SESSION['admin_tab_tokens'])) {
+            $_SESSION['admin_tab_tokens'] = [];
+        }
+        $_SESSION['admin_tab_tokens'][$token] = time();
+        // cancel any pending logout because a tab re-registered
+        if (isset($_SESSION['pending_logout'])) {
+            unset($_SESSION['pending_logout']);
+        }
+    }
+    // Return a minimal response
+    header('Content-Type: text/plain');
+    echo 'ok';
+    exit;
+}
+
+if ($action === 'unregister_tab') {
+    $token = $_POST['token'] ?? $_GET['token'] ?? '';
+    if ($token && isset($_SESSION['admin_tab_tokens'][$token])) {
+        unset($_SESSION['admin_tab_tokens'][$token]);
+    }
+    // if no tabs remain, schedule a pending logout a few seconds in the future
+    if (empty($_SESSION['admin_tab_tokens'])) {
+        $_SESSION['pending_logout'] = time() + 5; // grace period (seconds)
+    }
+    header('Content-Type: text/plain');
+    echo 'ok';
+    exit;
+}
+
+// If a pending logout was scheduled and its time has passed, destroy the session now
+if (!empty($_SESSION['pending_logout']) && is_numeric($_SESSION['pending_logout'])) {
+    if (time() >= (int)$_SESSION['pending_logout']) {
+        session_unset();
+        session_destroy();
+        // redirect to login page
+        header('Location: admin.php?action=login');
+        exit;
+    }
+}
+
 if ($action === 'login') {
     include __DIR__ . '/../views/backend/admin_login.php';
     exit;
@@ -50,10 +94,11 @@ if ($action === 'login_submit') {
         }
     }
     if ($ok) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_role'] = $user['quyen'];
-        // store normalized user data in session for quick access in views
-        $_SESSION['user'] = $user;
+        // Store admin-specific session keys so admin login doesn't overwrite frontend user session
+        $_SESSION['admin_user_id'] = $user['id'];
+        $_SESSION['admin_user_role'] = $user['quyen'];
+        // store normalized admin user data in session for quick access in admin views
+        $_SESSION['admin_user'] = $user;
         // flash success to show on login page briefly before redirect
         $_SESSION['flash_success'] = 'Đăng nhập thành công';
         // Render the login view so the flash is visible briefly; client JS will redirect
@@ -70,14 +115,17 @@ if ($action === 'login_submit') {
 }
 
 if ($action === 'logout') {
-    session_unset();
-    session_destroy();
+    // Only remove admin-related session keys so frontend session remains intact
+    unset($_SESSION['admin_user_id'], $_SESSION['admin_user_role'], $_SESSION['admin_user']);
+    // also clear admin flashes
+    unset($_SESSION['flash_success'], $_SESSION['flash_error'], $_SESSION['flash_login_error']);
     header('Location: admin.php?action=login');
     exit;
 }
 
 // require authentication for all other admin actions
-if (empty($_SESSION['user_id'])) {
+// Check admin-specific session key first (keeps frontend session separate)
+if (empty($_SESSION['admin_user_id'])) {
     header('Location: admin.php?action=login');
     exit;
 }

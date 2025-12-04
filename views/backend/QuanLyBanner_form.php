@@ -283,10 +283,6 @@ $banner = $isEdit ? ($banner ?? null) : null;
                         <?= $isEdit ? 'Lưu Thay Đổi' : 'Tạo Banner' ?>
                     </button>
 
-                    <!-- hidden file input + labeled button placed inline with actions -->
-                    <input type="file" name="hinh_banner" accept="image/*" id="imageInput" style="display:none" />
-                    <label for="imageInput" class="btn-upload">Chọn ảnh</label>
-
                     <a href="admin.php?action=banner" class="btn-cancel">Hủy</a>
                 </div>
             </div>

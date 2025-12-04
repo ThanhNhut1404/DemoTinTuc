@@ -99,11 +99,18 @@ switch ($action) {
         }
         break;
 
-    // CATEGORY
+    // CATEGORY (Child category - show articles)
     case 'chuyenmuc':
         $id = $_GET['id'] ?? 0;
         $controller = new ChuyenMucController();
         $controller->hienThiTheoChuyenMuc($id);
+        break;
+
+    // PARENT CATEGORY (show all children)
+    case 'chuyenmuccha':
+        $id = $_GET['id'] ?? 0;
+        $controller = new ChuyenMucController();
+        $controller->hienThiChuyenMucCha($id);
         break;
 
     // DETAIL POST

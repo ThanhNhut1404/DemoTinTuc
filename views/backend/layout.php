@@ -112,19 +112,37 @@ $fragments = [
                 <div class="actions">
                     <?php
                     $displayName = 'Admin';
-                    if (!empty($_SESSION['user']['ho_ten'] ?? null)) {
-                        $displayName = $_SESSION['user']['ho_ten'];
-                    } elseif (!empty($_SESSION['user']['email'] ?? null)) {
-                        $displayName = $_SESSION['user']['email'];
-                    } elseif (!empty($_SESSION['user_id'])) {
+                    // Prefer admin-specific session keys but fall back to legacy keys if present
+                    if (!empty($_SESSION['admin_user']['ho_ten'] ?? null)) {
+                        $displayName = $_SESSION['admin_user']['ho_ten'];
+                    } elseif (!empty($_SESSION['admin_user']['email'] ?? null)) {
+                        $displayName = $_SESSION['admin_user']['email'];
+                    } elseif (!empty($_SESSION['admin_user_id'])) {
                         try {
                             $tv = new \Website\TinTuc\Models\ThanhVienModel();
-                            $u = $tv->findById($_SESSION['user_id']);
+                            $u = $tv->findById($_SESSION['admin_user_id']);
                             if ($u) {
                                 $displayName = $u['ho_ten'] ?? $u['email'] ?? $displayName;
                             }
                         } catch (Exception $e) {
-                            // ignore and fallback to 'Admin'
+                            // ignore and fallback
+                        }
+                    } else {
+                        // legacy fallback (in case some code still sets frontend session keys)
+                        if (!empty($_SESSION['user']['ho_ten'] ?? null)) {
+                            $displayName = $_SESSION['user']['ho_ten'];
+                        } elseif (!empty($_SESSION['user']['email'] ?? null)) {
+                            $displayName = $_SESSION['user']['email'];
+                        } elseif (!empty($_SESSION['user_id'])) {
+                            try {
+                                $tv = new \Website\TinTuc\Models\ThanhVienModel();
+                                $u = $tv->findById($_SESSION['user_id']);
+                                if ($u) {
+                                    $displayName = $u['ho_ten'] ?? $u['email'] ?? $displayName;
+                                }
+                            } catch (Exception $e) {
+                                // ignore
+                            }
                         }
                     }
                     ?>
@@ -187,6 +205,59 @@ $fragments = [
             toggle.addEventListener('click', function(e){ e.stopPropagation(); if (menu.classList.contains('open')) closeMenu(); else openMenu(); });
             document.addEventListener('click', function(){ closeMenu(); });
             menu.addEventListener('click', function(e){ e.stopPropagation(); });
+        })();
+    </script>
+    <script>
+        // Tab-register/unregister approach:
+        // - On load, register this tab with the server (`admin.php?action=register_tab&token=...`).
+        // - On beforeunload, always unregister this tab via `sendBeacon` (`admin.php?action=unregister_tab&token=...`).
+        // The server keeps a list of active tab tokens in the session and schedules a short pending-logout
+        // when no tokens remain. This avoids logging out on quick reloads while still logging out when all
+        // tabs are closed.
+        (function(){
+            var storageKey = 'admin_tab_token';
+            var token = sessionStorage.getItem(storageKey);
+            if (!token) {
+                token = 't_' + Date.now() + '_' + Math.random().toString(36).slice(2,10);
+                try { sessionStorage.setItem(storageKey, token); } catch(e) { /* ignore */ }
+            }
+
+            // Register this tab on the server; use keepalive so the browser can finish the request when unloading.
+            try {
+                if (navigator.sendBeacon) {
+                    // sendBeacon cannot set request body type easily for POST with form data in all browsers,
+                    // but a simple GET with token query is acceptable here.
+                    var regUrl = 'admin.php?action=register_tab&token=' + encodeURIComponent(token);
+                    navigator.sendBeacon(regUrl);
+                } else {
+                    // fallback to fetch (keepalive if available)
+                    fetch('admin.php?action=register_tab', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'token=' + encodeURIComponent(token),
+                        keepalive: true,
+                        credentials: 'same-origin'
+                    }).catch(function(){});
+                }
+            } catch (e) {
+                // ignore registration errors
+            }
+
+            // Always unregister on unload so the server can know when tabs close.
+            window.addEventListener('beforeunload', function(){
+                try {
+                    var url = 'admin.php?action=unregister_tab&token=' + encodeURIComponent(token);
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon(url);
+                    } else {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', url, false);
+                        try { xhr.send(null); } catch(e) {}
+                    }
+                } catch (e) {
+                    // ignore errors
+                }
+            });
         })();
     </script>
 </body>
