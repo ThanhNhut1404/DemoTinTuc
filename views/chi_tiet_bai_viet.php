@@ -83,7 +83,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $w = trim($w);
             if ($w === '') continue;
             $chars = preg_split('//u', $w, -1, PREG_SPLIT_NO_EMPTY);
-            $parts = array_map(function($ch){ return preg_quote($ch, '/').'+'; }, $chars);
+            $parts = array_map(function ($ch) {
+                return preg_quote($ch, '/') . '+';
+            }, $chars);
             $sub[] = implode('', $parts);
         }
         if (!empty($sub)) {
@@ -129,14 +131,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_
         $stmt->bind_param("ii", $id, $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result->num_rows === 0) {
             // Chưa like, thêm vào yeu_thich
             $stmt = $conn->prepare("INSERT INTO yeu_thich (id_bai_viet, id_nguoi_dung) VALUES (?, ?)");
             $stmt->bind_param("ii", $id, $user_id);
             $stmt->execute();
             $stmt->close();
-            
+
             // Tăng luot_thich
             $stmt = $conn->prepare("UPDATE bai_viet SET luot_thich = luot_thich + 1 WHERE id = ?");
             $stmt->bind_param("i", $id);
@@ -153,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_
         $stmt->bind_param("ii", $id, $user_id);
         $stmt->execute();
         $stmt->close();
-        
+
         // Giảm luot_thich
         $stmt = $conn->prepare("UPDATE bai_viet SET luot_thich = GREATEST(luot_thich - 1, 0) WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -199,14 +201,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save'], $_POST
         $stmt = $conn->prepare("SELECT id FROM luu_bai_viet WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
         $stmt->bind_param("ii", $id, $user_id);
         $stmt->execute();
-        
+
         if ($stmt->get_result()->num_rows === 0) {
             // Chưa lưu, thêm vào luu_bai_viet
             $stmt = $conn->prepare("INSERT INTO luu_bai_viet (id_bai_viet, id_nguoi_dung) VALUES (?, ?)");
             $stmt->bind_param("ii", $id, $user_id);
             $stmt->execute();
             $stmt->close();
-            
+
             echo json_encode(['success' => true, 'saved' => true]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Bạn đã lưu bài viết này rồi']);
@@ -218,23 +220,106 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save'], $_POST
         $stmt->bind_param("ii", $id, $user_id);
         $stmt->execute();
         $stmt->close();
-        
+
         echo json_encode(['success' => true, 'saved' => false]);
         exit;
     }
 }
 
-// === TĂNG LƯỢT XEM (chống spam 30 giây/lần) ===
-if (!isset($_SESSION['views'][$id]) || (time() - ($_SESSION['views'][$id] ?? 0)) >= 30) {
-    $stmt = $conn->prepare("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
-    $_SESSION['views'][$id] = time();
-}
+// === TĂNG LƯỢT XEM – CHỐNG SPAM (5 phút cho user, 5 phút cho guest) ===
+// We'll use a DB table for logged-in users and a cookie for guests.
+if (isset($VIEW_COUNT_ENABLED) && $VIEW_COUNT_ENABLED) {
+    $threshold = isset($VIEW_COUNT_THRESHOLD_SECONDS) ? (int)$VIEW_COUNT_THRESHOLD_SECONDS : 300;
+    $now = time();
+    $didCount = false;
 
-// === LẤY BÀI VIẾT CHÍNH ===
-$stmt = $conn->prepare("SELECT b.*, n.ho_ten AS tac_gia, COALESCE(b.luot_thich, 0) AS luot_thich, COALESCE(b.luot_xem, 0) AS luot_xem 
+    if (isset($_SESSION['id_nguoi_dung']) && !empty($_SESSION['id_nguoi_dung'])) {
+        // Logged-in user: DB-backed tracking so it's resilient across sessions
+        $uid = (int)$_SESSION['id_nguoi_dung'];
+
+        // Create table if missing (safe no-op if exists)
+        $conn->query("CREATE TABLE IF NOT EXISTS `bai_viet_views_users` (
+            `id_bai_viet` INT NOT NULL,
+            `id_nguoi_dung` INT NOT NULL,
+            `last_view` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id_bai_viet`, `id_nguoi_dung`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Get last view timestamp
+        $stmt = $conn->prepare("SELECT UNIX_TIMESTAMP(last_view) AS last_ts FROM bai_viet_views_users WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
+        $stmt->bind_param('ii', $id, $uid);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res ? $res->fetch_assoc() : null;
+        $stmt->close();
+
+        $last_ts = isset($row['last_ts']) ? (int)$row['last_ts'] : 0;
+        if (($now - $last_ts) >= $threshold) {
+            // Upsert last_view and increment
+            $stmt = $conn->prepare("INSERT INTO bai_viet_views_users (id_bai_viet, id_nguoi_dung, last_view) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE last_view = NOW()");
+            $stmt->bind_param('ii', $id, $uid);
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt2 = $conn->prepare("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?");
+            $stmt2->bind_param('i', $id);
+            $stmt2->execute();
+            $stmt2->close();
+            $didCount = true;
+        }
+    } else {
+        // Guest: use DB-backed fingerprint (hash of IP + User-Agent) to avoid
+        // depending on cookies which may be blocked or not set.
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $fingerprint = hash('sha256', $ip . '|' . $ua);
+
+        // Create guest tracking table if missing
+        $conn->query("CREATE TABLE IF NOT EXISTS `bai_viet_views_guests` (
+            `id_bai_viet` INT NOT NULL,
+            `fingerprint` VARCHAR(64) NOT NULL,
+            `last_view` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id_bai_viet`, `fingerprint`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Check last view for this fingerprint
+        $stmt = $conn->prepare("SELECT UNIX_TIMESTAMP(last_view) AS last_ts FROM bai_viet_views_guests WHERE id_bai_viet = ? AND fingerprint = ?");
+        $stmt->bind_param('is', $id, $fingerprint);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res ? $res->fetch_assoc() : null;
+        $stmt->close();
+
+        $last_ts = isset($row['last_ts']) ? (int)$row['last_ts'] : 0;
+        if (($now - $last_ts) >= $threshold) {
+            // Upsert last_view and increment
+            $stmt = $conn->prepare("INSERT INTO bai_viet_views_guests (id_bai_viet, fingerprint, last_view) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE last_view = NOW()");
+            $stmt->bind_param('is', $id, $fingerprint);
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt2 = $conn->prepare("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?");
+            $stmt2->bind_param('i', $id);
+            $stmt2->execute();
+            $stmt2->close();
+            $didCount = true;
+        }
+    }
+
+    // Debug log if enabled
+    if (isset($VIEW_COUNT_DEBUG) && $VIEW_COUNT_DEBUG) {
+        $logDir = __DIR__ . '/../storage';
+        if (!is_dir($logDir)) @mkdir($logDir, 0755, true);
+        $logFile = $logDir . '/view_debug.log';
+        $uidLog = isset($uid) ? $uid : 0;
+        $cookieFlag = isset($cookieName) ? (isset($_COOKIE[$cookieName]) ? '1' : '0') : '0';
+        $line = date('Y-m-d H:i:s') . " | post={$id} | user={$uidLog} | cookieExists={$cookieFlag} | didCount=" . ($didCount ? '1' : '0') . " | now={$now} | threshold={$threshold}\n";
+        @file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
+    }
+}
+// === KẾT THÚC ===
+
+$stmt = $conn->prepare("SELECT b.*, n.ho_ten AS tac_gia, n.anh_dai_dien AS tac_gia_avatar, COALESCE(b.luot_thich, 0) AS luot_thich, COALESCE(b.luot_xem, 0) AS luot_xem 
                         FROM bai_viet b 
                         LEFT JOIN nguoi_dung n ON b.id_tac_gia = n.id 
                         WHERE b.id = ?");
@@ -258,7 +343,7 @@ if (isset($_SESSION['id_nguoi_dung'])) {
     $stmt->execute();
     $user_liked = $stmt->get_result()->num_rows > 0;
     $stmt->close();
-    
+
     // Kiểm tra user đã lưu chưa
     $stmt = $conn->prepare("SELECT id FROM luu_bai_viet WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
     $stmt->bind_param("ii", $id, $user_id);
@@ -367,10 +452,12 @@ $stmt->close();
         }
 
         @keyframes heartbeat {
+
             0%,
             100% {
                 transform: scale(1);
             }
+
             50% {
                 transform: scale(1.4);
             }
@@ -381,6 +468,7 @@ $stmt->close();
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -430,13 +518,21 @@ $stmt->close();
         }
 
         @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-            .sticky-sidebar {
-                position: static !important;
-                margin-top: 2rem;
+
+            0%,
+            100% {
+                transform: scale(1);
             }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .sticky-sidebar {
+            position: static !important;
+            margin-top: 2rem;
+        }
     </style>
 </head>
 
@@ -463,7 +559,15 @@ $stmt->close();
 
                         <div class="text-muted small mb-4 d-flex flex-wrap align-items-center gap-3 border-bottom pb-3">
                             <span><i class="fas fa-calendar-alt me-2"></i><?= date('d/m/Y', strtotime($bv['ngay_dang'])); ?></span>
-                            <span><i class="fas fa-user me-2"></i><?= htmlspecialchars($bv['tac_gia'] ?? 'Ẩn danh'); ?></span>
+                            <?php
+                                $authorName = htmlspecialchars($bv['tac_gia'] ?? 'Ẩn danh');
+                                $avatarVal = $bv['tac_gia_avatar'] ?? '';
+                                $avatarUrl = trim((string)$avatarVal) === '' ? img_url('uploads/no_avatar.png') : img_url($avatarVal);
+                            ?>
+                            <span class="d-flex align-items-center">
+                                <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="rounded-circle me-2" style="width:36px;height:36px;object-fit:cover;">
+                                <span><?= $authorName ?></span>
+                            </span>
                             <span><i class="fas fa-eye me-2"></i><?= number_format($bv['luot_xem']); ?> lượt xem</span>
 
                             <div class="ms-auto d-flex gap-3">
@@ -645,46 +749,46 @@ $stmt->close();
                     const currentAction = this.dataset.action;
 
                     fetch('', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'do': currentAction,
-                            'id_bai_viet': id
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                'do': currentAction,
+                                'id_bai_viet': id
+                            })
                         })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.login) {
-                            window.location.href = 'index.php?action=login';
-                            return;
-                        }
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.login) {
+                                window.location.href = 'index.php?action=login';
+                                return;
+                            }
 
-                        if (!data.success) {
-                            alert(data.message || 'Bạn đã like bài viết này rồi!');
-                            return;
-                        }
+                            if (!data.success) {
+                                alert(data.message || 'Bạn đã like bài viết này rồi!');
+                                return;
+                            }
 
-                        // Cập nhật giao diện
-                        const nextAction = currentAction === 'like' ? 'unlike' : 'like';
-                        this.dataset.action = nextAction;
-                        this.classList.toggle('active');
-                        
-                        // Cập nhật icon
-                        const icon = this.querySelector('i');
-                        if (currentAction === 'like') {
-                            icon.className = 'fas fa-heart';
-                        } else {
-                            icon.className = 'far fa-heart';
-                        }
-                        
-                        // Cập nhật số lượng like
-                        if (data.count !== undefined) {
-                            this.querySelector('.like-count').textContent = data.count.toLocaleString();
-                        }
-                    })
-                    .catch(err => console.error('Like error:', err));
+                            // Cập nhật giao diện
+                            const nextAction = currentAction === 'like' ? 'unlike' : 'like';
+                            this.dataset.action = nextAction;
+                            this.classList.toggle('active');
+
+                            // Cập nhật icon
+                            const icon = this.querySelector('i');
+                            if (currentAction === 'like') {
+                                icon.className = 'fas fa-heart';
+                            } else {
+                                icon.className = 'far fa-heart';
+                            }
+
+                            // Cập nhật số lượng like
+                            if (data.count !== undefined) {
+                                this.querySelector('.like-count').textContent = data.count.toLocaleString();
+                            }
+                        })
+                        .catch(err => console.error('Like error:', err));
                 });
             });
 
@@ -696,41 +800,41 @@ $stmt->close();
                     const currentAction = this.dataset.action;
 
                     fetch('', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'action_save': currentAction,
-                            'id_bai_viet': id
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                'action_save': currentAction,
+                                'id_bai_viet': id
+                            })
                         })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.login) {
-                            window.location.href = 'index.php?action=login';
-                            return;
-                        }
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.login) {
+                                window.location.href = 'index.php?action=login';
+                                return;
+                            }
 
-                        if (!data.success) {
-                            alert(data.message || 'Lỗi khi lưu bài viết!');
-                            return;
-                        }
+                            if (!data.success) {
+                                alert(data.message || 'Lỗi khi lưu bài viết!');
+                                return;
+                            }
 
-                        // Cập nhật giao diện
-                        const nextAction = data.saved ? 'unsave' : 'save';
-                        this.dataset.action = nextAction;
-                        this.classList.toggle('active');
-                        
-                        // Cập nhật icon
-                        const icon = this.querySelector('i');
-                        if (data.saved) {
-                            icon.className = 'fas fa-bookmark';
-                        } else {
-                            icon.className = 'far fa-bookmark';
-                        }
-                    })
-                    .catch(err => console.error('Save error:', err));
+                            // Cập nhật giao diện
+                            const nextAction = data.saved ? 'unsave' : 'save';
+                            this.dataset.action = nextAction;
+                            this.classList.toggle('active');
+
+                            // Cập nhật icon
+                            const icon = this.querySelector('i');
+                            if (data.saved) {
+                                icon.className = 'fas fa-bookmark';
+                            } else {
+                                icon.className = 'far fa-bookmark';
+                            }
+                        })
+                        .catch(err => console.error('Save error:', err));
                 });
             });
 

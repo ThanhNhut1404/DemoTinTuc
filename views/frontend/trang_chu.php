@@ -110,13 +110,27 @@ if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
         /* ===== HEADER & NAV ===== */
         .auth-nav {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             background: var(--primary);
             padding: 8px 12px;
             gap: 10px;
             flex-wrap: wrap;
         }
+
+        /* place search + auth links on the right when not logged in */
+        .search-container { order: 1; margin-left: auto; }
+        .auth-link, .auth-links { order: 1; margin-left: 8px; color: #fff; }
+
+        /* Account avatar + dropdown (left side) */
+        .account-dropdown { position: relative; order: -1; }
+        .account-btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; color:#fff; text-decoration:none; background:transparent; border:none; padding:0; }
+        .account-avatar { width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.18); }
+        .greeting { color: #fff; font-weight:600; font-size:0.95em; margin-right:6px; }
+        .dropdown-menu { position:absolute; left:0; top:calc(100% + 8px); background:#fff !important; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); min-width:200px; display:none; z-index:2000; overflow:hidden; }
+        .dropdown-menu a { display:block; padding:10px 12px; color:#333; text-decoration:none; border-bottom:1px solid #f1f1f1; }
+        .dropdown-menu a:hover { background:#f5f8ff; color:var(--primary); }
+        .dropdown-menu .last { border-bottom:0; }
 
         /* Reserve left space for the fixed category button */
         .auth-nav.with-left-menu {
@@ -1152,30 +1166,61 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     ?>
+<?php
+// Render account area: show avatar + greeting if logged in, otherwise show login/register
+if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
+    $user = $_SESSION['user'];
+    $displayName = $user['name'] ?? $user['ten'] ?? $user['ho_ten'] ?? $user['email'] ?? 'Người dùng';
+    $avatarVal = $user['avatar'] ?? $user['anh_dai_dien'] ?? $user['avatar_url'] ?? '';
+    $avatarUrl = trim((string)$avatarVal) === '' ? 'uploads/no_avatar.png' : img_url($avatarVal);
+    ?>
+    <div class="account-dropdown">
+        <button type="button" class="account-btn" id="accountToggle" aria-expanded="false">
+            <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="account-avatar">
+            <span class="greeting">Xin chào, <?= htmlspecialchars($displayName) ?></span>
+            <span style="color:#fff;font-size:0.9em;">▾</span>
+        </button>
 
-<?php if(isset($_SESSION['user'])): ?>
-    <div class="dropdown account-dropdown">
-        <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
-        </a>
-        <div class="dropdown-menu">
-
-          
+        <div class="dropdown-menu" id="accountMenu" role="menu">
             <a href="index.php?action=userPage">Cập nhật thông tin cá nhân</a>
-         <a href="index.php?action=dathich">Đã thích</a>
-        <a href="index.php?action=daluu">Đã lưu</a>
-        <a href="index.php?action=binhluancuatoi">Bình luận của tôi</a>
-        <a href="index.php?action=logout">Đăng xuất</a>
-
-            
-            
-            
-
+            <a href="index.php?action=dathich">Đã thích</a>
+            <a href="index.php?action=daluu">Đã lưu</a>
+            <a href="index.php?action=binhluancuatoi">Bình luận của tôi</a>
+            <a href="index.php?action=logout" class="last">Đăng xuất</a>
         </div>
     </div>
-<?php else: ?>
+    <script>
+    (function(){
+        const toggle = document.getElementById('accountToggle');
+        const menu = document.getElementById('accountMenu');
+        if (!toggle || !menu) return;
+
+        function closeMenu(){
+            menu.style.display = 'none';
+            toggle.setAttribute('aria-expanded','false');
+        }
+
+        function openMenu(){
+            menu.style.display = 'block';
+            toggle.setAttribute('aria-expanded','true');
+        }
+
+        toggle.addEventListener('click', function(e){
+            e.stopPropagation();
+            if (menu.style.display === 'block') closeMenu(); else openMenu();
+        });
+
+        // close when clicking outside
+        document.addEventListener('click', function(){ closeMenu(); });
+
+        // stop propagation when clicking inside the menu
+        menu.addEventListener('click', function(e){ e.stopPropagation(); });
+    })();
+    </script>
+<?php } else { ?>
     <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
     <a href="index.php?action=register" class="auth-link">Đăng ký</a>
-<?php endif; ?>
+<?php } ?>
 
 
         </nav>

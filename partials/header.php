@@ -175,22 +175,61 @@
                 </form>
 
                 <!-- Tài khoản (compact card) -->
-                <?php if (isset($_SESSION['id_nguoi_dung'])):
+                <?php
+                // Normalize avatar URLs and decide which avatar to show in the header button.
+                // When viewing an article detail, prefer the author's avatar (`$bv['tac_gia_avatar']`).
+                // Otherwise fall back to the logged-in user's avatar (from session).
+                $authorAvatarUrl = null;
+                if (isset($bv) && !empty($bv['tac_gia_avatar'])) {
+                    $authorAvatarVal = $bv['tac_gia_avatar'];
+                    if (function_exists('img_url')) {
+                        $authorAvatarUrl = img_url($authorAvatarVal);
+                    } else {
+                        $v = trim((string)$authorAvatarVal);
+                        if ($v === '') {
+                            $authorAvatarUrl = '/public/uploads/no_avatar.png';
+                        } elseif (preg_match('#^https?://#i', $v) || strpos($v, '/') === 0) {
+                            $authorAvatarUrl = $v;
+                        } else {
+                            $authorAvatarUrl = '/public/uploads/' . ltrim($v, '/');
+                        }
+                    }
+                }
+
+                if (isset($_SESSION['id_nguoi_dung'])):
                     $user = [
                         'ten' => $_SESSION['ho_ten'] ?? null,
                         'avatar' => $_SESSION['avatar'] ?? null
                     ];
-                    $avatar = !empty($user['avatar']) ? htmlspecialchars($user['avatar']) : '/uploads/no_avatar.png';
+                    // Normalize session avatar URL
+                    $sessAv = $user['avatar'] ?? '';
+                    if (function_exists('img_url')) {
+                        $sessionAvatarUrl = $sessAv ? img_url($sessAv) : '/public/uploads/no_avatar.png';
+                    } else {
+                        $sv = trim((string)$sessAv);
+                        if ($sv === '') {
+                            $sessionAvatarUrl = '/public/uploads/no_avatar.png';
+                        } elseif (preg_match('#^https?://#i', $sv) || strpos($sv, '/') === 0) {
+                            $sessionAvatarUrl = $sv;
+                        } else {
+                            $sessionAvatarUrl = '/public/uploads/' . ltrim($sv, '/');
+                        }
+                    }
                     $displayName = htmlspecialchars($user['ten'] ?? 'Tài khoản');
+
+                    // Choose avatar for the header button: prefer author (when on detail), else session
+                    $buttonAvatarUrl = $authorAvatarUrl ?: $sessionAvatarUrl;
+                    // Use the same avatar inside the dropdown so the image is consistent when opening
+                    $menuAvatarUrl = $buttonAvatarUrl;
                 ?>
                     <div class="dropdown account-dropdown" style="position:relative;">
-                        <button class="btn btn-outline-light dropdown-toggle" type="button" aria-expanded="false">
-                            <img src="<?= $avatar ?>" alt="avatar" class="account-avatar" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;"> 
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" aria-expanded="false" style="display:flex;align-items:center;gap:10px;padding:8px 14px;">
+                            <img src="<?= htmlspecialchars($buttonAvatarUrl) ?>" alt="avatar" class="account-avatar" style="width:34px;height:34px;border-radius:50%;object-fit:cover;margin-right:6px;border:2px solid rgba(255,255,255,0.85);"> 
                             <?= $displayName ?>
                         </button>
                         <div class="dropdown-menu account-dropdown-menu" style="display:none;position:absolute;right:0;top:48px;min-width:260px;border-radius:10px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,0.12);background:#fff;border:1px solid #eee;z-index:1100;">
                             <div style="display:flex;gap:12px;align-items:center;padding-bottom:8px;border-bottom:1px solid #f1f5f9;margin-bottom:8px;">
-                                <img src="<?= $avatar ?>" alt="avatar" style="width:54px;height:54px;border-radius:50%;object-fit:cover;">
+                                <img src="<?= htmlspecialchars($menuAvatarUrl) ?>" alt="avatar" style="width:54px;height:54px;border-radius:50%;object-fit:cover;">
                                 <div>
                                     <div style="font-weight:700;color:#222;"><?= $displayName ?></div>
                                     <a href="index.php?action=userPage" style="color:#0b5ed7;font-size:13px;text-decoration:none;">Cập nhật thông tin</a>
