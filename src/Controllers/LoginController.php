@@ -20,6 +20,13 @@ class LoginController
     // Hiển thị form đăng nhập
     public function showLoginForm()
     {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        // Nếu đã đăng nhập thì không cần vào trang đăng nhập, chuyển tới trang người dùng
+        if (!empty($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
+            header('Location: index.php?action=userPage');
+            exit;
+        }
+
         include __DIR__ . '/../../views/login.php';
     }
 

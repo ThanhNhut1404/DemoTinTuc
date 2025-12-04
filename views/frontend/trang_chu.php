@@ -1137,7 +1137,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ?>
 
 <?php if(isset($_SESSION['user'])): ?>
-    <div class="dropdown">
+    <div class="dropdown account-dropdown">
         <a href="javascript:void(0)" class="auth-link dropdown-toggle">Tài khoản ▾</a>
         </a>
         <div class="dropdown-menu">

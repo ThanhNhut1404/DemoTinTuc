@@ -511,6 +511,28 @@ $stmt->close();
                             <?= $bv['noi_dung'] ?? '' ?>
                         </div>
 
+                        <!-- SHARE BUTTONS -->
+                        <div class="mt-4 mb-3 share-row text-center">
+                            <div class="d-inline-flex gap-2 align-items-center">
+                                <button class="btn btn-outline-secondary btn-sm" id="copyLinkBtn" title="Sao chép liên kết">
+                                    <i class="far fa-copy"></i> Sao chép liên kết
+                                </button>
+                                <a href="#" class="btn btn-primary btn-sm" id="facebookShare" title="Chia sẻ lên Facebook">
+                                    <i class="fab fa-facebook-f"></i> Facebook
+                                </a>
+                                <a href="#" class="btn btn-info btn-sm text-white" id="twitterShare" title="Chia sẻ lên Twitter">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                                <a href="#" class="btn btn-success btn-sm" id="whatsappShare" title="Chia sẻ qua WhatsApp">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </a>
+                                <button class="btn btn-outline-danger btn-sm" id="instagramShare" title="Chia sẻ lên Instagram">
+                                    <i class="fab fa-instagram"></i> Instagram
+                                </button>
+                            </div>
+                            <div id="shareFeedback" class="small text-success mt-2" style="display:none;"></div>
+                        </div>
+
                         <div class="mt-5 pt-4 border-top text-center">
                             <a href="/Demotintuc/public/" class="btn btn-primary btn-lg px-5 btn-bounce">
                                 <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
@@ -711,6 +733,88 @@ $stmt->close();
                     .catch(err => console.error('Save error:', err));
                 });
             });
+
+            // === SHARE BUTTONS ===
+            const copyBtn = document.getElementById('copyLinkBtn');
+            const fbBtn = document.getElementById('facebookShare');
+            const twBtn = document.getElementById('twitterShare');
+            const waBtn = document.getElementById('whatsappShare');
+            const igBtn = document.getElementById('instagramShare');
+            const feedback = document.getElementById('shareFeedback');
+
+            const shareUrl = window.location.href;
+            const shareTitle = document.title || document.querySelector('h1')?.innerText || '';
+
+            function showFeedback(msg) {
+                if (!feedback) return;
+                feedback.textContent = msg;
+                feedback.style.display = 'block';
+                setTimeout(() => feedback.style.display = 'none', 2500);
+            }
+
+            if (copyBtn) {
+                copyBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    try {
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(shareUrl);
+                        } else {
+                            const ta = document.createElement('textarea');
+                            ta.value = shareUrl;
+                            document.body.appendChild(ta);
+                            ta.select();
+                            document.execCommand('copy');
+                            ta.remove();
+                        }
+                        showFeedback('Đã sao chép liên kết vào bộ nhớ tạm.');
+                    } catch (err) {
+                        console.error('Copy failed', err);
+                        showFeedback('Không thể sao chép liên kết.');
+                    }
+                });
+            }
+
+            if (fbBtn) {
+                fbBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shareUrl);
+                    window.open(url, 'fbshare', 'width=640,height=480');
+                });
+            }
+
+            if (twBtn) {
+                twBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareTitle);
+                    window.open(url, 'twshare', 'width=640,height=480');
+                });
+            }
+
+            if (waBtn) {
+                waBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const text = encodeURIComponent(shareTitle + '\n' + shareUrl);
+                    const url = 'https://api.whatsapp.com/send?text=' + text;
+                    window.open(url, '_blank');
+                });
+            }
+
+            if (igBtn) {
+                igBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    // Instagram doesn't offer a direct web share URL; copy link and open Instagram
+                    try {
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(shareUrl);
+                        }
+                        showFeedback('Đã sao chép liên kết. Mở Instagram và dán để chia sẻ.');
+                        window.open('https://www.instagram.com/', '_blank');
+                    } catch (err) {
+                        console.error(err);
+                        showFeedback('Không thể mở Instagram.');
+                    }
+                });
+            }
         });
     </script>
 </body>

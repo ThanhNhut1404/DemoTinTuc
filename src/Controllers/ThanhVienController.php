@@ -216,7 +216,7 @@ public function updateProfile()
                 $_SESSION['user']['anh_dai_dien'] = $anhDaiDien;
             }
 
-            $_SESSION['flash_message'] = "✅ Cập nhật thành công!";
+            $_SESSION['flash_message'] = "Cập nhật thành công!";
         } catch (\Exception $e) {
             $_SESSION['flash_message'] = "⚠️ " . $e->getMessage();
         }
