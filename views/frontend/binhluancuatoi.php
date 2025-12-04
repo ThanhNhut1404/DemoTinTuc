@@ -72,7 +72,24 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php if (!empty($data)): ?>
         <?php foreach ($data as $c): ?>
             <article class="article-item">
-                <?php $img = !empty($c['anh_dai_dien']) ? $c['anh_dai_dien'] : 'public/uploads/wallpapers/default.jpg'; ?>
+                <?php
+                // Normalize image path: handle full URLs, absolute paths, 'uploads/...' and bare filenames
+                $rawImg = trim((string)($c['anh_dai_dien'] ?? ''));
+                if ($rawImg === '') {
+                    $img = 'uploads/no_image.png';
+                } elseif (preg_match('#^(https?:)?//#i', $rawImg)) {
+                    $img = $rawImg;
+                } elseif (strpos($rawImg, 'uploads/') !== false) {
+                    $pos = stripos($rawImg, 'uploads/');
+                    $img = substr($rawImg, $pos);
+                } elseif (strpos($rawImg, '/') === 0) {
+                    // leading slash -> remove it to keep relative path
+                    $img = ltrim($rawImg, '/');
+                } else {
+                    // assume filename stored -> prefix uploads/
+                    $img = 'uploads/' . ltrim($rawImg, '/');
+                }
+                ?>
                 <a href="index.php?action=chi_tiet_bai_viet&id=<?= htmlspecialchars($c['id_bai']) ?>">
                     <img class="article-img" src="<?= htmlspecialchars($img) ?>" alt="">
                 </a>

@@ -37,6 +37,11 @@ switch ($action) {
 
     // LOGIN
     case 'login':
+        // Nếu đã đăng nhập thì chuyển trực tiếp tới trang người dùng
+        if (!empty($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
+            header('Location: index.php?action=userPage');
+            break;
+        }
         $controller = new LoginController();
         $controller->showLoginForm();
         break;
