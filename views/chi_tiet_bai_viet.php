@@ -83,7 +83,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $w = trim($w);
             if ($w === '') continue;
             $chars = preg_split('//u', $w, -1, PREG_SPLIT_NO_EMPTY);
-            $parts = array_map(function($ch){ return preg_quote($ch, '/').'+'; }, $chars);
+            $parts = array_map(function ($ch) {
+                return preg_quote($ch, '/') . '+';
+            }, $chars);
             $sub[] = implode('', $parts);
         }
         if (!empty($sub)) {
@@ -129,14 +131,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_
         $stmt->bind_param("ii", $id, $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result->num_rows === 0) {
             // Chưa like, thêm vào yeu_thich
             $stmt = $conn->prepare("INSERT INTO yeu_thich (id_bai_viet, id_nguoi_dung) VALUES (?, ?)");
             $stmt->bind_param("ii", $id, $user_id);
             $stmt->execute();
             $stmt->close();
-            
+
             // Tăng luot_thich
             $stmt = $conn->prepare("UPDATE bai_viet SET luot_thich = luot_thich + 1 WHERE id = ?");
             $stmt->bind_param("i", $id);
@@ -153,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do'], $_POST['id_bai_
         $stmt->bind_param("ii", $id, $user_id);
         $stmt->execute();
         $stmt->close();
-        
+
         // Giảm luot_thich
         $stmt = $conn->prepare("UPDATE bai_viet SET luot_thich = GREATEST(luot_thich - 1, 0) WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -199,14 +201,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save'], $_POST
         $stmt = $conn->prepare("SELECT id FROM luu_bai_viet WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
         $stmt->bind_param("ii", $id, $user_id);
         $stmt->execute();
-        
+
         if ($stmt->get_result()->num_rows === 0) {
             // Chưa lưu, thêm vào luu_bai_viet
             $stmt = $conn->prepare("INSERT INTO luu_bai_viet (id_bai_viet, id_nguoi_dung) VALUES (?, ?)");
             $stmt->bind_param("ii", $id, $user_id);
             $stmt->execute();
             $stmt->close();
-            
+
             echo json_encode(['success' => true, 'saved' => true]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Bạn đã lưu bài viết này rồi']);
@@ -218,20 +220,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save'], $_POST
         $stmt->bind_param("ii", $id, $user_id);
         $stmt->execute();
         $stmt->close();
-        
+
         echo json_encode(['success' => true, 'saved' => false]);
         exit;
     }
 }
 
-// === TĂNG LƯỢT XEM (chống spam 30 giây/lần) ===
-if (!isset($_SESSION['views'][$id]) || (time() - ($_SESSION['views'][$id] ?? 0)) >= 30) {
-    $stmt = $conn->prepare("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
-    $_SESSION['views'][$id] = time();
+// === TĂNG LƯỢT XEM – CHỐNG SPAM ===
+// Mục tiêu: mỗi tài khoản đã đăng nhập chỉ được tính 1 lượt sau mỗi
+// $VIEW_COUNT_THRESHOLD_SECONDS (mặc định 300 giây = 5 phút).
+// Khách (chưa đăng nhập) vẫn sử dụng cookie ngắn (30s) để giảm spam reload.
+if (isset($VIEW_COUNT_ENABLED) && $VIEW_COUNT_ENABLED) {
+    $threshold = isset($VIEW_COUNT_THRESHOLD_SECONDS) ? (int)$VIEW_COUNT_THRESHOLD_SECONDS : 300;
+    $now = time();
+    $didCount = false;
+
+    if (isset($_SESSION['id_nguoi_dung']) && !empty($_SESSION['id_nguoi_dung'])) {
+        // Logged-in user: enforce per-account threshold using session per-user
+        $uid = (int)$_SESSION['id_nguoi_dung'];
+        if (!isset($_SESSION['views_by_user']) || !is_array($_SESSION['views_by_user'])) {
+            $_SESSION['views_by_user'] = [];
+        }
+        if (!isset($_SESSION['views_by_user'][$uid]) || !is_array($_SESSION['views_by_user'][$uid])) {
+            $_SESSION['views_by_user'][$uid] = [];
+        }
+
+        $last = (int)($_SESSION['views_by_user'][$uid][$id] ?? 0);
+        if (($now - $last) >= $threshold) {
+            $conn->query("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = " . (int)$id);
+            $_SESSION['views_by_user'][$uid][$id] = $now;
+            $didCount = true;
+        }
+    } else {
+        // Guest: simple cookie-based short window (30s) to avoid rapid reloads
+        $cookie = "v_{$id}";
+        if (!isset($_COOKIE[$cookie])) {
+            setcookie($cookie, "1", time() + 30, "/");
+            $conn->query("UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = " . (int)$id);
+            $didCount = true;
+        }
+    }
+
+    // Optional debug logging when enabled
+    if (isset($VIEW_COUNT_DEBUG) && $VIEW_COUNT_DEBUG) {
+        $logDir = __DIR__ . '/../storage';
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0755, true);
+        }
+        $logFile = $logDir . '/view_debug.log';
+        $uidLog = isset($uid) ? $uid : 0;
+        $line = date('Y-m-d H:i:s') . " | post={$id} | user={$uidLog} | didCount=" . ($didCount ? '1' : '0') . " | now={$now} | threshold={$threshold}\n";
+        @file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
+    }
 }
+// === KẾT THÚC ===
 
 // === LẤY BÀI VIẾT CHÍNH ===
 $stmt = $conn->prepare("SELECT b.*, n.ho_ten AS tac_gia, COALESCE(b.luot_thich, 0) AS luot_thich, COALESCE(b.luot_xem, 0) AS luot_xem 
@@ -258,7 +300,7 @@ if (isset($_SESSION['id_nguoi_dung'])) {
     $stmt->execute();
     $user_liked = $stmt->get_result()->num_rows > 0;
     $stmt->close();
-    
+
     // Kiểm tra user đã lưu chưa
     $stmt = $conn->prepare("SELECT id FROM luu_bai_viet WHERE id_bai_viet = ? AND id_nguoi_dung = ?");
     $stmt->bind_param("ii", $id, $user_id);
@@ -367,10 +409,12 @@ $stmt->close();
         }
 
         @keyframes heartbeat {
+
             0%,
             100% {
                 transform: scale(1);
             }
+
             50% {
                 transform: scale(1.4);
             }
@@ -381,6 +425,7 @@ $stmt->close();
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -430,13 +475,21 @@ $stmt->close();
         }
 
         @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-            .sticky-sidebar {
-                position: static !important;
-                margin-top: 2rem;
+
+            0%,
+            100% {
+                transform: scale(1);
             }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .sticky-sidebar {
+            position: static !important;
+            margin-top: 2rem;
+        }
     </style>
 </head>
 
@@ -645,46 +698,46 @@ $stmt->close();
                     const currentAction = this.dataset.action;
 
                     fetch('', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'do': currentAction,
-                            'id_bai_viet': id
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                'do': currentAction,
+                                'id_bai_viet': id
+                            })
                         })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.login) {
-                            window.location.href = 'index.php?action=login';
-                            return;
-                        }
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.login) {
+                                window.location.href = 'index.php?action=login';
+                                return;
+                            }
 
-                        if (!data.success) {
-                            alert(data.message || 'Bạn đã like bài viết này rồi!');
-                            return;
-                        }
+                            if (!data.success) {
+                                alert(data.message || 'Bạn đã like bài viết này rồi!');
+                                return;
+                            }
 
-                        // Cập nhật giao diện
-                        const nextAction = currentAction === 'like' ? 'unlike' : 'like';
-                        this.dataset.action = nextAction;
-                        this.classList.toggle('active');
-                        
-                        // Cập nhật icon
-                        const icon = this.querySelector('i');
-                        if (currentAction === 'like') {
-                            icon.className = 'fas fa-heart';
-                        } else {
-                            icon.className = 'far fa-heart';
-                        }
-                        
-                        // Cập nhật số lượng like
-                        if (data.count !== undefined) {
-                            this.querySelector('.like-count').textContent = data.count.toLocaleString();
-                        }
-                    })
-                    .catch(err => console.error('Like error:', err));
+                            // Cập nhật giao diện
+                            const nextAction = currentAction === 'like' ? 'unlike' : 'like';
+                            this.dataset.action = nextAction;
+                            this.classList.toggle('active');
+
+                            // Cập nhật icon
+                            const icon = this.querySelector('i');
+                            if (currentAction === 'like') {
+                                icon.className = 'fas fa-heart';
+                            } else {
+                                icon.className = 'far fa-heart';
+                            }
+
+                            // Cập nhật số lượng like
+                            if (data.count !== undefined) {
+                                this.querySelector('.like-count').textContent = data.count.toLocaleString();
+                            }
+                        })
+                        .catch(err => console.error('Like error:', err));
                 });
             });
 
@@ -696,41 +749,41 @@ $stmt->close();
                     const currentAction = this.dataset.action;
 
                     fetch('', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'action_save': currentAction,
-                            'id_bai_viet': id
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                'action_save': currentAction,
+                                'id_bai_viet': id
+                            })
                         })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.login) {
-                            window.location.href = 'index.php?action=login';
-                            return;
-                        }
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.login) {
+                                window.location.href = 'index.php?action=login';
+                                return;
+                            }
 
-                        if (!data.success) {
-                            alert(data.message || 'Lỗi khi lưu bài viết!');
-                            return;
-                        }
+                            if (!data.success) {
+                                alert(data.message || 'Lỗi khi lưu bài viết!');
+                                return;
+                            }
 
-                        // Cập nhật giao diện
-                        const nextAction = data.saved ? 'unsave' : 'save';
-                        this.dataset.action = nextAction;
-                        this.classList.toggle('active');
-                        
-                        // Cập nhật icon
-                        const icon = this.querySelector('i');
-                        if (data.saved) {
-                            icon.className = 'fas fa-bookmark';
-                        } else {
-                            icon.className = 'far fa-bookmark';
-                        }
-                    })
-                    .catch(err => console.error('Save error:', err));
+                            // Cập nhật giao diện
+                            const nextAction = data.saved ? 'unsave' : 'save';
+                            this.dataset.action = nextAction;
+                            this.classList.toggle('active');
+
+                            // Cập nhật icon
+                            const icon = this.querySelector('i');
+                            if (data.saved) {
+                                icon.className = 'fas fa-bookmark';
+                            } else {
+                                icon.className = 'far fa-bookmark';
+                            }
+                        })
+                        .catch(err => console.error('Save error:', err));
                 });
             });
 
