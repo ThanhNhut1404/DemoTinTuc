@@ -17,25 +17,42 @@ if ($sub === 'create' || $sub === 'edit') {
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
-    .backend-banner-card h2 {
+    .backend-banner-card h2:not(.member-title) {
         margin-top: 0;
         font-size: 1.6rem;
-        margin-bottom: 20px;
+        margin-bottom: 12px;
         color: #1f2937;
-        border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 10px;
+        /* border-bottom removed to eliminate divider line */
+        padding-bottom: 0;
     }
 
     .backend-banner-card .btn-add {
-        background: linear-gradient(90deg, #0d6efd, #0b5ed7);
+        background: #22c55e; /* match Thêm Background */
         color: #fff;
         border-radius: 8px;
-        padding: 10px 16px;
+        padding: 10px 20px; /* same padding/height as .btn-submit */
         text-decoration: none;
-        display: inline-block;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700; /* match heading weight */
+        font-size: 24px; /* match heading size */
         margin-bottom: 15px;
+        border: none;
+        text-align: center;
+        font-size: 1rem;
+        line-height: 1;
+        box-shadow: none;
+        transition: background-color 0.15s ease, transform 0.12s ease;
+    }
+
+    .backend-banner-card .btn-add:hover {
+        background: #16a34a; /* same hover as .btn-submit */
+    }
+
+    /* Reduce default paragraph spacing so the add button sits a bit higher */
+    .backend-banner-card > p {
+        margin: 6px 0 12px; /* smaller top margin than browser default */
     }
 
     /* Table Styling */
@@ -141,13 +158,13 @@ if ($sub === 'create' || $sub === 'edit') {
 </style>
 
 <div class="backend-banner-card">
-    <h2>Quản lý Banner</h2>
+    <h2 class="member-title">Danh sách Banner</h2>
     
     <?php if (isset($_GET['updated'])): ?>
         <div style="padding:10px;background:#e6ffee;border:1px solid #90ee90;margin-bottom:15px;border-radius:8px; color:#0a7a2a;">Cập nhật thành công.</div>
     <?php endif; ?>
     
-    <p><a href="admin.php?action=banner_create" class="btn-add">+ Thêm Banner</a></p>
+    <p><a href="admin.php?action=banner_create" class="btn-add">Thêm Banner</a></p>
 
     <?php if (empty($banners)): ?>
         <div style="text-align:center; padding:40px; background:#fff; border-radius:12px; color:#6b7280;">Chưa có dữ liệu banner.</div>

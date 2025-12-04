@@ -8,6 +8,7 @@ $fragments = [
     'bai_viet' => __DIR__ . '/QuanLyBaiViet.php',
     'danh_muc' => __DIR__ . '/QuanLyDanhMuc.php',
     'tag' => __DIR__ . '/QuanLyTag.php',
+        'bad_words' => __DIR__ . '/QuanLyTuKhoaXau.php',
     'binh_luan' => __DIR__ . '/QuanLyBinhLuan.php',
     'quang_cao' => __DIR__ . '/QuanLyQuangCao.php',
     'banner' => __DIR__ . '/QuanLyBanner.php',
@@ -62,6 +63,12 @@ $fragments = [
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3 3 11l8.59 8.59a2 2 0 0 0 2.83 0L20.59 16.24a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
                     </span>
                     <span class="label">Quản lý thẻ Tag</span>
+                </a>
+                <a href="admin.php?action=bad_words" class="<?= ($action === 'bad_words') ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                    </span>
+                    <span class="label">Quản lý Từ khoá xấu</span>
                 </a>
                 <a href="admin.php?action=binh_luan" class="<?= ($action === 'binh_luan') ? 'active' : '' ?>">
                     <span class="icon">

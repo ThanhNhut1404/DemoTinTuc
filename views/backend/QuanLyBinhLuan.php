@@ -234,12 +234,31 @@ if (!empty($binhLuans)) {
 
     .status-badge {
         display: inline-block;
-        background: <?= ($comment['trang_thai'] === 'Hien') ? '#d1fae5' : '#fee2e2' ?>;
-        color: <?= ($comment['trang_thai'] === 'Hien') ? '#065f46' : '#b91c1c' ?>;
+        background: #d1fae5;
+        color: #065f46;
         padding: 3px 6px;
         border-radius: 3px;
         font-size: 0.75rem;
         font-weight: 600;
+    }
+
+    .status-badge[data-status="An"] {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .pending-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: #ef4444;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
     }
 </style>
 
@@ -306,10 +325,13 @@ if (!empty($binhLuans)) {
     <?php else: ?>
         <div class="posts-list">
             <?php foreach ($commentsByPost as $postId => $postData): ?>
-                <div class="post-item">
+                <?php 
+                $pendingCount = count(array_filter($postData['comments'], fn($c) => $c['trang_thai'] === 'An'));
+                ?>
+                <div class="post-item" data-post-id="<?= $postId ?>">
                     <div class="post-header" onclick="togglePost(this)">
                         <div style="flex: 1;">
-                            <p class="post-title">📝 <?= htmlspecialchars($postData['tieu_de']) ?></p>
+                            <p class="post-title"><?php if ($pendingCount > 0): ?><span class="pending-indicator" title="<?= $pendingCount ?> bình luận chờ duyệt"></span> <?php endif; ?>📝 <?= htmlspecialchars($postData['tieu_de']) ?></p>
                         </div>
                         <div class="post-stats">
                             <?= count($postData['comments']) ?> bình luận
@@ -320,13 +342,13 @@ if (!empty($binhLuans)) {
                     <div class="post-comments">
                         <div class="comments-list">
                             <?php foreach ($postData['comments'] as $comment): ?>
-                                <div class="comment-item <?= ($comment['trang_thai'] === 'An') ? 'hidden' : '' ?>">
+                                <div class="comment-item <?= ($comment['trang_thai'] === 'An') ? 'hidden' : '' ?>" data-id="<?= $comment['id'] ?>" data-status="<?= $comment['trang_thai'] ?>">
                                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                                         <div>
                                             <div class="comment-author">👤 <?= htmlspecialchars($comment['ho_ten'] ?? 'Ẩn danh') ?></div>
                                             <div class="comment-date">📅 <?= htmlspecialchars($comment['ngay_binh_luan'] ?? '-') ?></div>
                                         </div>
-                                        <span class="status-badge">
+                                        <span class="status-badge" data-status="<?= $comment['trang_thai'] ?>">
                                             <?= translateTrangThaiComment($comment['trang_thai']) ?>
                                         </span>
                                     </div>
@@ -336,9 +358,9 @@ if (!empty($binhLuans)) {
                                     </div>
 
                                     <div class="comment-actions">
-                                        <a href="admin.php?action=comment_toggle_status&id=<?= $comment['id'] ?>" class="action-btn toggle">
+                                        <button type="button" onclick="toggleCommentAjax(<?= $comment['id'] ?>, this)" class="action-btn toggle">
                                             <?= ($comment['trang_thai'] === 'Hien') ? '🔒 Ẩn' : '🔓 Hiển thị' ?>
-                                        </a>
+                                        </button>
                                         <a href="admin.php?action=comment_delete&id=<?= $comment['id'] ?>" class="action-btn delete" onclick="return confirm('Xóa bình luận này?')">
                                             🗑️ Xóa
                                         </a>
@@ -360,6 +382,83 @@ function togglePost(element) {
     
     commentsDiv.classList.toggle('show');
     toggleIcon.classList.toggle('open');
+}
+
+async function toggleCommentAjax(commentId, btn) {
+    btn.disabled = true;
+    try {
+        const url = 'admin.php?action=comment_toggle_status_ajax&id=' + encodeURIComponent(commentId);
+        const res = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        if (data.success) {
+            const item = document.querySelector('.comment-item[data-id="' + commentId + '"]');
+            if (item) {
+                const newStatus = data.new_status;
+                item.setAttribute('data-status', newStatus);
+                
+                // Update status badge
+                const badge = item.querySelector('.status-badge');
+                if (badge) {
+                    badge.setAttribute('data-status', newStatus);
+                    badge.textContent = data.new_status_label;
+                }
+                
+                // Update button text
+                const toggleBtn = item.querySelector('.action-btn.toggle');
+                if (toggleBtn) toggleBtn.textContent = (newStatus === 'Hien') ? '🔒 Ẩn' : '🔓 Hiển thị';
+                
+                // Hide/show item based on status
+                if (newStatus === 'An') {
+                    item.classList.add('hidden');
+                } else {
+                    item.classList.remove('hidden');
+                }
+                
+                // Update post header pending indicator
+                updatePostPendingIndicator(item);
+            }
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không thể thay đổi trạng thái'));
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Lỗi mạng');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function updatePostPendingIndicator(commentItem) {
+    const postItem = commentItem.closest('.post-item');
+    if (!postItem) return;
+    
+    const comments = postItem.querySelectorAll('.comment-item');
+    const pendingCount = Array.from(comments).filter(c => c.getAttribute('data-status') === 'An').length;
+    
+    const postHeader = postItem.querySelector('.post-header');
+    if (postHeader) {
+        const title = postHeader.querySelector('.post-title');
+        const existingDot = title.querySelector('.pending-indicator');
+        
+        if (pendingCount > 0) {
+            if (!existingDot) {
+                const dot = document.createElement('span');
+                dot.className = 'pending-indicator';
+                dot.title = pendingCount + ' bình luận chờ duyệt';
+                title.insertBefore(dot, title.firstChild);
+                title.insertBefore(document.createTextNode(' '), dot.nextSibling);
+            } else {
+                existingDot.title = pendingCount + ' bình luận chờ duyệt';
+            }
+        } else {
+            if (existingDot) existingDot.remove();
+            // Remove the extra space if it exists
+            const firstChild = title.firstChild;
+            if (firstChild && firstChild.nodeType === 3 && firstChild.textContent.trim() === '') {
+                firstChild.remove();
+            }
+        }
+    }
 }
 
 function filterPosts() {

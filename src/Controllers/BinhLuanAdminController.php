@@ -30,6 +30,21 @@ class BinhLuanAdminController
         exit;
     }
 
+    public function toggleStatusAjax($id)
+    {
+        $record = $this->model->find($id);
+        if (!$record) {
+            return ['success' => false, 'message' => 'Không tìm thấy bình luận'];
+        }
+        $newStatus = ($record['trang_thai'] === 'Hien') ? 'An' : 'Hien';
+        $this->model->updateStatus($id, $newStatus);
+        return [
+            'success' => true,
+            'new_status' => $newStatus,
+            'new_status_label' => ($newStatus === 'Hien') ? '🟢 Hiển thị' : '🔴 Ẩn'
+        ];
+    }
+
     public function delete($id)
     {
         $this->model->delete($id);

@@ -34,13 +34,14 @@ class SearchController {
             $totalResults = (int) $stmtTotal->fetchColumn();
 
             // Lấy dữ liệu trang hiện tại
-            $stmt = $this->conn->prepare("
-                SELECT id, tieu_de, mo_ta_ngan, ngay_dang 
-                FROM bai_viet 
-                WHERE tieu_de LIKE :q OR noi_dung LIKE :q
-                ORDER BY ngay_dang DESC
-                LIMIT :offset, :perpage
-            ");
+                // Select all columns so view can use whichever image column exists
+                $stmt = $this->conn->prepare("
+                    SELECT *
+                    FROM bai_viet 
+                    WHERE tieu_de LIKE :q OR noi_dung LIKE :q
+                    ORDER BY ngay_dang DESC
+                    LIMIT :offset, :perpage
+                ");
             $stmt->bindValue(':q', "%$query%", PDO::PARAM_STR);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->bindValue(':perpage', $perPage, PDO::PARAM_INT);
