@@ -18,13 +18,11 @@ if ($conn->connect_error) {
 $MAIL_HOST = getenv('MAIL_HOST') ?: 'sandbox.smtp.mailtrap.io';
 // Allow MAIL_PORT env to be a number (e.g. 2525). Default to 2525.
 $MAIL_PORT = (int)(getenv('MAIL_PORT') ?: 2525);
-<<<<<<< HEAD
+
+// Đổi ở đây
 $MAIL_USERNAME = getenv('MAIL_USERNAME') ?: '14014f24ce315d';
 $MAIL_PASSWORD = getenv('MAIL_PASSWORD') ?: '99cb543ad6fe10'; // replace with the full Mailtrap password (do not commit real creds)
-=======
-$MAIL_USERNAME = getenv('MAIL_USERNAME') ?: '6169e9137e8b25';
-$MAIL_PASSWORD = getenv('MAIL_PASSWORD') ?: '765f641942601c'; // replace with the full Mailtrap password (do not commit real creds)
->>>>>>> d141a36aeabcf33f60b1e58b30d6c1f26f9180d3
+
 $MAIL_FROM = getenv('MAIL_FROM') ?: 'no-reply@yourdomain.test';
 $MAIL_FROM_NAME = getenv('MAIL_FROM_NAME') ?: 'DemoTinTuc';
 $MAIL_SECURE = getenv('MAIL_SECURE') ?: ''; // Mailtrap typically doesn't require 'ssl' or 'tls' (leave empty or 'tls')
