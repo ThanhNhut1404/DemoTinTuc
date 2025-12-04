@@ -319,8 +319,7 @@ if (isset($VIEW_COUNT_ENABLED) && $VIEW_COUNT_ENABLED) {
 }
 // === KẾT THÚC ===
 
-// === LẤY BÀI VIẾT CHÍNH ===
-$stmt = $conn->prepare("SELECT b.*, n.ho_ten AS tac_gia, COALESCE(b.luot_thich, 0) AS luot_thich, COALESCE(b.luot_xem, 0) AS luot_xem 
+$stmt = $conn->prepare("SELECT b.*, n.ho_ten AS tac_gia, n.anh_dai_dien AS tac_gia_avatar, COALESCE(b.luot_thich, 0) AS luot_thich, COALESCE(b.luot_xem, 0) AS luot_xem 
                         FROM bai_viet b 
                         LEFT JOIN nguoi_dung n ON b.id_tac_gia = n.id 
                         WHERE b.id = ?");
@@ -560,7 +559,15 @@ $stmt->close();
 
                         <div class="text-muted small mb-4 d-flex flex-wrap align-items-center gap-3 border-bottom pb-3">
                             <span><i class="fas fa-calendar-alt me-2"></i><?= date('d/m/Y', strtotime($bv['ngay_dang'])); ?></span>
-                            <span><i class="fas fa-user me-2"></i><?= htmlspecialchars($bv['tac_gia'] ?? 'Ẩn danh'); ?></span>
+                            <?php
+                                $authorName = htmlspecialchars($bv['tac_gia'] ?? 'Ẩn danh');
+                                $avatarVal = $bv['tac_gia_avatar'] ?? '';
+                                $avatarUrl = trim((string)$avatarVal) === '' ? img_url('uploads/no_avatar.png') : img_url($avatarVal);
+                            ?>
+                            <span class="d-flex align-items-center">
+                                <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="rounded-circle me-2" style="width:36px;height:36px;object-fit:cover;">
+                                <span><?= $authorName ?></span>
+                            </span>
                             <span><i class="fas fa-eye me-2"></i><?= number_format($bv['luot_xem']); ?> lượt xem</span>
 
                             <div class="ms-auto d-flex gap-3">
