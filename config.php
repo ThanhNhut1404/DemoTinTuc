@@ -37,4 +37,13 @@ $mailConfig = [
     'smtp_auth' => true,
     'alt_ports' => [25, 465, 587, 2525],
 ];
+
+// View count threshold (seconds): when the same visitor revisits the same post,
+// a new view will only be counted if the last view timestamp for that post
+// is older than this value. Default: 300 seconds (5 minutes).
+$VIEW_COUNT_THRESHOLD_SECONDS = (int)(getenv('VIEW_COUNT_THRESHOLD_SECONDS') ?: 300);
+// Enable debug logging for view-count checks. Set env VIEW_COUNT_DEBUG=1 to enable.
+$VIEW_COUNT_DEBUG = (bool)((int)(getenv('VIEW_COUNT_DEBUG') ?: 0));
+// Enable or disable view counting (set to 0 to disable). Default: disabled per user request.
+$VIEW_COUNT_ENABLED = (bool)((int)(getenv('VIEW_COUNT_ENABLED') ?: 1));
 ?>
