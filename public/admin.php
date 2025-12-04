@@ -50,10 +50,11 @@ if ($action === 'login_submit') {
         }
     }
     if ($ok) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_role'] = $user['quyen'];
-        // store normalized user data in session for quick access in views
-        $_SESSION['user'] = $user;
+        // Store admin-specific session keys so admin login doesn't overwrite frontend user session
+        $_SESSION['admin_user_id'] = $user['id'];
+        $_SESSION['admin_user_role'] = $user['quyen'];
+        // store normalized admin user data in session for quick access in admin views
+        $_SESSION['admin_user'] = $user;
         // flash success to show on login page briefly before redirect
         $_SESSION['flash_success'] = 'Đăng nhập thành công';
         // Render the login view so the flash is visible briefly; client JS will redirect
@@ -70,14 +71,17 @@ if ($action === 'login_submit') {
 }
 
 if ($action === 'logout') {
-    session_unset();
-    session_destroy();
+    // Only remove admin-related session keys so frontend session remains intact
+    unset($_SESSION['admin_user_id'], $_SESSION['admin_user_role'], $_SESSION['admin_user']);
+    // also clear admin flashes
+    unset($_SESSION['flash_success'], $_SESSION['flash_error'], $_SESSION['flash_login_error']);
     header('Location: admin.php?action=login');
     exit;
 }
 
 // require authentication for all other admin actions
-if (empty($_SESSION['user_id'])) {
+// Check admin-specific session key first (keeps frontend session separate)
+if (empty($_SESSION['admin_user_id'])) {
     header('Location: admin.php?action=login');
     exit;
 }

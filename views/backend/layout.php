@@ -112,19 +112,37 @@ $fragments = [
                 <div class="actions">
                     <?php
                     $displayName = 'Admin';
-                    if (!empty($_SESSION['user']['ho_ten'] ?? null)) {
-                        $displayName = $_SESSION['user']['ho_ten'];
-                    } elseif (!empty($_SESSION['user']['email'] ?? null)) {
-                        $displayName = $_SESSION['user']['email'];
-                    } elseif (!empty($_SESSION['user_id'])) {
+                    // Prefer admin-specific session keys but fall back to legacy keys if present
+                    if (!empty($_SESSION['admin_user']['ho_ten'] ?? null)) {
+                        $displayName = $_SESSION['admin_user']['ho_ten'];
+                    } elseif (!empty($_SESSION['admin_user']['email'] ?? null)) {
+                        $displayName = $_SESSION['admin_user']['email'];
+                    } elseif (!empty($_SESSION['admin_user_id'])) {
                         try {
                             $tv = new \Website\TinTuc\Models\ThanhVienModel();
-                            $u = $tv->findById($_SESSION['user_id']);
+                            $u = $tv->findById($_SESSION['admin_user_id']);
                             if ($u) {
                                 $displayName = $u['ho_ten'] ?? $u['email'] ?? $displayName;
                             }
                         } catch (Exception $e) {
-                            // ignore and fallback to 'Admin'
+                            // ignore and fallback
+                        }
+                    } else {
+                        // legacy fallback (in case some code still sets frontend session keys)
+                        if (!empty($_SESSION['user']['ho_ten'] ?? null)) {
+                            $displayName = $_SESSION['user']['ho_ten'];
+                        } elseif (!empty($_SESSION['user']['email'] ?? null)) {
+                            $displayName = $_SESSION['user']['email'];
+                        } elseif (!empty($_SESSION['user_id'])) {
+                            try {
+                                $tv = new \Website\TinTuc\Models\ThanhVienModel();
+                                $u = $tv->findById($_SESSION['user_id']);
+                                if ($u) {
+                                    $displayName = $u['ho_ten'] ?? $u['email'] ?? $displayName;
+                                }
+                            } catch (Exception $e) {
+                                // ignore
+                            }
                         }
                     }
                     ?>
