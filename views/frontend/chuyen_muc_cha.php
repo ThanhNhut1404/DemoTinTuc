@@ -40,23 +40,29 @@ foreach ($dsChuyenMuc as $c) {
 }
 
 // Helper: chuẩn hóa đường dẫn ảnh
-function img_url($src)
-{
-    $src = trim((string)$src);
-    if ($src === '') return 'uploads/no_image.png';
-    if (preg_match('#^(https?:)?//#i', $src)) return $src;
-    if (strpos($src, '/') === 0) return $src;
-    if (stripos($src, 'uploads/') !== false) {
-        $pos = stripos($src, 'uploads/');
-        return substr($src, $pos);
+if (!function_exists('img_url')) {
+    function img_url($src)
+    {
+        $src = trim((string)$src);
+        if ($src === '') return 'uploads/no_image.png';
+        if (preg_match('#^(https?:)?//#i', $src)) return $src;
+        if (strpos($src, '/') === 0) return $src;
+        if (stripos($src, 'uploads/') !== false) {
+            $pos = stripos($src, 'uploads/');
+            return substr($src, $pos);
+        }
+        return 'uploads/' . ltrim($src, '/');
     }
-    return 'uploads/' . ltrim($src, '/');
 }
 
 // Count articles per child category and fetch articles for each
 $baiVietModel = new BaiVietModel();
 $articleCounts = [];
 $articlesByChild = [];
+
+// Ensure $chuyenMucCon is an array
+$chuyenMucCon = isset($chuyenMucCon) && is_array($chuyenMucCon) ? $chuyenMucCon : [];
+
 foreach ($chuyenMucCon as $child) {
     $count = $baiVietModel->countByChuyenMuc($child['id']);
     $articleCounts[$child['id']] = $count;
