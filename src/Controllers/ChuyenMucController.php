@@ -260,4 +260,35 @@ class ChuyenMucController
         // ✅ Load view
         include __DIR__ . '/../../views/frontend/chuyen_muc.php';
     }
+
+    // Frontend: Hiển thị tất cả chuyên mục con của chuyên mục cha
+    public function hienThiChuyenMucCha($id)
+    {
+        if (!$id || !is_numeric($id)) {
+            die("❌ ID chuyên mục cha không hợp lệ.");
+        }
+
+        $chuyenMucChaModel = new ChuyenMucChaModel();
+        $chuyenMucModel = new ChuyenMucModel();
+
+        // ✅ Lấy thông tin chuyên mục cha
+        $chuyenMucCha = $chuyenMucChaModel->getById($id);
+        if (!$chuyenMucCha) {
+            die("❌ Không tìm thấy chuyên mục cha này.");
+        }
+
+        $tenChuyenMucCha = $chuyenMucCha['ten_chuyen_muc'];
+
+        // ✅ Lấy tất cả chuyên mục con của chuyên mục cha này
+        $dsChuyenMuc = $chuyenMucModel->getAll();
+        $chuyenMucCon = [];
+        foreach ($dsChuyenMuc as $cm) {
+            if (($cm['id_cha'] ?? null) == $id) {
+                $chuyenMucCon[] = $cm;
+            }
+        }
+
+        // ✅ Load view
+        include __DIR__ . '/../../views/frontend/chuyen_muc_cha.php';
+    }
 }
