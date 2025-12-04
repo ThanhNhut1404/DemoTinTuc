@@ -174,7 +174,8 @@ $fragments = [
                 <?php endif; ?>
                 <?php
                 // If the logged-in user is an Editor and the action is restricted, show an inline 'no permission' message
-                $currentRole = strtolower(trim((string)($_SESSION['user_role'] ?? '')));
+                // Prefer admin-specific session keys so frontend session role doesn't affect admin UI.
+                $currentRole = strtolower(trim((string)($_SESSION['admin_user_role'] ?? ($_SESSION['admin_user']['quyen'] ?? ''))));
                 $restrictedForEditor = ['dashboard', 'index', 'thanh_vien_roles'];
                 if ($currentRole === 'editor' && in_array($action, $restrictedForEditor, true)) {
                     // show an inline, two-line permission notice (no background)
