@@ -41,10 +41,10 @@ if (!isset($tagList)) {
     <p>Danh sách bài viết, chỉnh sửa, xóa, thêm mới.</p>
 
     <div class="menu-links">
-        <a href="admin.php?action=bai_viet&sub=danhsach" class="tag">📄 Danh sách bài viết</a>
-        <a href="admin.php?action=bai_viet&sub=them" class="tag">✏️ Thêm bài viết</a>
-        <a href="admin.php?action=bai_viet&sub=duyet" class="tag">✔️ Duyệt bài viết</a>
-        <a href="admin.php?action=bai_viet&sub=lich" class="tag">⏰ Lịch đăng bài</a>
+        <a href="admin.php?action=bai_viet&sub=danhsach" class="tag">Danh sách bài viết</a>
+        <a href="admin.php?action=bai_viet&sub=them" class="tag">Thêm bài viết</a>
+        <a href="admin.php?action=bai_viet&sub=duyet" class="tag"> Duyệt bài viết</a>
+        <a href="admin.php?action=bai_viet&sub=lich" class="tag">Lịch đăng bài</a>
     </div>
 
     <div class="fragment">
@@ -71,7 +71,7 @@ if (!isset($tagList)) {
     padding: 20px 25px;
     border-radius: 16px;
     box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    margin-top: 20px;
+    margin-top: 4px; /* raised slightly */
 }
 
 .card h2 {
@@ -109,7 +109,7 @@ if (!isset($tagList)) {
 
 /* Fragment content */
 .fragment {
-    margin-top: 18px;
+    margin-top: 8px; /* tightened spacing above fragment */
 }
 
 </style>
