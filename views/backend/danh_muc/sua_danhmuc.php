@@ -55,8 +55,8 @@ $parentList = $parentModel->getAll();
     </div>
     
     <div style="display: flex; gap: 10px;">
-        <button type="submit" class="btn btn-success">💾 Lưu</button>
-        <a href="admin.php?action=danh_muc&sub=danhsach" class="btn btn-secondary">❌ Hủy</a>
+        <button type="submit" class="btn btn-success">Lưu</button>
+        <a href="admin.php?action=danh_muc&sub=danhsach" class="btn btn-secondary">Hủy</a>
     </div>
 </form>
 
@@ -83,21 +83,18 @@ $parentList = $parentModel->getAll();
     display: inline-block;
 }
 
+/* make button text bold white by default */
+.btn { font-weight: 700; color: #fff; }
+
+/* Success (green) */
 .btn-success {
-    background: #10b981;
-    color: white;
+    background: #16a34a; /* green-600 */
 }
+.btn-success:hover { background: #15803d; }
 
-.btn-success:hover {
-    background: #059669;
-}
-
+/* Secondary used as destructive here: red */
 .btn-secondary {
-    background: #6b7280;
-    color: white;
+    background: #ef4444; /* red-500 */
 }
-
-.btn-secondary:hover {
-    background: #4b5563;
-}
+.btn-secondary:hover { background: #dc2626; }
 </style>

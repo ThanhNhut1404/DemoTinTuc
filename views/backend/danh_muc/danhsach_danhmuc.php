@@ -25,10 +25,10 @@ if (isset($_SESSION['flash'])) {
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
             <thead>
                 <tr style="background: #f0f0f0; border-bottom: 2px solid #ddd;">
-                    <th style="padding: 12px; text-align: left; width: 5%;">#</th>
-                    <th style="padding: 12px; text-align: left; width: 30%;">Tên danh mục con</th>
-                    <th style="padding: 12px; text-align: left; width: 35%;">Mô tả</th>
-                    <th style="padding: 12px; text-align: left; width: 15%;">Danh mục cha</th>
+                    <th style="padding: 12px; text-align: center; width: 5%;">#</th>
+                    <th style="padding: 12px; text-align: center; width: 30%;">Tên danh mục con</th>
+                    <th style="padding: 12px; text-align: center; width: 35%;">Mô tả</th>
+                    <th style="padding: 12px; text-align: center; width: 15%;">Danh mục cha</th>
                     <th style="padding: 12px; text-align: center; width: 15%;">Thao tác</th>
                 </tr>
             </thead>
@@ -55,11 +55,11 @@ if (isset($_SESSION['flash'])) {
                             ?>
                         </td>
                         <td style="padding: 12px; text-align: center;">
-                            <a href="admin.php?action=danh_muc&sub=sua&id=<?= $child['id'] ?>" class="btn-icon" title="Sửa">✏️</a>
+                            <a href="admin.php?action=danh_muc&sub=sua&id=<?= $child['id'] ?>" class="btn btn-primary" style="margin-right:6px; font-size:13px; padding:6px 10px;">Sửa</a>
                             <form method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="id" value="<?= $child['id'] ?>">
-                                <button type="submit" class="btn-icon" title="Xóa">🗑️</button>
+                                <button type="submit" class="btn btn-danger" style="font-size:13px; padding:6px 10px">Xóa</button>
                             </form>
                         </td>
                     </tr>
@@ -67,7 +67,7 @@ if (isset($_SESSION['flash'])) {
             </tbody>
             </tbody>
         </table>
-        <button type="submit" class="btn btn-primary">💾 Lưu thứ tự</button>
+        <button type="submit" class="btn btn-success">Lưu thứ tự</button>
     </form>
 <?php else: ?>
     <p style="text-align: center; padding: 20px; color: #999;">Chưa có danh mục nào</p>
@@ -105,6 +105,29 @@ if (isset($_SESSION['flash'])) {
 
 .btn-primary:hover {
     background: #0284c7;
+}
+
+/* small adjustments so .btn-primary matches other fragments */
+.btn-primary { border-radius: 6px; }
+
+/* Success (green) button */
+.btn-success {
+    background: #16a34a; /* green-600 */
+    color: white;
+}
+.btn-success:hover {
+    background: #15803d; /* green-700 */
+}
+
+/* Danger (red) button for delete actions */
+.btn-danger {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+}
+.btn-danger:hover {
+    background: #dc2626;
 }
 
 tr[draggable="true"]:hover {

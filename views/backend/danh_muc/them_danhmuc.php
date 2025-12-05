@@ -8,7 +8,7 @@ $danhMucList = $chuyenMucModel->getAll();
 $parentList = $parentModel->getAll();
 ?>
 
-<h3>Thêm Danh mục mới</h3>
+<h3>Thêm Danh mục con</h3>
 
 <form method="POST" style="max-width: 600px;">
     <input type="hidden" name="action" value="add">
@@ -33,8 +33,17 @@ $parentList = $parentModel->getAll();
         </select>
     </div>
     
-    <div style="display: flex; gap: 10px;">
-        <button type="submit" class="btn btn-success">💾 Lưu</button>
-        <a href="admin.php?action=danh_muc&sub=danhsach" class="btn btn-secondary">❌ Hủy</a>
+    <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button type="submit" class="btn btn-success">Lưu</button>
+        <a href="admin.php?action=danh_muc&sub=danhsach" class="btn btn-secondary">Hủy</a>
     </div>
 </form>
+
+<style>
+/* Local button styles: white bold text, green for save, red for cancel */
+.btn { padding: 8px 14px; border-radius: 8px; font-weight: 700; color: #fff; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.btn-success { background: #16a34a; }
+.btn-success:hover { background: #15803d; }
+.btn-secondary { background: #ef4444; }
+.btn-secondary:hover { background: #dc2626; }
+</style>

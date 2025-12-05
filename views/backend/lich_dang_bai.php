@@ -1,5 +1,5 @@
 <div class="card">
-    <h2 style="margin-top:0;margin-bottom:14px">📅 Lịch đăng bài</h2>
+    <h2 style="margin-top:0;margin-bottom:14px">Lịch đăng bài</h2>
     
     <?php if (empty($baiviets)): ?>
         <p style="text-align:center;color:#999">Không có bài viết nào được lên lịch đăng trong tương lai.</p>

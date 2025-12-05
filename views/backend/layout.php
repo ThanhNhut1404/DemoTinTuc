@@ -25,6 +25,12 @@ $fragments = [
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Admin</title>
     <link rel="stylesheet" href="/DemoTinTuc/public/assets/admin.css?v=<?= time() ?>">
+    <style>
+        /* Center table headers across admin fragments */
+        main.content .card table thead th {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="admin-wrap">

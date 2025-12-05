@@ -19,13 +19,11 @@ $danhMucList = $chuyenMucModel->getAll();
 
 <div class="card">
     <h2>Quản lý Danh mục</h2>
-    <p>Quản lý danh mục bài viết</p>
-
     <div class="menu-links">
-        <a href="admin.php?action=danh_muc&sub=danhsach" class="tag">Danh sách danh mục</a>
-        <a href="admin.php?action=danh_muc&sub=them" class="tag">Thêm danh mục</a>
-        <a href="admin.php?action=danh_muc&sub=sap_xep" class="tag">Sắp xếp thứ tự</a>
-        <a href="admin.php?action=danh_muc&sub=parents" class="tag">Danh mục cha</a>
+        <a href="admin.php?action=danh_muc&sub=danhsach" class="tag btn-blue">Danh sách danh mục</a>
+        <a href="admin.php?action=danh_muc&sub=them" class="tag btn-blue">Thêm danh mục</a>
+        <a href="admin.php?action=danh_muc&sub=sap_xep" class="tag btn-blue">Sắp xếp thứ tự</a>
+        <a href="admin.php?action=danh_muc&sub=parents" class="tag btn-blue">Danh mục cha</a>
     </div>
 
     <div class="fragment">
@@ -113,4 +111,21 @@ $danhMucList = $chuyenMucModel->getAll();
 .fragment {
     margin-top: 6px; /* tightened spacing above fragment */
 }
+
+/* Table column dividers */
+.card table, .card table th, .card table td {
+    border-collapse: collapse;
+}
+.card table th, .card table td {
+    border-right: 1px solid #e6e6e6;
+}
+.card table th:last-child, .card table td:last-child {
+    border-right: none;
+}
+
+/* Center table header text */
+.card table thead th {
+    text-align: center;
+}
+
 </style>
