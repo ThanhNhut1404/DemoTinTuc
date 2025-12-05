@@ -146,7 +146,8 @@ if (empty($_SESSION['admin_user_id'])) {
 }
 
 // Determine role and whether the current action is forbidden for Editors.
-$role = strtolower(trim((string)($_SESSION['user_role'] ?? '')));
+// Use admin-specific session keys so frontend/session user_role doesn't interfere.
+$role = strtolower(trim((string)($_SESSION['admin_user_role'] ?? ($_SESSION['admin_user']['quyen'] ?? ''))));
 $forbiddenForEditor = ['dashboard', 'index', 'thanh_vien_roles'];
 $isForbiddenForEditor = ($role === 'editor' && in_array($action, $forbiddenForEditor, true));
 

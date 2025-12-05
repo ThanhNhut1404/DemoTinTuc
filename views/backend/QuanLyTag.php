@@ -59,19 +59,18 @@ $baseAdmin = $_SERVER['SCRIPT_NAME'] . '?action=tag';
 ?>
 
 <div class="card">
-    <h2 class="member-title">Quản lý thẻ Tag</h2>
+    <h2 class="member-title">Danh sách thẻ Tag</h2>
     <p>Danh sách thẻ tag, thêm mới, chỉnh sửa, xóa.</p>
 
     <div class="menu-links">
-        <a href="<?= htmlspecialchars($baseAdmin) ?>&sub=danhsach" class="tag">📋 Danh sách thẻ tag</a>
-        <a href="<?= htmlspecialchars($baseAdmin) ?>&sub=them" class="tag">➕ Thêm thẻ tag</a>
+        <a href="<?= htmlspecialchars($baseAdmin) ?>&sub=danhsach" class="tag">Danh sách thẻ Tag</a>
+        <a href="<?= htmlspecialchars($baseAdmin) ?>&sub=them" class="tag">Thêm thẻ tag</a>
     </div>
 
     <div class="fragment">
         <?php if ($sub === 'danhsach'): ?>
             <div class="card">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                    <h2 style="margin:0">Danh sách thẻ tag</h2>
                 </div>
 
                 <div style="overflow:auto">
@@ -132,7 +131,7 @@ $baseAdmin = $_SERVER['SCRIPT_NAME'] . '?action=tag';
                             </div>
                             <div>
                                 <button type="submit" class="btn" style="background: #0ea5e9; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                                    ➕ Thêm thẻ tag
+                                    Thêm thẻ Tag
                                 </button>
                             </div>
                         </form>
@@ -190,7 +189,7 @@ $baseAdmin = $_SERVER['SCRIPT_NAME'] . '?action=tag';
     padding: 20px 25px;
     border-radius: 16px;
     box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    margin-top: 20px;
+    margin-top: 2px; /* moved slightly up */
 }
 
 .card h2 {
@@ -227,7 +226,7 @@ $baseAdmin = $_SERVER['SCRIPT_NAME'] . '?action=tag';
 }
 
 .fragment {
-    margin-top: 18px;
+    margin-top: 6px; /* tighten spacing above fragment */
 }
 
 .table {

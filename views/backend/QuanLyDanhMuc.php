@@ -19,13 +19,13 @@ $danhMucList = $chuyenMucModel->getAll();
 
 <div class="card">
     <h2>Quản lý Danh mục</h2>
-    <p>Quản lý danh mục bài viết.</p>
+    <p>Quản lý danh mục bài viết</p>
 
     <div class="menu-links">
-        <a href="admin.php?action=danh_muc&sub=danhsach" class="tag">📂 Danh sách danh mục</a>
-        <a href="admin.php?action=danh_muc&sub=them" class="tag">➕ Thêm danh mục</a>
-        <a href="admin.php?action=danh_muc&sub=sap_xep" class="tag">🔀 Sắp xếp thứ tự</a>
-        <a href="admin.php?action=danh_muc&sub=parents" class="tag">🏷️ Danh mục cha</a>
+        <a href="admin.php?action=danh_muc&sub=danhsach" class="tag">Danh sách danh mục</a>
+        <a href="admin.php?action=danh_muc&sub=them" class="tag">Thêm danh mục</a>
+        <a href="admin.php?action=danh_muc&sub=sap_xep" class="tag">Sắp xếp thứ tự</a>
+        <a href="admin.php?action=danh_muc&sub=parents" class="tag">Danh mục cha</a>
     </div>
 
     <div class="fragment">
@@ -53,7 +53,7 @@ $danhMucList = $chuyenMucModel->getAll();
     padding: 22px 26px;
     border-radius: 16px;
     box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    margin-top: 20px;
+    margin-top: 2px; /* moved slightly up */
 }
 
 .card h2 {
@@ -111,6 +111,6 @@ $danhMucList = $chuyenMucModel->getAll();
 
 /* ===== Content Fragment ===== */
 .fragment {
-    margin-top: 18px;
+    margin-top: 6px; /* tightened spacing above fragment */
 }
 </style>

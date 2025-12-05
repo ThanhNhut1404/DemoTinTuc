@@ -263,7 +263,7 @@ if (!empty($binhLuans)) {
 </style>
 
 <div class="backend-comment-card">
-    <h2>💬 Quản lý Bình luận theo Bài viết</h2>
+    <h2>Danh sách Bình luận theo bài viết</h2>
 
     <?php
     $totalComments = count($binhLuans ?? []);
@@ -274,7 +274,7 @@ if (!empty($binhLuans)) {
 
     <div style="margin-bottom: 24px;">
         <div style="display: flex; gap: 12px; align-items: center;">
-            <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm bài viết hoặc bình luận..." style="
+            <input type="text" id="searchInput" placeholder="Tìm kiếm bài viết hoặc bình luận..." style="
                 flex: 1;
                 padding: 12px 16px;
                 border: 2px solid #e5e7eb;
