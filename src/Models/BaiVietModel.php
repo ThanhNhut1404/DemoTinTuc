@@ -141,12 +141,23 @@ class BaiVietModel
             'mo_ta_ngan' => $data['mo_ta_ngan'] ?? '',
             'noi_dung' => $data['noi_dung'] ?? '',
             'anh_dai_dien' => $data['anh_dai_dien'] ?? '',
-            'id_chuyen_muc' => $data['id_chuyen_muc'] ?? 0,
+            // validate id_chuyen_muc: if missing or invalid, set to NULL to satisfy FK constraints
+            'id_chuyen_muc' => null,
             'id_tac_gia' => $data['id_tac_gia'] ?? null,
             'la_noi_bat' => $data['la_noi_bat'] ?? 0,
             'trang_thai' => $status,
             'ngay_dang' => $data['ngay_dang'] ?? date('Y-m-d H:i:s'),
         ];
+
+        // validate and set id_chuyen_muc only if the category exists
+        $rawChuyen = $data['id_chuyen_muc'] ?? null;
+        if ($rawChuyen !== null && $rawChuyen !== '' && (int)$rawChuyen > 0) {
+            $check = $this->conn->prepare("SELECT COUNT(*) FROM chuyen_muc WHERE id = ?");
+            $check->execute([(int)$rawChuyen]);
+            if ($check->fetchColumn() > 0) {
+                $params['id_chuyen_muc'] = (int)$rawChuyen;
+            }
+        }
 
         if ($tagColumn) {
             $params['tag_val'] = $data['tag'] ?? ($data['id_the_tag'] ?? null);
@@ -200,13 +211,29 @@ class BaiVietModel
             'mo_ta_ngan' => $data['mo_ta_ngan'] ?? '',
             'noi_dung' => $data['noi_dung'] ?? '',
             'anh_dai_dien' => $data['anh_dai_dien'] ?? '',
-            'id_chuyen_muc' => $data['id_chuyen_muc'] ?? 0,
+            // default to NULL; will validate below
+            'id_chuyen_muc' => null,
             'id_tac_gia' => $data['id_tac_gia'] ?? null,
             'la_noi_bat' => $data['la_noi_bat'] ?? 0,
             'trang_thai' => $status,
             'ngay_dang' => $data['ngay_dang'] ?? date('Y-m-d H:i:s'),
             'id' => $id,
         ];
+
+        // Validate id_chuyen_muc for update as well
+        $rawChuyen = $data['id_chuyen_muc'] ?? null;
+        if ($rawChuyen !== null && $rawChuyen !== '' && (int)$rawChuyen > 0) {
+            $check = $this->conn->prepare("SELECT COUNT(*) FROM chuyen_muc WHERE id = ?");
+            $check->execute([(int)$rawChuyen]);
+            if ($check->fetchColumn() > 0) {
+                $params['id_chuyen_muc'] = (int)$rawChuyen;
+            } else {
+                // leave as null to avoid FK violation
+                $params['id_chuyen_muc'] = null;
+            }
+        } else {
+            $params['id_chuyen_muc'] = null;
+        }
 
         if ($tagColumn) {
             $params['tag_val'] = $data['tag'] ?? ($data['id_the_tag'] ?? null);

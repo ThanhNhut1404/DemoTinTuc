@@ -196,14 +196,7 @@
                     if (function_exists('img_url')) {
                         $authorAvatarUrl = img_url($authorAvatarVal);
                     } else {
-                        $v = trim((string)$authorAvatarVal);
-                        if ($v === '') {
-                            $authorAvatarUrl = '/public/uploads/no_avatar.png';
-                        } elseif (preg_match('#^https?://#i', $v) || strpos($v, '/') === 0) {
-                            $authorAvatarUrl = $v;
-                        } else {
-                            $authorAvatarUrl = '/public/uploads/' . ltrim($v, '/');
-                        }
+                        $authorAvatarUrl = trim((string)$authorAvatarVal);
                     }
                 }
 
@@ -217,15 +210,48 @@
                     if (function_exists('img_url')) {
                         $sessionAvatarUrl = $sessAv ? img_url($sessAv) : '/public/uploads/no_avatar.png';
                     } else {
-                        $sv = trim((string)$sessAv);
-                        if ($sv === '') {
-                            $sessionAvatarUrl = '/public/uploads/no_avatar.png';
-                        } elseif (preg_match('#^https?://#i', $sv) || strpos($sv, '/') === 0) {
-                            $sessionAvatarUrl = $sv;
-                        } else {
-                            $sessionAvatarUrl = '/public/uploads/' . ltrim($sv, '/');
-                        }
+                        $sessionAvatarUrl = trim((string)$sessAv);
                     }
+                        // Normalize returned URLs to absolute paths that work from header include
+                        $normalize_avatar = function($u) {
+                            $u = trim((string)$u);
+                            $default1 = '/public/uploads/no_avatar.png';
+                            $default2 = '/public/uploads/logo.png';
+                            // If empty, return first existing default
+                            if ($u === '') {
+                                $path1 = __DIR__ . '/../public/uploads/no_avatar.png';
+                                $path2 = __DIR__ . '/../public/uploads/logo.png';
+                                if (file_exists($path1)) return $default1;
+                                if (file_exists($path2)) return $default2;
+                                return $default1; // last resort
+                            }
+                            // If it's a full http(s) URL, keep it
+                            if (preg_match('#^https?://#i', $u)) return $u;
+                            // If it already starts with /public, keep as-is
+                            if (strpos($u, '/public/') === 0) return $u;
+                            // If it contains uploads/ anywhere, build absolute path under /public/uploads/
+                            if (stripos($u, 'uploads/') !== false) {
+                                $parts = preg_split('#uploads/#i', $u);
+                                $after = end($parts);
+                                $candidate = '/public/uploads/' . ltrim($after, '/');
+                                $fs = __DIR__ . '/../' . ltrim($candidate, '/');
+                                if (file_exists($fs)) return $candidate;
+                                // if not found, fall back to logo if available
+                                $path2 = __DIR__ . '/../public/uploads/logo.png';
+                                if (file_exists($path2)) return $default2;
+                                return $candidate;
+                            }
+                            // If it's an absolute path starting with '/', keep it
+                            if (strpos($u, '/') === 0) return $u;
+                            // Otherwise assume it's a filename and prefix with /public/uploads/
+                            $candidate = '/public/uploads/' . ltrim($u, '/');
+                            $fs = __DIR__ . '/../' . ltrim($candidate, '/');
+                            if (file_exists($fs)) return $candidate;
+                            // fallback to available default
+                            $path2 = __DIR__ . '/../public/uploads/logo.png';
+                            if (file_exists($path2)) return $default2;
+                            return $default1;
+                        };
                     // Prefer several possible sources for the display name (session top-level, user array, email)
                     $rawDisplay = $_SESSION['ho_ten'] ?? $user['ten'] ?? ($_SESSION['user']['ho_ten'] ?? null) ?? ($_SESSION['user']['email'] ?? null) ?? 'Tài khoản';
                     $displayName = htmlspecialchars($rawDisplay);
@@ -234,8 +260,10 @@
                     $firstName = $parts[0] ?? $rawDisplay;
                     $displayShort = htmlspecialchars($firstName);
 
-                    // Choose avatar for the header button: prefer author (when on detail), else session
-                    $buttonAvatarUrl = $authorAvatarUrl ?: $sessionAvatarUrl;
+                    // Normalize URLs and choose avatar for the header button: prefer author (when on detail), else session
+                    $authorAvatarUrl = isset($authorAvatarUrl) ? $normalize_avatar($authorAvatarUrl) : null;
+                    $sessionAvatarUrl = isset($sessionAvatarUrl) ? $normalize_avatar($sessionAvatarUrl) : '/public/uploads/no_avatar.png';
+                    $buttonAvatarUrl = $authorAvatarUrl ?: $sessionAvatarUrl ?: '/public/uploads/no_avatar.png';
                     // Use the same avatar inside the dropdown so the image is consistent when opening
                     $menuAvatarUrl = $buttonAvatarUrl;
                 ?>

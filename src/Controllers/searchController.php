@@ -52,8 +52,12 @@ class SearchController {
         // If the query looks like a tag (matches any tag name), fetch posts that have that tag
         try {
             $tagModel = new TagModel();
-            $stmtTags = $this->conn->prepare("SELECT id, ten_tag FROM the_tag WHERE ten_tag LIKE :q LIMIT 5");
-            $stmtTags->execute(['q' => "%$query%"]);
+            // Normalize tag query: strip leading #/@ and trim
+            $tagQuery = preg_replace('/^[#@]+/', '', trim($query));
+            $tagQuery = $tagQuery === '' ? $query : $tagQuery;
+            // Use case-insensitive comparison
+            $stmtTags = $this->conn->prepare("SELECT id, ten_tag FROM the_tag WHERE LOWER(ten_tag) LIKE LOWER(:q) LIMIT 5");
+            $stmtTags->execute(['q' => "%$tagQuery%"]);
             $matchingTags = $stmtTags->fetchAll(PDO::FETCH_ASSOC);
 
             if (!empty($matchingTags)) {
@@ -68,7 +72,30 @@ class SearchController {
                     $stmtTagPosts->bindValue($i+1, (int)$tid, PDO::PARAM_INT);
                 }
                 $stmtTagPosts->execute();
+                // Debug log when tag matches found (non-fatal)
+                if (!empty($matchingTags)) {
+                    error_log('SearchController: tagQuery="' . $tagQuery . '" matched tags: ' . implode(',', array_column($matchingTags,'ten_tag')));
+                }
                 $tagSuggestions = $stmtTagPosts->fetchAll(PDO::FETCH_ASSOC);
+                // Merge tag-suggested posts into main results (avoid duplicates)
+                if (!empty($tagSuggestions)) {
+                    $existing = [];
+                    foreach ($results as $r) {
+                        $existing[(int)$r['id']] = $r;
+                    }
+                    // Prepend tag suggestions so tag matches are more visible
+                    foreach ($tagSuggestions as $tp) {
+                        $id = (int)$tp['id'];
+                        if (!isset($existing[$id])) {
+                            array_unshift($results, $tp);
+                            $existing[$id] = $tp;
+                        }
+                    }
+                    // Reindex results
+                    $results = array_values($results);
+                    // Adjust totalResults conservatively to the number of distinct results currently loaded
+                    $totalResults = max($totalResults, count($existing));
+                }
             }
         } catch (\Exception $e) {
             // non-fatal: if tag table doesn't exist or column mismatch, ignore suggestions
