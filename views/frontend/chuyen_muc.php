@@ -23,15 +23,30 @@ $bgModel = new BgWallpaperModel();
 $activeWallpaper = $bgModel->getActive();
 $wallpaperUrl = '';
 if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
-    $wallpaperUrl = 'uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
+    $wallpaperUrl = '/Demotintuc/public/uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
 }
 $cmModel = new \Website\TinTuc\Models\ChuyenMucModel();
 $dsChuyenMuc = $cmModel->getAll();
 $cmChaModel = new \Website\TinTuc\Models\ChuyenMucChaModel();
 $chuyenMucCha = $cmChaModel->getAll();
 $childrenMap = [];
+$currentChuyenMuc = null; // To store parent info for breadcrumb
 foreach ($dsChuyenMuc as $c) {
     if (!empty($c['id_cha'])) $childrenMap[$c['id_cha']][] = $c;
+    // Find current category info to get parent
+    if ($c['id'] == ($chuyenMuc['id'] ?? null)) {
+        $currentChuyenMuc = $c;
+    }
+}
+// Get parent name if exists
+$parentName = '';
+if ($currentChuyenMuc && !empty($currentChuyenMuc['id_cha'])) {
+    foreach ($chuyenMucCha as $cha) {
+        if ($cha['id'] == $currentChuyenMuc['id_cha']) {
+            $parentName = $cha['ten_chuyen_muc'];
+            break;
+        }
+    }
 }
 // Helper to normalize image URLs (matches homepage behavior)
 function img_url($src)
@@ -106,6 +121,8 @@ function img_url($src)
             margin: 0 auto;
             padding: 10px 12px;
             align-items: center;
+            /* ensure dropdowns are not clipped by the scrolling container */
+            overflow: visible;
         }
 
         .category-bar .cat-item { position: relative; }
@@ -130,7 +147,8 @@ function img_url($src)
             border-radius: 6px;
             box-shadow: 0 6px 18px rgba(10,20,30,0.08);
             min-width: 220px;
-            z-index: 1500;
+            /* raise above most other elements to avoid being covered */
+            z-index: 99999;
             padding: 8px 0;
         }
 
@@ -141,6 +159,7 @@ function img_url($src)
         .category-bar .cat-item:hover .cat-dropdown { display: block; }
 
         @media (max-width: 900px) {
+            /* allow horizontal scrolling on narrow screens */
             .category-bar .cat-list { overflow:auto; padding:8px; gap:12px; }
         }
     </style>
@@ -159,7 +178,11 @@ function img_url($src)
         </nav>
             <div style="text-align:center;padding:18px 0 6px 0;">
                 <h1 style="margin:6px 0 4px;font-size:34px;letter-spacing:0.6px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.25);">
-                    <?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?>
+                    <?php if (!empty($parentName)): ?>
+                        <?= htmlspecialchars($parentName) ?>  <?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?>
+                    <?php else: ?>
+                        <?= htmlspecialchars($tenChuyenMuc ?? 'Chuyên mục') ?>
+                    <?php endif; ?>
                 </h1>
                 <p style="color:#e8f0fb;margin:0;font-weight:500;">Danh sách bài viết theo chuyên mục</p>
             </div>

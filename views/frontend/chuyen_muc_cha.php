@@ -22,7 +22,7 @@ $bgModel = new BgWallpaperModel();
 $activeWallpaper = $bgModel->getActive();
 $wallpaperUrl = '';
 if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
-    $wallpaperUrl = 'uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
+    $wallpaperUrl = '/Demotintuc/public/uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
 }
 
 // Get all parent categories for navigation
@@ -156,7 +156,8 @@ foreach ($chuyenMucCon as $child) {
         margin: 0 auto;
         padding: 10px 12px;
         align-items: center;
-        overflow: auto;
+        /* make dropdowns escape the list bounds on larger screens */
+        overflow: visible;
     }
 
     .category-bar .cat-item { position: relative; }
@@ -183,14 +184,13 @@ foreach ($chuyenMucCon as $child) {
         border-radius: 6px;
         box-shadow: 0 6px 18px rgba(10,20,30,0.08);
         min-width: 220px;
-        z-index: 1500;
+        z-index: 99999;
         padding: 8px 0;
     }
 
     .category-bar .cat-dropdown ul { list-style:none; margin:0; padding:0; }
     .category-bar .cat-dropdown li a { display:block; padding:8px 14px; color:#333; text-decoration:none; }
     .category-bar .cat-dropdown li a:hover { background:#f4f8ff; color:#005fa3; }
-
     .category-bar .cat-item:hover .cat-dropdown { display: block; }
 
     /* Ad styling */
@@ -208,6 +208,11 @@ foreach ($chuyenMucCon as $child) {
         main > section { width: 100%; }
         main > aside { width: 100%; }
         .category-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    }
+
+    /* keep the category list scrollable on small screens */
+    @media (max-width: 900px) {
+        .category-bar .cat-list { overflow: auto; }
     }
 
     /* Article list with scrollbar */

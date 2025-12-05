@@ -384,11 +384,50 @@ $stmt->close();
     <title><?= htmlspecialchars($bv['tieu_de']); ?> - DemoTinTuc</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../views/frontend/frontend.css">
     <style>
+        <?php
+        // Load active wallpaper so header/background matches homepage
+        try {
+            $bgModel = new \Website\TinTuc\Models\BgWallpaperModel();
+            $activeWallpaper = $bgModel->getActive();
+        } catch (Exception $e) {
+            $activeWallpaper = null;
+        }
+        $wallpaperUrl = '';
+        if (!empty($activeWallpaper) && !empty($activeWallpaper['duong_dan_file'])) {
+            // Use absolute public path so background loads correctly from any route
+            $wallpaperUrl = '/Demotintuc/public/uploads/wallpapers/' . htmlspecialchars($activeWallpaper['duong_dan_file']);
+        }
+        ?>
+
+        <?php if (!empty($wallpaperUrl)): ?>
+        body {
+            background-image: url('<?= $wallpaperUrl ?>');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            padding-top: 76px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        <?php else: ?>
         body {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding-top: 76px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        <?php endif; ?>
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.20);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .article-img {
@@ -533,12 +572,228 @@ $stmt->close();
             position: static !important;
             margin-top: 2rem;
         }
+
+        /* Header and category bar styles - align with homepage (layout B)
+           Account/avatar stays on the left; search + login/register sit on the right together */
+        .auth-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #0d6efd 0%, #0dcaf0 100%);
+            padding: 8px 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1000;
+        }
+
+        /* Account area (left) */
+        .account-dropdown { position: relative; order: -1; }
+        .account-btn { display:inline-flex; align-items:center; gap:8px; cursor:pointer; color:#fff; text-decoration:none; background:transparent; border:none; padding:0; }
+        .account-avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.18); }
+
+        /* Search + auth links group on the right */
+        .search-container { order: 1; margin-left: auto; display:flex; align-items:center; gap:8px; }
+        .search-wrapper { width: 320px; max-width: 46vw; }
+        .auth-link, .auth-links { order: 2; margin-left: 8px; color: #fff; }
+        .auth-link { margin-left: 6px; margin-right: 6px; color: #fff; background: rgba(255,255,255,0.06); padding:8px 10px; border-radius:8px; text-decoration:none; }
+
+        /* Ensure dropdown menu appears over the header content */
+        .dropdown-menu { position:absolute; left:0; top:calc(100% + 8px); background:#fff !important; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); min-width:200px; display:none; z-index:2000; overflow:hidden; }
+
+        header {
+            text-align: center;
+            padding: 18px 0 6px 0;
+        }
+
+        header {
+            position: relative;
+            padding-top: 8px;
+        }
+
+        .header-title {
+            margin: 10px 0 2px;
+            font-size: 34px;
+            letter-spacing: 0.6px;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+
+        .header-title .site-title-link { color: inherit; text-decoration: none; }
+
+        .header-sub { text-align: center; margin-top: 6px; color: #e8f0fb; font-weight:500; }
+
+        .left-controls { display:flex; align-items:center; gap:8px; }
+        .home-link-left { color:#fff; background: rgba(0,0,0,0.06); padding:8px 10px; border-radius:8px; text-decoration:none; }
+
+        header p {
+            color: #e8f0fb;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .category-bar {
+            background: white;
+            border-bottom: 1px solid #e6e6e6;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            margin-bottom: 12px;
+        }
+
+        .category-bar .cat-list {
+            list-style: none;
+            display: flex;
+            gap: 18px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 12px;
+            align-items: center;
+            overflow: visible;
+        }
+
+        .category-bar .cat-item { position: relative; }
+
+        .category-bar .cat-link {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .category-bar .cat-link:hover { color: #005fa3; }
+
+        .category-bar .cat-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            box-shadow: 0 6px 18px rgba(10,20,30,0.08);
+            min-width: 220px;
+            z-index: 99999;
+            padding: 8px 0;
+        }
+
+        .category-bar .cat-item:hover .cat-dropdown { display: block; }
+
+        @media (max-width: 900px) {
+            .category-bar .cat-list { overflow: auto; padding:8px; gap:12px; }
+        }
     </style>
 </head>
 
 <body>
 
-    <?php include __DIR__ . '/../partials/header.php'; ?>
+    <?php
+    // Load parent and child categories for the header (same as trang_chu)
+    if (!isset($chuyenMucCha) || !is_array($chuyenMucCha)) {
+        try {
+            $cmChaModel = new \Website\TinTuc\Models\ChuyenMucChaModel();
+            $chuyenMucCha = $cmChaModel->getAll();
+        } catch (Exception $e) {
+            $chuyenMucCha = [];
+        }
+    }
+    if (!isset($chuyenMuc) || !is_array($chuyenMuc)) {
+        try {
+            $cmModel = new \Website\TinTuc\Models\ChuyenMucModel();
+            $chuyenMuc = $cmModel->getAll();
+        } catch (Exception $e) {
+            $chuyenMuc = [];
+        }
+    }
+    $childrenMap = [];
+    foreach ($chuyenMuc as $c) {
+        if (!empty($c['id_cha'])) {
+            $childrenMap[$c['id_cha']][] = $c;
+        }
+    }
+    ?>
+
+    <!-- BEGIN: Header copied from trang_chu.php -->
+    <header>
+        <nav class="auth-nav">
+            <!-- left: home button + account (account may be moved by order) -->
+            <div class="left-controls">
+                <a class="home-link-left" href="/Demotintuc/public/">🏠 Trang chủ</a>
+            </div>
+            <form id="searchForm" action="index.php" method="get" class="search-container">
+                <input type="hidden" name="action" value="search">
+                <div class="search-wrapper">
+                    <input type="text" 
+                        id="searchBox" 
+                        name="q" 
+                        placeholder="Bạn muốn tìm gì hôm nay?" 
+                        autocomplete="off" 
+                        class="search-input">
+                    <button type="submit" class="search-button">🔍</button>
+                    <ul id="suggestions" class="suggestions" style="position:fixed;display:none;z-index:99999;background:rgba(255,255,255,0.98);border-radius:12px;box-shadow:0 10px 30px rgba(8,20,40,0.18);backdrop-filter:blur(6px);max-height:360px;overflow:auto;padding:6px 0;margin:0;list-style:none;"> </ul>
+                </div>
+            </form>
+
+            <?php
+            // account area (login/register) or avatar greeting
+            if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
+                $user = $_SESSION['user'];
+                $displayName = $user['name'] ?? $user['ten'] ?? $user['ho_ten'] ?? $user['email'] ?? 'Người dùng';
+                $avatarVal = $user['avatar'] ?? $user['anh_dai_dien'] ?? $user['avatar_url'] ?? '';
+                $avatarUrl = trim((string)$avatarVal) === '' ? 'uploads/no_avatar.png' : img_url($avatarVal);
+                ?>
+                <div class="account-dropdown">
+                    <button type="button" class="account-btn" id="accountToggle" aria-expanded="false">
+                        <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="account-avatar">
+                        <span class="greeting">Xin chào, <?= htmlspecialchars($displayName) ?></span>
+                        <span style="color:#fff;font-size:0.9em;">▾</span>
+                    </button>
+                    <div class="dropdown-menu" id="accountMenu" role="menu">
+                        <a href="index.php?action=userPage">Cập nhật thông tin cá nhân</a>
+                        <a href="index.php?action=dathich">Đã thích</a>
+                        <a href="index.php?action=daluu">Đã lưu</a>
+                        <a href="index.php?action=binhluancuatoi">Bình luận của tôi</a>
+                        <a href="index.php?action=logout" class="last">Đăng xuất</a>
+                    </div>
+                </div>
+                <?php
+            } else {
+                ?>
+                <div class="auth-links">
+                    <a href="index.php?action=login" class="auth-link">Đăng nhập</a>
+                    <a href="index.php?action=register" class="auth-link">Đăng ký</a>
+                </div>
+                <?php
+            }
+            ?>
+        </nav>
+
+        <h1 class="header-title"><a href="/Demotintuc/public/" class="site-title-link">Website Tin Tức</a></h1>
+        <p class="header-sub">Cập nhật tin tức mới nhất, nhanh chóng & chính xác</p>
+    </header>
+
+    <nav class="category-bar">
+        <ul class="cat-list">
+            <?php foreach ($chuyenMucCha as $parent): ?>
+                <li class="cat-item">
+                    <a href="index.php?action=chuyenmuccha&id=<?= $parent['id'] ?>" class="cat-link"><?= htmlspecialchars($parent['ten_chuyen_muc']) ?></a>
+                    <div class="cat-dropdown">
+                        <ul>
+                            <?php if (!empty($childrenMap[$parent['id']])): ?>
+                                <?php foreach ($childrenMap[$parent['id']] as $child): ?>
+                                    <li><a href="index.php?action=chuyenmuc&id=<?= $child['id'] ?>"><?= htmlspecialchars($child['ten_chuyen_muc']) ?></a></li>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <li class="no-child">(Chưa có chuyên mục con)</li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
+    
+    <!-- END: Header copied from trang_chu.php -->
 
     <div class="container my-5">
         <div class="row g-5">
@@ -559,15 +814,7 @@ $stmt->close();
 
                         <div class="text-muted small mb-4 d-flex flex-wrap align-items-center gap-3 border-bottom pb-3">
                             <span><i class="fas fa-calendar-alt me-2"></i><?= date('d/m/Y', strtotime($bv['ngay_dang'])); ?></span>
-                            <?php
-                                $authorName = htmlspecialchars($bv['tac_gia'] ?? 'Ẩn danh');
-                                $avatarVal = $bv['tac_gia_avatar'] ?? '';
-                                $avatarUrl = trim((string)$avatarVal) === '' ? img_url('uploads/no_avatar.png') : img_url($avatarVal);
-                            ?>
-                            <span class="d-flex align-items-center">
-                                <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="avatar" class="rounded-circle me-2" style="width:36px;height:36px;object-fit:cover;">
-                                <span><?= $authorName ?></span>
-                            </span>
+                            <!-- Author avatar and name removed as requested -->
                             <span><i class="fas fa-eye me-2"></i><?= number_format($bv['luot_xem']); ?> lượt xem</span>
 
                             <div class="ms-auto d-flex gap-3">
@@ -638,8 +885,8 @@ $stmt->close();
                         </div>
 
                         <div class="mt-5 pt-4 border-top text-center">
-                            <a href="/Demotintuc/public/" class="btn btn-primary btn-lg px-5 btn-bounce">
-                                <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
+                            <a href="/Demotintuc/public/" class="btn btn-outline-secondary btn-sm back-home">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại trang chủ
                             </a>
                         </div>
                     </div>

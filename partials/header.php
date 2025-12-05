@@ -136,6 +136,7 @@
             border-radius: 50px !important;
             padding: 0.6rem 1.6rem !important;
             font-weight: 600;
+            color: #fff !important;
             transition: all 0.3s ease;
         }
 
@@ -145,6 +146,16 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
+        /* Account name inside avatar button */
+        .account-name {
+            color: #fff;
+            font-weight: 700;
+            display: inline-block;
+            margin-right: 6px;
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+        .account-dropdown .btn-outline-light { padding-left:10px !important; padding-right:14px !important; }
     </style>
 </head>
 
@@ -185,14 +196,7 @@
                     if (function_exists('img_url')) {
                         $authorAvatarUrl = img_url($authorAvatarVal);
                     } else {
-                        $v = trim((string)$authorAvatarVal);
-                        if ($v === '') {
-                            $authorAvatarUrl = '/public/uploads/no_avatar.png';
-                        } elseif (preg_match('#^https?://#i', $v) || strpos($v, '/') === 0) {
-                            $authorAvatarUrl = $v;
-                        } else {
-                            $authorAvatarUrl = '/public/uploads/' . ltrim($v, '/');
-                        }
+                        $authorAvatarUrl = trim((string)$authorAvatarVal);
                     }
                 }
 
@@ -206,26 +210,67 @@
                     if (function_exists('img_url')) {
                         $sessionAvatarUrl = $sessAv ? img_url($sessAv) : '/public/uploads/no_avatar.png';
                     } else {
-                        $sv = trim((string)$sessAv);
-                        if ($sv === '') {
-                            $sessionAvatarUrl = '/public/uploads/no_avatar.png';
-                        } elseif (preg_match('#^https?://#i', $sv) || strpos($sv, '/') === 0) {
-                            $sessionAvatarUrl = $sv;
-                        } else {
-                            $sessionAvatarUrl = '/public/uploads/' . ltrim($sv, '/');
-                        }
+                        $sessionAvatarUrl = trim((string)$sessAv);
                     }
-                    $displayName = htmlspecialchars($user['ten'] ?? 'Tài khoản');
+                        // Normalize returned URLs to absolute paths that work from header include
+                        $normalize_avatar = function($u) {
+                            $u = trim((string)$u);
+                            $default1 = '/public/uploads/no_avatar.png';
+                            $default2 = '/public/uploads/logo.png';
+                            // If empty, return first existing default
+                            if ($u === '') {
+                                $path1 = __DIR__ . '/../public/uploads/no_avatar.png';
+                                $path2 = __DIR__ . '/../public/uploads/logo.png';
+                                if (file_exists($path1)) return $default1;
+                                if (file_exists($path2)) return $default2;
+                                return $default1; // last resort
+                            }
+                            // If it's a full http(s) URL, keep it
+                            if (preg_match('#^https?://#i', $u)) return $u;
+                            // If it already starts with /public, keep as-is
+                            if (strpos($u, '/public/') === 0) return $u;
+                            // If it contains uploads/ anywhere, build absolute path under /public/uploads/
+                            if (stripos($u, 'uploads/') !== false) {
+                                $parts = preg_split('#uploads/#i', $u);
+                                $after = end($parts);
+                                $candidate = '/public/uploads/' . ltrim($after, '/');
+                                $fs = __DIR__ . '/../' . ltrim($candidate, '/');
+                                if (file_exists($fs)) return $candidate;
+                                // if not found, fall back to logo if available
+                                $path2 = __DIR__ . '/../public/uploads/logo.png';
+                                if (file_exists($path2)) return $default2;
+                                return $candidate;
+                            }
+                            // If it's an absolute path starting with '/', keep it
+                            if (strpos($u, '/') === 0) return $u;
+                            // Otherwise assume it's a filename and prefix with /public/uploads/
+                            $candidate = '/public/uploads/' . ltrim($u, '/');
+                            $fs = __DIR__ . '/../' . ltrim($candidate, '/');
+                            if (file_exists($fs)) return $candidate;
+                            // fallback to available default
+                            $path2 = __DIR__ . '/../public/uploads/logo.png';
+                            if (file_exists($path2)) return $default2;
+                            return $default1;
+                        };
+                    // Prefer several possible sources for the display name (session top-level, user array, email)
+                    $rawDisplay = $_SESSION['ho_ten'] ?? $user['ten'] ?? ($_SESSION['user']['ho_ten'] ?? null) ?? ($_SESSION['user']['email'] ?? null) ?? 'Tài khoản';
+                    $displayName = htmlspecialchars($rawDisplay);
+                    // Short display for header: first word (first name) — keep full name in title attribute
+                    $parts = preg_split('/\s+/', trim((string)$rawDisplay));
+                    $firstName = $parts[0] ?? $rawDisplay;
+                    $displayShort = htmlspecialchars($firstName);
 
-                    // Choose avatar for the header button: prefer author (when on detail), else session
-                    $buttonAvatarUrl = $authorAvatarUrl ?: $sessionAvatarUrl;
+                    // Normalize URLs and choose avatar for the header button: prefer author (when on detail), else session
+                    $authorAvatarUrl = isset($authorAvatarUrl) ? $normalize_avatar($authorAvatarUrl) : null;
+                    $sessionAvatarUrl = isset($sessionAvatarUrl) ? $normalize_avatar($sessionAvatarUrl) : '/public/uploads/no_avatar.png';
+                    $buttonAvatarUrl = $authorAvatarUrl ?: $sessionAvatarUrl ?: '/public/uploads/no_avatar.png';
                     // Use the same avatar inside the dropdown so the image is consistent when opening
                     $menuAvatarUrl = $buttonAvatarUrl;
                 ?>
                     <div class="dropdown account-dropdown" style="position:relative;">
-                        <button class="btn btn-outline-light dropdown-toggle" type="button" aria-expanded="false" style="display:flex;align-items:center;gap:10px;padding:8px 14px;">
-                            <img src="<?= htmlspecialchars($buttonAvatarUrl) ?>" alt="avatar" class="account-avatar" style="width:34px;height:34px;border-radius:50%;object-fit:cover;margin-right:6px;border:2px solid rgba(255,255,255,0.85);"> 
-                            <?= $displayName ?>
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" aria-expanded="false" title="<?= $displayName ?>" style="display:flex;align-items:center;gap:10px;padding:8px 14px;">
+                            <img src="<?= htmlspecialchars($buttonAvatarUrl) ?>" alt="avatar" class="account-avatar" style="width:34px;height:34px;border-radius:50%;object-fit:cover;margin-right:8px;border:2px solid rgba(255,255,255,0.85);"> 
+                            <span class="account-name"><?= $displayShort ?></span>
                         </button>
                         <div class="dropdown-menu account-dropdown-menu" style="display:none;position:absolute;right:0;top:48px;min-width:260px;border-radius:10px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,0.12);background:#fff;border:1px solid #eee;z-index:1100;">
                             <div style="display:flex;gap:12px;align-items:center;padding-bottom:8px;border-bottom:1px solid #f1f5f9;margin-bottom:8px;">
